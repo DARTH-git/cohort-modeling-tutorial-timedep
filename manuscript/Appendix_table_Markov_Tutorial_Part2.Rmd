@@ -114,7 +114,6 @@ This table contains an overview of the key model components used in the code for
 | Parameter              | Distribution         | Distribution values      | Parameter mean       | Parameter standard error|
 |------------------------|----------------------|--------------------------|----------------------|---------|
 | Number of simulation   | `n_sim`              | 1000                     |                      |         |
-| - Constant rate of dying when Healthy (all-cause mortality)             |$Lognormal$ | $log(\mu)$ = $log(0.002)$   ,  $log(\sigma)$ = 0.01    | 0.002 |   0.00002|
 | Annual transition probabilities |             |                          |                      |         |
 | - Disease onset (Healthy to Sick)             |$Beta$ | \(\alpha\) = 30, \(\beta\) = 170     | 0.15 |   0.026 |
 | - Recovery (Sick to Healthy)                  |$Beta$ | \(\alpha\) = 60, \(\beta\) = 60     | 0.5   |   0.045 |
