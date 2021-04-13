@@ -256,7 +256,6 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
       v_tot_cost[i] <- t(v_cost_str) %*% (v_dwc * v_wcc)
     }
     
-    
     ## Vector with discounted net monetary benefits (NMB)
     v_nmb <- v_tot_qaly * n_wtp - v_tot_cost
     
@@ -272,7 +271,7 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
 }
 
 #------------------------------------------------------------------------------#
-####                     Generate a PSA dataset                             ####
+####             Generate a PSA input parameter dataset                     ####
 #------------------------------------------------------------------------------#
 #' Generate parameter sets for the probabilistic sensitivity analysis (PSA)
 #'

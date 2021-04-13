@@ -1,39 +1,3 @@
-# Function to generate PSA input dataset
-generate_psa_params <- function(n_sim = 1000, seed = 071818){
-  set.seed(seed) # set a seed to be able to reproduce the same results
-  df_psa <- data.frame(
-    # Transition probabilities (per cycle)
-    p_HS1    = rbeta(n_sim, 30, 170),               # probability to become sick when healthy conditional on surviving
-    p_S1H    = rbeta(n_sim, 60, 60) ,               # probability to become healthy when sick conditional on surviving
-    hr_S1    = rlnorm(n_sim, log(3), 0.01),         # rate ratio of death in S1 vs healthy 
-    hr_S2    = rlnorm(n_sim, log(10), 0.02),        # rate ratio of death in S2 vs healthy 
-    p_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
-    p_S1S2_shape = rlnorm(n_sim, log(1.1), 0.02),   # transition from S1 to S2 - Weibull shape parameter
-    hr_S1S2_trtB = rlnorm(n_sim, log(0.6), 0.1),    # hazard ratio of becoming Sicker when Sick under B
-    
-    # State rewards
-    # Costs
-    c_H    = rgamma(n_sim, shape = 100,   scale = 20),   # cost of remaining one cycle in state H
-    c_S1   = rgamma(n_sim, shape = 177.8, scale = 22.5), # cost of remaining one cycle in state S1
-    c_S2   = rgamma(n_sim, shape = 225,   scale = 66.7), # cost of remaining one cycle in state S2
-    c_trtA = rgamma(n_sim, shape = 576,   scale = 20.8), # cost of treatment A (per cycle) 
-    c_trtB = rgamma(n_sim, shape = 676,   scale = 19.2), # cost of treatment B (per cycle)
-    c_D    = 0,                                          # cost of being in the death state
-    # Utilities
-    u_H    = rbeta(n_sim, shape1 = 200, shape2 = 3),     # utility when healthy
-    u_S1   = rbeta(n_sim, shape1 = 130, shape2 = 45),    # utility when sick
-    u_S2   = rbeta(n_sim, shape1 = 50,  shape2 = 50),    # utility when sicker
-    u_D    = 0,                                          # utility when dead
-    u_trtA = rbeta(n_sim, shape1 = 300, shape2 = 15),    # utility when being treated
-    
-    # Transition rewards
-    du_HS1 = rbeta(n_sim, shape1 = 11,  shape2 = 1088),  # disutility when transitioning from Healthy to Sick
-    ic_HS1 = rgamma(n_sim, shape = 25,  scale = 40),     # increase in cost when transitioning from Healthy to Sick
-    ic_D   = rgamma(n_sim, shape = 100, scale = 20)      # increase in cost when dying
-  )
-  return(df_psa)
-}
-
 #-----------------------------------------#
 ####          Decision Model           ####
 #-----------------------------------------#
@@ -57,18 +21,19 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     v_p_S1Dage <- rate_to_prob(v_r_S1Dage) # Age-specific mortality risk in the Sick state
     v_p_S2Dage <- rate_to_prob(v_r_S2Dage) # Age-specific mortality risk in the Sicker state
     
-    ## History-dependent transition probability of becoming Sicker when Sick
-    # conditional on surviving
-    # Weibull hazard
+    ## State-residence-dependent transition probability of becoming Sicker when 
+    # Sick conditional on surviving
+    # Weibull function
     v_p_S1S2_tunnels <- p_S1S2_scale * p_S1S2_shape * (1:n_tunnel_size)^{p_S1S2_shape-1}
     
-    ## History-dependent transition probability of becoming Sicker when Sick for treatment B
+    ## State-residence-dependent transition probability of becoming Sicker when 
+    ## Sick for treatment B 
     # transform probability to rate
     v_r_S1S2_tunnels <- prob_to_rate(p = v_p_S1S2_tunnels)
     # apply hazard ratio to rate to obtain transition rate of becoming Sicker when Sick for treatment B
     r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
     # transform rate to probability
-    v_p_S1S2_tunnels_trtB <- rate_to_prob(r = r_S1S2_tunnels_trtB) # probability to become Sicker when Sick 
+    v_p_S1S2_tunnels_trtB <- rate_to_prob(r = r_S1S2_tunnels_trtB) # probability to get Sicker when Sick 
     # under treatment B conditional on surviving
     
     ###################### Construct state-transition models #####################
@@ -156,18 +121,18 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     # For strategies B and AB
     a_A_tunnels_strB <- a_A_tunnels
     
-    ## Iterative solution of age-dependent cSTM
+    ## Iterative solution for age- and state-residence-dependent cSTM
     for(t in 1:n_cycles){
       # Fill in cohort trace
-      # For srategies SoC and A
+      # For strategies SoC and A
       m_M_tunnels[t + 1, ]     <- m_M_tunnels[t, ]      %*% a_P_tunnels[, , t]
-      # For srategies B and AB
+      # For strategies B and AB
       m_M_tunnels_strB[t + 1,] <- m_M_tunnels_strB[t, ] %*% a_P_tunnels_strB[, , t]
       
       # Fill in transition dynamics array
-      # For srategies SoC and A
+      # For strategies SoC and A
       a_A_tunnels[, , t + 1]      <- m_M_tunnels[t, ]      * a_P_tunnels[, , t]
-      # For srategies B and AB
+      # For strategies B and AB
       a_A_tunnels_strB[, , t + 1] <- m_M_tunnels_strB[t, ] * a_P_tunnels_strB[, , t]
     }
     
@@ -301,10 +266,10 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
                   v_c_strB,
                   v_c_strAB)
     ## Store the transition array for each strategy in a list
-    l_a_A <- list(a_A_tunnels,
-                  a_A_tunnels,
-                  a_A_tunnels_strB,
-                  a_A_tunnels_strB)
+    l_a_A <- list(SQ = l_a_A$`Standard of care`,
+                  A  = l_a_A$`Strategy A`,
+                  B  = l_a_A$`Strategy B`,
+                  AB = l_a_A$`Strategy AB`)
     
     # assign strategy names to matching items in the lists
     names(l_u) <- names(l_c) <- names(l_a_A) <- v_names_str
@@ -314,7 +279,7 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
     names(v_tot_qaly) <- names(v_tot_cost) <- v_names_str
     
     #### Loop through each strategy and calculate total utilities and costs ####
-    for (i in 1:n_str) {
+    for (i in 1:n_str) { # i <- 1
       v_u_str         <- l_u[[i]]   # select the vector of state utilities for the ith strategy
       v_c_str         <- l_c[[i]]   # select the vector of state costs for the ith strategy
       a_A_tunnels_str <- l_a_A[[i]] # select the transition array for the ith strategy
@@ -358,13 +323,63 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
       v_tot_cost[i] <- t(v_cost_str) %*% (v_dwc * v_wcc)
     }
     
-    ########################## Cost-effectiveness analysis #######################
-    ### Calculate incremental cost-effectiveness ratios (ICERs)
-    df_cea <- calculate_icers(cost       = v_tot_cost, 
-                              effect     = v_tot_qaly,
-                              strategies = v_names_str)
-    df_cea <- df_cea[match(v_names_str, df_cea$Strategy), ]
-    return(df_cea)
+    ## Vector with discounted net monetary benefits (NMB)
+    v_nmb <- v_tot_qaly * n_wtp - v_tot_cost
+    
+    ## data.frame with discounted costs, effectiveness and NMB
+    df_ce <- data.frame(Strategy = v_names_str,
+                        Cost     = v_tot_cost,
+                        Effect   = v_tot_qaly,
+                        NMB      = v_nmb)
+    
+    return(df_ce)
   }
   )
+}
+
+#------------------------------------------------------------------------------#
+####             Generate a PSA input parameter dataset                     ####
+#------------------------------------------------------------------------------#
+#' Generate parameter sets for the probabilistic sensitivity analysis (PSA)
+#'
+#' \code{generate_psa_params} generates a PSA dataset of the parameters of the 
+#' cost-effectiveness analysis.
+#' @param n_sim Number of parameter sets for the PSA dataset
+#' @param seed Seed for the random number generation
+#' @return A data.frame with a PSA dataset of he parameters of the 
+#' cost-effectiveness analysis
+#' @export
+generate_psa_params <- function(n_sim = 1000, seed = 071818){
+  set.seed(seed) # set a seed to be able to reproduce the same results
+  df_psa <- data.frame(
+    # Transition probabilities (per cycle)
+    p_HS1    = rbeta(n_sim, 30, 170),               # probability to become sick when healthy conditional on surviving
+    p_S1H    = rbeta(n_sim, 60, 60) ,               # probability to become healthy when sick conditional on surviving
+    hr_S1    = rlnorm(n_sim, log(3), 0.01),         # rate ratio of death in S1 vs healthy 
+    hr_S2    = rlnorm(n_sim, log(10), 0.02),        # rate ratio of death in S2 vs healthy 
+    p_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
+    p_S1S2_shape = rlnorm(n_sim, log(1.1), 0.02),   # transition from S1 to S2 - Weibull shape parameter
+    hr_S1S2_trtB = rlnorm(n_sim, log(0.6), 0.1),    # hazard ratio of becoming Sicker when Sick under B
+    
+    # State rewards
+    # Costs
+    c_H    = rgamma(n_sim, shape = 100,   scale = 20),   # cost of remaining one cycle in state H
+    c_S1   = rgamma(n_sim, shape = 177.8, scale = 22.5), # cost of remaining one cycle in state S1
+    c_S2   = rgamma(n_sim, shape = 225,   scale = 66.7), # cost of remaining one cycle in state S2
+    c_trtA = rgamma(n_sim, shape = 576,   scale = 20.8), # cost of treatment A (per cycle) 
+    c_trtB = rgamma(n_sim, shape = 676,   scale = 19.2), # cost of treatment B (per cycle)
+    c_D    = 0,                                          # cost of being in the death state
+    # Utilities
+    u_H    = rbeta(n_sim, shape1 = 200, shape2 = 3),     # utility when healthy
+    u_S1   = rbeta(n_sim, shape1 = 130, shape2 = 45),    # utility when sick
+    u_S2   = rbeta(n_sim, shape1 = 50,  shape2 = 50),    # utility when sicker
+    u_D    = 0,                                          # utility when dead
+    u_trtA = rbeta(n_sim, shape1 = 300, shape2 = 15),    # utility when being treated
+    
+    # Transition rewards
+    du_HS1 = rbeta(n_sim, shape1 = 11,  shape2 = 1088),  # disutility when transitioning from Healthy to Sick
+    ic_HS1 = rgamma(n_sim, shape = 25,  scale = 40),     # increase in cost when transitioning from Healthy to Sick
+    ic_D   = rgamma(n_sim, shape = 100, scale = 20)      # increase in cost when dying
+  )
+  return(df_psa)
 }

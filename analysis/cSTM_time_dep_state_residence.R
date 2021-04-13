@@ -1,8 +1,8 @@
-##############################################################################
-### Cohort State-Transition Models in R                                    ###
-##############################################################################
-# This code forms the basis for the state-transition model of the article: 
-# 'cohort State-transition Models in R' 
+################################################################################
+### Time-dependent cSTMs in R: State-residence time dependency               ###
+################################################################################
+# This code forms the basis for the state-transition model of the tutorial: 
+# 'A Tutorial on Time-Dependent Cohort State-Transition Models in R' 
 # Authors: 
 # - Fernando Alarid-Escudero <fernando.alarid@cide.edu>
 # - Eline Krijkamp
@@ -13,21 +13,27 @@
 # - Hawre Jalal
 # Please cite the article when using this code
 #
-# To program this tutorial we made use of 
-# R version 4.0.2 (2020-06-22)
+# To program this tutorial we used: 
+# R version 4.0.3 (2020-10-10)
 # Platform: 64-bit operating system, x64-based processor
-# Running under: Windows 10
-# RStudio: Version 1.3.1073 2009-2020 RStudio, Inc
+# Running under: Mac OS 11.2.2
+# RStudio: Version 1.4.1103 2009-2021 RStudio, Inc
 
-##############################################################################
-############################# Code of Appendix ############################### 
-##############################################################################
-# Implements a time-independent Sick-Sicker cSTM model                       #
-# Standard of Care (SoC): best available care for the patients with the disease. This scenario reflects the natural history of the disease progressions
-# Strategy A: treatment A is given to all sick patients, patients in sick and sicker, but does only improves the utility of those being sick.
-# Strategy B: treatment B reduces disease progression from sick to sicker. However, it is not possible to distinguish those sick from sicker and therefore all individuals in one of the two sick states get the treatment.  
-# Strategy AB: This strategy combines treatment A and treatment B. The disease progression is reduced and Sick individuals has an improved utility. 
-# This model incorporates time-dependent and history- / state-dependent transition probabilities 
+################################################################################
+################################ Description ###################################
+################################################################################
+# This code implements a state-residence time-dependent Sick-Sicker cSTM model 
+# to conduct a CEA of four strategies:
+# - Standard of Care (SoC): best available care for the patients with the 
+#   disease. This scenario reflects the natural history of the disease 
+#   progression.
+# - Strategy A: treatment A is given to patients in the Sick and Sicker states, 
+#   but only improves the quality of life of those in the Sick state.
+# - Strategy B: treatment B is given to all sick patients and reduces disease 
+#   progression from the Sick to Sicker state.
+# - Strategy AB: This strategy combines treatment A and treatment B. The disease 
+#   progression is reduced, and individuals in the Sick state have an improved 
+#   quality of life.
 
 ################################ Initial setup ############################### 
 rm(list = ls())    # remove any variables in R's memory 
@@ -41,7 +47,7 @@ rm(list = ls())    # remove any variables in R's memory
 # install.packages("scales")    # for dollar signs and commas
 # install.packages("boot")      # to handle log odds and log odds ratios
 # install.packages("devtools")  # to ensure compatibility among packages
-# install.packages("dampack")   # for CEA and calculate ICERs
+# install.packages("dampack")   # for CEA, calculating ICERs and PSA visualization
 # devtools::install_github("DARTH-git/darthtools") # to install darthtools from GitHub
 
 ### Load packages
@@ -437,9 +443,51 @@ plot(df_cea, label = "all") +
      expand_limits(x = max(table_cea$QALYs) + 0.3, 
                    y = 250000) 
 
-###################### Probabalistic Sensitivty Analysis #####################
-# Source functions that contain the model and CEA output
-source('R/Functions STM_03.R')
+###################### Probabilistic Sensitivity Analysis #####################
+### Load model, CEA and PSA functions
+source('R/Functions_cSTM_time_dep_state_residence.R')
+
+# List of input parameters
+l_params_all <- list(
+  # Transition probabilities (per cycle), hazard ratios
+  v_r_HDage    = v_r_HDage, # constant rate of dying when Healthy (all-cause mortality)
+  p_HS1        = 0.15,  # probability to become Sick when Healthy conditional on surviving
+  p_S1H        = 0.5,   # probability to become Healthy when Sick conditional on surviving
+  p_S1S2       = 0.105, # probability to become Sicker when Sick conditional on surviving
+  hr_S1        = 3,     # hazard ratio of death in Sick vs Healthy 
+  hr_S2        = 10,    # hazard ratio of death in Sicker vs Healthy 
+  p_S1S2_scale = 0.08,  # transition from S1 to S2 - Weibull scale parameter
+  p_S1S2_shape = 1.1,   # transition from S1 to S2 - Weibull shape parameter
+  # Effectiveness of treatment B 
+  hr_S1S2_trtB = 0.6,  # hazard ratio of becoming Sicker when Sick under B under treatment B
+  ## State rewards
+  # Costs
+  c_H    = 2000,  # cost of remaining one cycle in Healthy 
+  c_S1   = 4000,  # cost of remaining one cycle in Sick 
+  c_S2   = 15000, # cost of remaining one cycle in Sicker 
+  c_D    = 0,     # cost of being dead (per cycle)
+  c_trtA = 12000, # cost of treatment A
+  c_trtB = 13000, # cost of treatment B
+  # Utilities
+  u_H    = 1,     # utility when Healthy 
+  u_S1   = 0.75,  # utility when Sick 
+  u_S2   = 0.5,   # utility when Sicker
+  u_D    = 0,     # utility when Dead 
+  u_trtA = 0.95,  # utility when being treated with A
+  ## Transition rewards
+  du_HS1 = 0.01,  # disutility when transitioning from Healthy to Sick
+  ic_HS1 = 1000,  # increase in cost when transitioning from Healthy to Sick
+  ic_D   = 2000   # increase in cost when dying
+)
+
+# store the parameter names into a vector
+v_names_params <- names(l_params_all)
+
+# Test function to compute CE outcomes
+calculate_ce_out(l_params_all)
+
+# Test function to generate PSA input dataset
+generate_psa_params(10) 
 
 # Number of PSA samples
 n_sim <- 1000
@@ -450,11 +498,17 @@ df_psa_input <- generate_psa_params(n_sim = n_sim)
 head(df_psa_input)
 
 # Histogram of parameters
-ggplot(melt(df_psa_input, variable.name = "Parameter"), 
-       aes(x = value)) +
-       facet_wrap(~Parameter, scales = "free") +
-       geom_histogram(aes(y = ..density..)) +
-       theme_bw(base_size = 16)
+ggplot(melt(df_psa_input, variable.name = "Parameter"), aes(x = value)) +
+  facet_wrap(~Parameter, scales = "free") +
+  geom_histogram(aes(y = ..density..)) +
+  scale_x_continuous(breaks = dampack::number_ticks(4)) + 
+  ylab("") +
+  theme_bw(base_size = 16) + 
+  theme(axis.text = element_text(size = 6),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y  = element_blank(),
+        axis.ticks.y = element_blank()) 
 
 # Initialize matrices with PSA output 
 # Dataframe of costs
@@ -507,8 +561,8 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
 #     df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
 #   }
 #   # Extract costs and effects from the PSA dataset
-#   df_c[i, ] <- df_ce[, 1:n_str]
-#   df_e[i, ] <- df_ce[, (n_str+1):(2*n_str)]
+#   df_c <- df_ce[, 1:n_str]
+#   df_e <- df_ce[, (n_str+1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa <- Sys.time()
 # }
@@ -527,8 +581,8 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
 #                              df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
 #                            }
 #   # Extract costs and effects from the PSA dataset
-#   df_c[i, ] <- df_ce[, 1:n_str]
-#   df_e[i, ] <- df_ce[, (n_str+1):(2*n_str)]
+#   df_c <- df_ce[, 1:n_str]
+#   df_e <- df_ce[, (n_str+1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa <- Sys.time()
 # }
@@ -543,8 +597,8 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
 #     df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
 #   }
 #   # Extract costs and effects from the PSA dataset
-#   df_c[i, ] <- df_ce[, 1:n_str]
-#   df_e[i, ] <- df_ce[, (n_str+1):(2*n_str)]
+#   df_c <- df_ce[, 1:n_str]
+#   df_e <- df_ce[, (n_str+1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa <- Sys.time()
 # }
