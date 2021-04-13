@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  13 APR 2021 12:37
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex 2020.4.7)  13 APR 2021 15:57
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1047,7 +1047,7 @@ Package pdftex.def Info: figs/CE-scatter-TimeDep-1.pdf  used on input line 1647
                                                   \fi \fi 
 l.1652 \end{figure}
                     <./figs/Sick-Sicker-CEA-AgeDep-1.pdf>]
-<figs/CEAC-AgeDep-1.pdf, id=374, 568.1225pt x 423.5825pt>
+<figs/CEAC-AgeDep-1.pdf, id=375, 568.1225pt x 423.5825pt>
 File: figs/CEAC-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/CEAC-AgeDep-1.pdf>
 Package pdftex.def Info: figs/CEAC-AgeDep-1.pdf  used on input line 1658.
@@ -1059,7 +1059,7 @@ Package pdftex.def Info: figs/CEAC-AgeDep-1.pdf  used on input line 1658.
                                                   \fi \fi 
 l.1664 
         <./figs/CE-scatter-TimeDep-1.pdf>]
-<figs/ELC-AgeDep-1.pdf, id=394, 569.12625pt x 423.5825pt>
+<figs/ELC-AgeDep-1.pdf, id=396, 569.12625pt x 423.5825pt>
 File: figs/ELC-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/ELC-AgeDep-1.pdf>
 Package pdftex.def Info: figs/ELC-AgeDep-1.pdf  used on input line 1669.
@@ -1077,8 +1077,18 @@ the same identifier (name{figure.13}) has been already used, duplicate ignored
                                                   \fi \fi 
 l.1682 
         <./figs/ELC-AgeDep-1.pdf>] [34]
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1704--1707
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1700--1703
 [][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1700--1703
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1704--1707
+[][][] []
  []
 
 
@@ -1096,7 +1106,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1708--1711
 
  []
 
-[35]
+
 Overfull \hbox (2.22221pt too wide) in paragraph at lines 1712--1715
 [][][] []
  []
@@ -1136,7 +1146,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1724--1727
 
  []
 
-
+[35]
 Overfull \hbox (2.22221pt too wide) in paragraph at lines 1728--1731
 [][][] []
  []
@@ -1226,7 +1236,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1760--1763
 
  []
 
-[36]
+
 Overfull \hbox (2.22221pt too wide) in paragraph at lines 1764--1767
 [][][] []
  []
@@ -1276,7 +1286,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 1780--1783
 
  []
 
-
+[36]
 Overfull \hbox (2.22221pt too wide) in paragraph at lines 1784--1787
 [][][] []
  []
@@ -1356,99 +1366,19 @@ Underfull \hbox (badness 10000) in paragraph at lines 1812--1815
 
  []
 
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1818.
 [37]
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1816--1819
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1816--1819
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1820--1823
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1820--1823
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1824--1827
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1824--1827
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1828--1831
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1828--1831
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1832--1835
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1832--1835
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1836--1839
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1836--1839
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1840--1843
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1840--1843
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1844--1847
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1844--1847
-
- []
-
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 1850.
-[38]
-Package atveryend Info: Executing hook `AfterLastShipout' on input line 1850.
+Package atveryend Info: Executing hook `AfterLastShipout' on input line 1818.
  (./cSTM_Tutorial_TimeDep.xwm) (./cSTM_Tutorial_TimeDep.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1850.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1850.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1818.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 1818.
  ) 
 Here is how much of TeX's memory you used:
- 19518 strings out of 480608
- 305855 string characters out of 5903631
- 676285 words of memory out of 5000000
- 34760 multiletter control sequences out of 15000+600000
- 620522 words of font info for 153 fonts, out of 8000000 for 9000
+ 19507 strings out of 480608
+ 305695 string characters out of 5903631
+ 675840 words of memory out of 5000000
+ 34759 multiletter control sequences out of 15000+600000
+ 620392 words of font info for 152 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  69i,14n,75p,2409b,830s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2020/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/lo
@@ -1479,10 +1409,10 @@ lmsy8.pfb></usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtk10.pfb>
 </usr/local/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtko10.pfb></usr/loc
 al/texlive/2020/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive
 /2020/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on cSTM_Tutorial_TimeDep.pdf (38 pages, 1214252 bytes).
+Output written on cSTM_Tutorial_TimeDep.pdf (37 pages, 1207250 bytes).
 PDF statistics:
- 675 PDF objects out of 1000 (max. 8388607)
- 569 compressed objects within 6 object streams
- 139 named destinations out of 1000 (max. 500000)
+ 649 PDF objects out of 1000 (max. 8388607)
+ 544 compressed objects within 6 object streams
+ 131 named destinations out of 1000 (max. 500000)
  16570 words of extra memory for PDF output out of 17280 (max. 10000000)
 
