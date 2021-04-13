@@ -102,8 +102,8 @@ hr_S1S2_trtB <- 0.6 # hazard ratio of becoming Sicker when Sick under treatment 
 
 # Weibull parameters for state-residence-dependent transition probability of 
 # becoming Sicker when Sick conditional on surviving
-r_S1S2_scale <- 0.08 # scale
-r_S1S2_shape <- 1.1  # shape
+p_S1S2_scale <- 0.08 # scale
+p_S1S2_shape <- 1.1  # shape
 
 ## Age-dependent mortality rates
 lt_usa_2015 <- read.csv("data/LifeTable_USA_Mx_2015.csv")
@@ -151,7 +151,7 @@ v_p_S2Dage <- rate_to_prob(v_r_S2Dage) # Age-specific mortality risk in the Sick
 ## History-dependent transition probability of becoming Sicker when Sick
 # conditional on surviving
 # Weibull hazard
-v_p_S1S2_tunnels <- r_S1S2_scale * r_S1S2_shape * (1:n_tunnel_size)^{r_S1S2_shape-1}
+v_p_S1S2_tunnels <- p_S1S2_scale * p_S1S2_shape * (1:n_tunnel_size)^{p_S1S2_shape-1}
 
 ## History-dependent transition probability of becoming Sicker when Sick for treatment B
 # transform probability to rate

@@ -7,8 +7,8 @@ generate_psa_params <- function(n_sim = 1000, seed = 071818){
     p_S1H    = rbeta(n_sim, 60, 60) ,               # probability to become healthy when sick conditional on surviving
     hr_S1    = rlnorm(n_sim, log(3), 0.01),         # rate ratio of death in S1 vs healthy 
     hr_S2    = rlnorm(n_sim, log(10), 0.02),        # rate ratio of death in S2 vs healthy 
-    r_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
-    r_S1S2_shape = rlnorm(n_sim, log(1.1), 0.02),   # transition from S1 to S2 - Weibull shape parameter
+    p_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
+    p_S1S2_shape = rlnorm(n_sim, log(1.1), 0.02),   # transition from S1 to S2 - Weibull shape parameter
     hr_S1S2_trtB = rlnorm(n_sim, log(0.6), 0.1),    # hazard ratio of becoming Sicker when Sick under B
     
     # State rewards
@@ -60,7 +60,7 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     ## History-dependent transition probability of becoming Sicker when Sick
     # conditional on surviving
     # Weibull hazard
-    v_p_S1S2_tunnels <- r_S1S2_lambda * r_S1S2_gamma * (1:n_tunnel_size)^{r_S1S2_gamma-1}
+    v_p_S1S2_tunnels <- p_S1S2_scale * p_S1S2_shape * (1:n_tunnel_size)^{p_S1S2_shape-1}
     
     ## History-dependent transition probability of becoming Sicker when Sick for treatment B
     # transform probability to rate
