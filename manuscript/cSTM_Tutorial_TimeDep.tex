@@ -4,14 +4,13 @@
 %
 \documentclass[
 ]{article}
+\usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{amsmath}
 \usepackage{ifxetex,ifluatex}
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
-  \usepackage{amssymb}
 \else % if luatex or xetex
   \usepackage{unicode-math}
   \defaultfontfeatures{Scale=MatchLowercase}
@@ -84,7 +83,7 @@
 \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\usepackage{longtable,booktabs}
+\usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
 \usepackage{etoolbox}
@@ -114,8 +113,6 @@
 \usepackage{amsmath}
 \usepackage{float}
 \usepackage{setspace}\onehalfspacing
-\usepackage[printwatermark]{xwatermark}
-\newwatermark[allpages,color=gray!20,angle=45,scale=2,xpos=0,ypos=0]{DRAFT, Do Not Share}
 \renewcommand{\contentsname}{}\vspace{-.5cm}
 \usepackage{booktabs}
 \usepackage{longtable}
@@ -157,12 +154,12 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Pittsburgh, Pittsburgh, PA, USA}}
-\date{2021-04-13}
+\date{2021-06-17}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-In an accompanying tutorial, we show how to implement time-independent cohort state-transition models (cSTMs) to conduct cost-effectiveness analyses (CEA) in R. In this tutorial, we introduce time-dependent cSTMs, where transition probabilities and rewards can depend on the time since the start of the simulation (simulation time-dependency) or on time spent in a health state (state residence). We illustrate how to conduct a CEA of multiple strategies using a time-dependent cSTM using a previously published cSTM, including probabilistic sensitivity analyses. We also demonstrate how to compute various epidemiological outcomes of interest, such as survival probability and prevalence. We provide a link to a public repository with all the R code described in this tutorial that readers can use to replicate the example or adapt for various decision modeling applications.
+This tutorial shows how to implement time-dependent cohort state-transition models (cSTMs) to conduct cost-effectiveness analyses (CEA) in R, where transition probabilities and rewards vary by time. We account for two types of time dependency: time since the start of the simulation (simulation-time dependency) and time spent in a health state (state residence dependency). This tutorial is based on an accompanying tutorial that introduces how to implement time-independent cSTMs.We illustrate how to conduct a CEA of multiple strategies based on a time-dependent cSTM using a previously published cSTM, including probabilistic sensitivity analyses. We also demonstrate how to compute various epidemiological outcomes of interest, such as survival probability and prevalence. To illustrate the concepts, we provide both the mathematical notation and the R code to execute the calculations. Finally, similar to the introductory tutorial, we provide a public repository with the R code for broader implementation.
 \end{abstract}
 
 {
@@ -172,17 +169,17 @@ In an accompanying tutorial, we show how to implement time-independent cohort st
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Cohort state-transition models (cSTMs) are a type of decision model used to evaluate different health policy and clinical strategies, such as screening and surveillance programs,\textsuperscript{\protect\hyperlink{ref-Suijkerbuijk2018}{1},\protect\hyperlink{ref-Sathianathen2018a}{2}} diagnostic procedures,\textsuperscript{\protect\hyperlink{ref-Lu2018b}{3}} disease management programs,\textsuperscript{\protect\hyperlink{ref-Djatche2018}{4}} and interventions.\textsuperscript{\protect\hyperlink{ref-Pershing2014}{5},\protect\hyperlink{ref-Smith-Spangler2010}{6}}. cSTMs can be either time-independent or time-dependent. Time dependency could be either the time since the start of the simulation (simulation time-dependency) or on time spent in a health state (state residence). In an accompanying tutorial,\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} we describe the components of a time-independent cSTM, illustrate the implementation of these components and conduct a cost-effectiveness analysis (CEA) in R, a statistical software with an increasing use in health decision sciences.\textsuperscript{\protect\hyperlink{ref-Jalal2017b}{8}} This tutorial focuses on time-dependent cSTM. We cover both simulation time-dependency and time dependency on state residence. We first expand the Sick-Sicker model described in the accompanying tutorial\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} to account for age dependency and time dependency on state residence and allowing for transition rewards. We then provide a description of each of the components of a time-dependent cSTM, illustrate the implementation of these components by expanding the example described in the accompanying tutorial, conduct a CEA comparing four strategies, including a probabilistic sensitivity analysis. We also demonstrate how to compute various epidemiological outcomes of interest, such as survival probability and prevalence. Readers can find the most up-to-date model code and code to create the tutorial graphs in the accompanying GitHub repository (\url{https://github.com/DARTH-git/cohort-modeling-tutorial-timedep}). We assume that the reader is familiar with the basics of decision modeling and coding a time-independent cSTM in R. Thus, a prior introduction to R and linear algebra for decision modelers is recommended.
+Cohort state-transition models (cSTMs) are a type of decision model used to evaluate different health policy and clinical strategies, such as screening and surveillance programs,\textsuperscript{\protect\hyperlink{ref-Suijkerbuijk2018}{1},\protect\hyperlink{ref-Sathianathen2018a}{2}} diagnostic procedures,\textsuperscript{\protect\hyperlink{ref-Lu2018b}{3}} disease management programs,\textsuperscript{\protect\hyperlink{ref-Djatche2018}{4}} and interventions.\textsuperscript{\protect\hyperlink{ref-Pershing2014}{5},\protect\hyperlink{ref-Smith-Spangler2010}{6}}. cSTMs can be either time-independent or time-dependent. In an accompanying tutorial,\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} we describe the components of a time-independent cSTM, illustrate the implementation of these cSTMs and conduct a cost-effectiveness analysis (CEA) in R, a statistical software with increasing use in health decision sciences.\textsuperscript{\protect\hyperlink{ref-Jalal2017b}{8}} Time dependence could be either on time since the start of the simulation (simulation-time dependency) or time spent in a health state (state residence dependency). In this tutorial, we cover the implementation of a cSTM with one or both types of time dependencies. We first expand the Sick-Sicker example described in the accompanying tutorial\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} to have simulation time-dependency and state residence dependency, as well as state and transition rewards. We then describe each of the components of time-dependent cSTMs, illustrate the implementation of these components by expanding the example described in the accompanying tutorial and conduct a CEA comparing four strategies, including a probabilistic sensitivity analysis. We also demonstrate how to compute various epidemiological outcomes of interest, such as survival probability and prevalence. Readers can find the most up-to-date model code and code to create the tutorial graphs in the accompanying GitHub repository (\url{https://github.com/DARTH-git/cohort-modeling-tutorial-timedep}). We assume that the reader is familiar with the basics of decision modeling and the basics of developing time-independent cSTMs in R, as described in the accompanying tutorial.
 
 \hypertarget{time-dependent-cstms}{%
 \section{Time-dependent cSTMs}\label{time-dependent-cstms}}
 
-Time-dependency in cSTMs means that transition probabilities or rewards are not fixed over time. Time dependency in cSTMs is desirable to represent disease processes over relatively long periods accurately. In this tutorial, we describe two types of time dependency: (1) dependency on time since simulation starts (``simulation-time dependency''), with age-specific background mortality being an important example,\textsuperscript{\protect\hyperlink{ref-Snowsill2019}{9}} and (2) state-residence time dependency, which means that transition probabilities or rewards depend on the duration of time the cohort spends in a given state. Time-dependent cSTMs can capture the increasing age-specific background mortality as the cohort ages (age dependency) and dependency on the amount of time spent in a given state (state residence). We cover both types in this tutorial.
+Time-dependency in cSTMs means that transition probabilities or rewards are not fixed over time. Time dependency in cSTMs is desirable to represent disease processes over relatively long periods accurately where the transition probabilities may change. In this tutorial, we describe two types of time dependency: (1) \emph{simulation-time dependency} that refers to the dependence on time since simulation starts, with age-specific background mortality being a common important example,\textsuperscript{\protect\hyperlink{ref-Snowsill2019}{9}} and (2) \emph{state residence dependency}, which means that transition probabilities or rewards depend on the duration of time the cohort spends in a given state. We first describe how to implement simulation-time dependent cSTMs and then add state residence dependency to account for both time dependencies.
 
 \hypertarget{simulation-time-dependency}{%
 \subsection{Simulation-time dependency}\label{simulation-time-dependency}}
 
-Transition probabilities that depend on the time since the start of the simulation (simulation-time dependency) can be accounted for by the transition probability matrix being a function of time, \(P_t\). From here after we will refer to time since the start of the simulation as \textit{simulation-time dependency}. The elements of \(P_t\) are the transition probabilities of moving from state \(i\) to state \(j\) as a function of time \(t\), \(p_{[i,j,t]}\), where \(\{i,j\} = 1,\ldots, n_S\) and \(t = 0,\ldots,n_T\)
+Simulation-time dependency can be accounted for by defining the transition probability matrix as a function of time, \(P_t\). The elements of \(P_t\) are the transition probabilities of moving from state \(i\) to state \(j\) as a function of time \(t\), \(p_{[i,j,t]}\), where \(\{i,j\} = 1,\ldots, n_S\) and \(t = 0,\ldots,n_T\), with \(n_S\) being the number of health states of the model and \(n_T\) the number of cycles that represent total simulation time.
 \[
   P_t = 
   \begin{bmatrix}
@@ -194,12 +191,14 @@ Transition probabilities that depend on the time since the start of the simulati
 \]
 Note that all rows of the transition probability matrix in each cycle \(t\) must sum to one, \(\sum_{j=1}^{n_S}{p_{[i,j,t]}} = 1\) for all \(i = 1,\ldots,n_S\) and \(t = 0,\ldots, n_T\).
 
-The state vector at cycle \(t+1\) (\(\mathbf{m}_{t+1}\)) is then calculated as the matrix product of the state vector at cycle \(t\), \(\mathbf{m}_{t}\), and the transition probability matrix that the cohort faces in cycle \(t\), \(P_t\), such that,
+After defining the transition probability matrix, we need to specify the initial distribution of the cohort at \(t = 0\). These two components will allow us to simulate the transitions of the cohort across health states over time. Therefore, we define \(\mathbf{m}_{0}\) as the vector that captures the distribution of the cohort among the states at \(t = 0\) (i.e., the initial state vector). The state vector at cycle \(t+1\) (\(\mathbf{m}_{t+1}\)) is then calculated as the matrix product of the state vector at cycle \(t\), \(\mathbf{m}_{t}\), and the transition probability matrix that the cohort faces in cycle \(t\), \(P_t\),
 
-\[
-  \mathbf{m}_{t+1} = \mathbf{m}_{t} P_t \text{ for } t = 0,\ldots, (n_T - 1),
-\]
-where \(\mathbf{m}_1\) is computed from \(\mathbf{m}_{0}\) and represents the initial state vector with the distribution of the cohort across all health states at the start of the simulation (cycle 0). Then, this equation is iteratively evaluated until \(t = n_T\).
+\begin{equation}
+  \label{eq:time-dep-matrix-mult}
+  \mathbf{m}_{t+1} = \mathbf{m}_{t} P_t \qquad\text{ for }\qquad t = 0,\ldots, (n_T - 1).
+\end{equation}
+
+Equation \eqref{eq:time-dep-matrix-mult} is iteratively evaluated until \(t = n_T\).
 
 The cohort trace matrix, \(M\), is a matrix of dimensions \((n_T+1) \times n_S\) where each row is a state vector \((-\mathbf{m}_{t}-)\), such that
 
@@ -217,126 +216,42 @@ The cohort trace matrix, \(M\), is a matrix of dimensions \((n_T+1) \times n_S\)
 \hypertarget{time-dependency-on-state-residence}{%
 \subsection{Time dependency on state residence}\label{time-dependency-on-state-residence}}
 
-A slightly more complex time dependency is \emph{state residence}, for which transition probabilities or rewards depending on the time spent in a given state. One way to account for state-residence dependency is to expand the number of states with as many transient states as the number of cycles for which state residency is required. These transient states are referred to as \emph{tunnel} states where the cohort can stay for only one cycle and either transition to the next tunnel state or completely exit the tunnel. The set of tunnel states then essentially equals the amount of time that the cohort has spent in the tunnel representing a specific health state.
+The implementation of state residence dependency is slightly more involved than simulation-time dependency. As described above, dependence on state residence time occurs when transition probabilities or rewards depend on the time spent in a given state. To account for state residence dependency, we expand the number of states with as many transient states as the number of cycles for which state residency is required. These transient states are often referred to as \emph{tunnel} states where the cohort stays for only one cycle and either transition to the next tunnel state or completely exit the tunnel.
 
-If state-residence in a given state lasts \(n_{tunnels}\) cycles, such a state needs to be expanded into \(n_{tunnels}\) states, and the transition probability matrix also needs to be expanded to incorporate these additional states. This will result in a transition probability matrix (or array if the transition probabilities are also dependent on simulation time) of dimensions \(n_{S_{tunnels}} \times n_{S_{tunnels}}\) (or \(n_{S_{tunnels}} \times n_{S_{tunnels}} \times n_T\)), where \(n_{S_{tunnels}}\) is the total number of health states (\(n_{S_{tunnels}} = n_S + n_{tunnels} - 1\)).
+In a scenario where state-residence in one state lasts \(n_{\text{tunnels}}\) cycles, this state needs to be expanded into \(n_{\text{tunnels}}\) states, and the transition probability matrix also needs to be expanded to incorporate these additional transient states. This will result in a transition probability matrix of dimensions \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}}\), where \(n_{S_\text{tunnels}}\) is the total number of health states (\(n_{S_\text{tunnels}} = n_S + n_{\text{tunnels}} - 1\)). If the transition probabilities are also dependent on simulation time, we add a third dimension such that the dimensions will become \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}} \times n_T\). As state residence dependency extends in more health states, the total number of health states will increase, causing what has been referred to as ``state explosion''. Table \ref{tab:Timedep-cSTM-components-table} describes the core components of time-dependent cSTMs and their suggested R code names.
 
-Table \ref{tab:Timedep-cSTM-components-table} describes the elements related to the core components of time-dependent cSTMs and their suggested R code names. For a more detailed description of the variable types, data structure, R name for all cSTM elements, please see the Supplementary Material.
-
-\begin{longtable}[]{@{}llcl@{}}
-\caption{\label{tab:Timedep-cSTM-components-table} Components of a time-dependent cSTM with their R name.}\tabularnewline
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.19}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.57}}
+  >{\centering\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.17}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.06}}@{}}
+\caption{\label{tab:Timedep-cSTM-components-table} Core components of time-dependent cSTMs with their R name.}\tabularnewline
 \toprule
-\begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-Element\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Description\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-R name\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
+Element & Description & R name & \\
 \midrule
 \endfirsthead
 \toprule
-\begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-Element\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Description\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-R name\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
+Element & Description & R name & \\
 \midrule
 \endhead
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(n_S\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Number of states\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{n\_states}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(\mathbf{m}_0\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Initial state vector\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{v\_s\_init}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(\mathbf{m}_t\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-State vector in cycle \(t\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{v\_mt}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(M\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Cohort trace matrix\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{m\_M}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(\mathbf{P}\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Time-dependent transition probability array\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{a\_P}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(\mathbf{A}\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Transition-dynamics array\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{a\_A}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(n_{tunnels}\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Number of tunnel states\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{n\_tunnel\ size}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(n_{S_{tunnels}}\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Number of states including tunnel states\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{n\_states\_tunnels}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\raggedright
-\(\mathbf{m}_{{tunnels}_0}\)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.57}}\raggedright
-Initial state vector for the model with tunnel states\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.17}}\centering
-\texttt{v\_s\_init\_tunnels}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.06}}\raggedright
-\strut
-\end{minipage}\tabularnewline
+\(n_S\) & Number of states & \texttt{n\_states} & \\
+\(\mathbf{m}_0\) & Initial state vector & \texttt{v\_s\_init} & \\
+\(\mathbf{m}_t\) & State vector in cycle \(t\) & \texttt{v\_mt} & \\
+\(M\) & Cohort trace matrix & \texttt{m\_M} & \\
+\(\mathbf{P}\) & Time-dependent transition probability array & \texttt{a\_P} & \\
+\(\mathbf{A}\) & Transition-dynamics array & \texttt{a\_A} & \\
+\(n_{\text{tunnels}}\) & Number of tunnel states & \texttt{n\_tunnel\ size} & \\
+\(n_{S_{\text{tunnels}}}\) & Number of states including tunnel states & \texttt{n\_states\_tunnels} & \\
+\(\mathbf{m}_{\text{tunnels}_0}\) & Initial state vector for the model with tunnel states & \texttt{v\_s\_init\_tunnels} & \\
 \bottomrule
 \end{longtable}
+
+For a more detailed description of these components with their variable types, data structure, and R name, please see the Supplementary Material.
 
 \hypertarget{case-study-time-dependent-sick-sicker-model}{%
 \section{Case study: Time-dependent Sick-Sicker model}\label{case-study-time-dependent-sick-sicker-model}}
 
-To demonstrate the implementation of time-dependent cSTMs in R, we expand the time-independent 4-state ``Sick-Sicker'' model\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} to account for time dependency. We utilize this illustrative 4-state cSTM of a hypothetical disease (known as the ``Sick-Sicker'' model) to conduct a CEA of different health care strategies accounting for transition rewards. The state-transition diagram of the Sick-Sicker model is presented in Figure \ref{fig:STD-Sick-Sicker}. We first expand it to account for age dependency as an example of simulation time dependency. We then expand the age-dependent cSTM to account for time dependency in state residence.
+Similar to the introductory tutorial, we will demonstrate how to implement time-dependent cSTMs in R using the 4-state ``Sick-Sicker'' model\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} to account for time dependency. We will use this cSTM to conduct a CEA of different treatment strategies accounting for transition rewards. The state-transition diagram of the Sick-Sicker model is presented in Figure \ref{fig:STD-Sick-Sicker}. We first adapt the cSTM to account for simulation-time dependency by allowing age-dependent background mortality and then expand it to account for state-residence dependency.
 
 \begin{figure}[H]
 
@@ -344,392 +259,68 @@ To demonstrate the implementation of time-dependent cSTMs in R, we expand the ti
 
 }
 
-\caption{State-transition diagram of the Sick-Sicker cohort state-transition model with the name of the health states and possible transitions with their corresponding transition probabilities.}\label{fig:STD-Sick-Sicker}
+\caption{State-transition diagram of the Sick-Sicker cohort state-transition model with the name of the health states and possible transitions with their corresponding transition probability names.}\label{fig:STD-Sick-Sicker}
 \end{figure}
 
-The model simulates the health care costs and quality-adjusted life-years (QALYs) of a cohort of 25-year-old individuals at risk of developing a hypothetical disease that has two stages: ``Sick'' and ``Sicker''.\textsuperscript{\protect\hyperlink{ref-Enns2015e}{10}} We simulate the cohort of individuals who all start in the ``Healthy'' state (denoted ``H''). Meaning that we will simulate the cohort for 75 cycles. The total number of cycles is denoted as \(n_T\) and defined in R as \texttt{n\_cycles}. Healthy individuals face age-specific background mortality, and those who become ill over time transition to the ``Sick'' state (denoted by ``S1''). Once healthy individuals get sick, they incur a one-time utility decrement of 0.01 (\texttt{du\_HS1}, a disutility of transitioning from H to S1) and a transition cost of \$1,000 (\texttt{ic\_HS1}) that reflects the acute impacts of developing the illness. The ``Sick'' state is associated with higher mortality, higher health care costs, and lower quality of life than the ``Healthy'' state. Once in the ``Sick'' state, individuals may recover (returning to the ``Healthy'' state), or they might progress further to the ``Sicker'' state (denoted by ``S2''), with further increases in mortality and health care costs and reduced quality of life. In the state-residence time-dependent model, the risk progressing from S1 to S2 is a function of the duration of time spent in S1. Individuals in S1 and S2 face an increased hazard of death, compared to healthy individuals, in the form of a hazard ratio (HR) of 3 and 10, respectively, relative to the background age-specific mortality hazard rate. Once simulated individuals die, they transition to the absorbing ``Dead'' state (denoted by ``D''), where they remain, and incur a one-time cost of \$2,000 (\texttt{ic\_D}) that reflects the expected acute care preceding death. All transitions between non-death states are assumed to be conditional on surviving each cycle. We simulated the evolution of the cohort in one-year discrete-time cycles.
+The model simulates the health care costs and quality-adjusted life-years (QALYs) of a cohort of 25-year-old individuals at risk of developing a hypothetical disease that has two stages: ``Sick'' and ``Sicker''.\textsuperscript{\protect\hyperlink{ref-Enns2015e}{10}} We simulate the cohort of individuals who all start in the ``Healthy'' state (denoted by ``H'') over their lifetime, which means that we will simulate the cohort for 75 cycles. The total number of cycles is denoted as \(n_T\) and defined in R as \texttt{n\_cycles}. Healthy individuals face age-specific background mortality and those who become ill over time transition to the ``Sick'' state (denoted by ``S1''). Once healthy individuals get sick, they incur a one-time utility decrement of 0.01 (\texttt{du\_HS1}, a disutility of transitioning from H to S1) and a transition cost of \$1,000 (\texttt{ic\_HS1}) that reflects the acute impacts of developing the illness. The S1 state is associated with higher mortality, higher health care costs, and lower quality of life than the H state. Once in the S1 state, individuals may recover (returning to the H state), die (move to the D state), or progress further to the ``Sicker'' state (denoted by ``S2''), with further increases in mortality risk and health care costs and reduced quality of life. We assume that it is not possible to distinguish between individuals in S1 and S2. In the state-residence time-dependent model, the risk of progressing from S1 to S2 is a function of the duration of time spent in S1. Individuals in S1 and S2 face an increased hazard of death, compared to healthy individuals, in the form of a hazard ratio (HR) of 3 and 10, respectively, relative to the background age-specific mortality hazard rate. Once simulated individuals die, they transition to the absorbing D state, where they remain, and incur a one-time cost of \$2,000 (\texttt{ic\_D}) that reflects the expected acute care preceding death. All transitions between non-death states are assumed to be conditional on surviving each cycle. We simulated the evolution of the cohort in one-year discrete-time cycles.
 
-We use this cSTM to evaluate the cost-effectiveness of four strategies: Strategy A, strategy B, a combination of A and B (Strategy AB), and the standard of care (strategy SoC). Strategy A involves administering treatment A that increases the QoL of individuals in S1 from 0.75 (utility without treatment, \texttt{u\_S1}) to 0.95 (utility with treatment A, \texttt{u\_trtA}) and costs \$12,000 per year (\texttt{c\_trtA}).\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{11}} This strategy does not impact the QoL of individuals in S2, nor does it change the risk of becoming sick or progressing through the sick states. Strategy B uses treatment B to reduce only the rate of Sick individuals progressing to the Sicker state with a hazard ratio (HR) of 0.6 (\texttt{hr\_S1S2\_trtB}) and costs \$13,000 per year (\texttt{c\_trtB}) and does not affect QoL. Strategy AB involves administering both treatments A and B. We evaluate the strategies over a lifetime time horizon (until a maximum age of 100 years), meaning that we will simulate the cohort for 75 cycles. We discount both costs and QALYs at an annual rate of 3\%. Model parameters and the corresponding R variable names are presented in Table \ref{tab:param-table} and follow the notation described in the DARTH coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{12}}
+We use this cSTM to evaluate the cost-effectiveness of four strategies: Strategy A, strategy B, a combination of A and B (strategy AB), and the standard of care (strategy SoC). Strategy A involves administering treatment A to individuals in S1 and S2 but only increases the QoL of individuals in S1 from 0.75 (utility without treatment, \texttt{u\_S1}) to 0.95 (utility with treatment A, \texttt{u\_trtA}) and costs \$12,000 per year (\texttt{c\_trtA}).\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{11}} This strategy does not impact the QoL of individuals in S2, nor does it change the risk of becoming sick or progressing through the sick states. Strategy B uses treatment B to reduce only the rate of Sick individuals progressing to the S2 state with a hazard ratio (HR) of 0.6 (\texttt{hr\_S1S2\_trtB}) and costs \$13,000 per year (\texttt{c\_trtB}) and does not affect QoL. Strategy AB involves administering both treatments A and B. We discount both costs and QALYs at an annual rate of 3\%. Model parameters and the corresponding R variable names are presented in Table \ref{tab:param-table} and follow the notation described in the DARTH coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{12}}
 
-We assume that it is not possible to distinguish between Sick and Sicker patients; therefore, individuals in both disease states receive the treatments. Note that for strategy A, the model has the same structure and identical transition probabilities to SoC. The only difference is the added cost of the treatment for S1 or S2, and QoL increases for S1. After comparing the four strategies in terms of expected QALYs and costs, we calculate the incremental cost per QALY gained between non-dominated strategies.
+Note that for strategy A, the model has the same structure and identical transition probabilities to SoC. The only difference is the added cost of the treatment for S1 or S2, and QoL increases for S1. After comparing the four strategies in terms of expected QALYs and costs, we calculate the incremental cost per QALY gained between non-dominated strategies.
 
-\begin{longtable}[]{@{}lccc@{}}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.45}}
+  >{\centering\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.16}}
+  >{\centering\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.19}}
+  >{\centering\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.20}}@{}}
 \caption{\label{tab:param-table} Description of parameters, their R variable name, base-case values and distribution.}\tabularnewline
 \toprule
-\begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-\textbf{Parameter}\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\textbf{R name}\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\textbf{Base-case}\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\textbf{Distribution}\strut
-\end{minipage}\tabularnewline
+\textbf{Parameter} & \textbf{R name} & \textbf{Base-case} & \textbf{Distribution} \\
 \midrule
 \endfirsthead
 \toprule
-\begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-\textbf{Parameter}\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\textbf{R name}\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\textbf{Base-case}\strut
-\end{minipage} & \begin{minipage}[b]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\textbf{Distribution}\strut
-\end{minipage}\tabularnewline
+\textbf{Parameter} & \textbf{R name} & \textbf{Base-case} & \textbf{Distribution} \\
 \midrule
 \endhead
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Number of cycles (\(n_cycles\))\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{n\_cycles}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-75 years\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Names of health states (\(n\))\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{v\_names\_states}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-H, S1, S2, D\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Annual discount rate for costs\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{d\_c}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-3\%\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Annual discount rate for QALYs\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{d\_e}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-3\%\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Number of PSA samples (\(K\))\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{n\_sim}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-1,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Annual transition probabilities conditional on surviving\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Disease onset (H to S1)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{p\_HS1}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.15\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(30, 170)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Recovery (S1 to H)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{p\_S1H}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.5\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(60, 60)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Time-independent disease progression (S1 to S2)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{p\_S1S2}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.105\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(84, 716)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Time-dependent disease progression (S1 to S2)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{v\_p\_S1S2\_tunnels}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-~~~~Weibull parameters\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-~~~~~~~~Scale (\(\lambda\))\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{p\_S1S2\_scale}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.08\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-lognormal(log(0.08), 0.02)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-~~~~~~~~Shape (\(\gamma\))\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{p\_S1S2\_shape}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-1.10\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-lognormal(log(1.10), 0.05)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Annual mortality\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Age-dependent background mortality rate (H to D)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{v\_r\_HDage}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-age-specific\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Hazard ratio of death in S1 vs H\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{hr\_S1}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-3.0\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-lognormal(log(3.0), 0.01)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Hazard ratio of death in S2 vs H\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{hr\_S2}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-10.0\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-lognormal(log(10.0), 0.02)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Annual costs\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Healthy individuals\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{c\_H}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$2,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-gamma(100.0, 20.0)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Sick individuals in S1\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{c\_S1}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$4,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-gamma(177.8, 22.5)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Sick individuals in S2\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{c\_S2}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$15,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-gamma(225.0, 66.7)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Dead individuals\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{c\_D}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$0\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Cost of treatment A as an additional costs on individuals treated in S1 or S2\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{c\_trtA}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$12,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-gamma(576.0, 20.8)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Cost of treatment B as an additional costs on individuals treated in S1 or S2\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{c\_trtB}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$13,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-gamma(676.0, 19.2)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Utility weights\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Healthy individuals\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{u\_H}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-1.00\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(200, 3)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Sick individuals in S1\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{u\_S1}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.75\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(130, 45)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Sick individuals in S2\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{u\_S2}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.50\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(230, 230)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Dead individuals\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{u\_D}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.00\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
--\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Treatment A effectiveness\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Utility for treated individuals in S1\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{u\_trtA}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.95\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(300, 15)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Treatment B effectiveness\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Reduction in rate of disease progression (S1 to S2) as hazard ratio (HR)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{hr\_S1S2\_trtB}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-log(0.6)\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-lognormal(log(0.6), 0.1)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-Transition rewards\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Utility decrement of healthy individuals\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{du\_HS1}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-0.01\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-beta(11,1088)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-when transitioning to S1\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Cost of healthy individuals\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{ic\_HS1}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$1,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-gamma(25, 40)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-when transitioning to S1\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.45}}\raggedright
-- Cost of dying when transitioning to D\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.16}}\centering
-\texttt{ic\_D}\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.19}}\centering
-\$2,000\strut
-\end{minipage} & \begin{minipage}[t]{(\columnwidth - 3\tabcolsep) * \real{0.20}}\centering
-gamma(100, 20)\strut
-\end{minipage}\tabularnewline
+Number of cycles (\(n_{T}\)) & \texttt{n\_cycles} & 75 years & constant \\
+Names of health states & \texttt{v\_names\_states} & H, S1, S2, D & constant \\
+Annual discount rate for costs & \texttt{d\_c} & 3\% & constant \\
+Annual discount rate for QALYs & \texttt{d\_e} & 3\% & constant \\
+Number of PSA samples (\(K\)) & \texttt{n\_sim} & 1,000 & constant \\
+Annual transition probabilities conditional on surviving & & & \\
+- Disease onset (H to S1) & \texttt{p\_HS1} & 0.15 & beta(30, 170) \\
+- Recovery (S1 to H) & \texttt{p\_S1H} & 0.5 & beta(60, 60) \\
+- Time-independent disease progression (S1 to S2) & \texttt{p\_S1S2} & 0.105 & beta(84, 716) \\
+- Time-dependent disease progression (S1 to S2) & \texttt{v\_p\_S1S2\_tunnels} & & \\
+~~~~Weibull parameters & & & \\
+~~~~~~~~Scale (\(\lambda\)) & \texttt{p\_S1S2\_scale} & 0.08 & lognormal(log(0.08), 0.02) \\
+~~~~~~~~Shape (\(\gamma\)) & \texttt{p\_S1S2\_shape} & 1.10 & lognormal(log(1.10), 0.05) \\
+Annual mortality & & & \\
+- Age-dependent background mortality rate (H to D) & \texttt{v\_r\_HDage} & age-specific & constant \\
+- Hazard ratio of death in S1 vs H & \texttt{hr\_S1} & 3.0 & lognormal(log(3.0), 0.01) \\
+- Hazard ratio of death in S2 vs H & \texttt{hr\_S2} & 10.0 & lognormal(log(10.0), 0.02) \\
+Annual costs & & & \\
+- Healthy individuals & \texttt{c\_H} & \$2,000 & gamma(100.0, 20.0) \\
+- Sick individuals in S1 & \texttt{c\_S1} & \$4,000 & gamma(177.8, 22.5) \\
+- Sick individuals in S2 & \texttt{c\_S2} & \$15,000 & gamma(225.0, 66.7) \\
+- Dead individuals & \texttt{c\_D} & \$0 & - \\
+- Cost of treatment A as an additional costs on individuals treated in S1 or S2 & \texttt{c\_trtA} & \$12,000 & gamma(576.0, 20.8) \\
+- Cost of treatment B as an additional costs on individuals treated in S1 or S2 & \texttt{c\_trtB} & \$13,000 & gamma(676.0, 19.2) \\
+Utility weights & & & \\
+- Healthy individuals & \texttt{u\_H} & 1.00 & beta(200, 3) \\
+- Sick individuals in S1 & \texttt{u\_S1} & 0.75 & beta(130, 45) \\
+- Sick individuals in S2 & \texttt{u\_S2} & 0.50 & beta(230, 230) \\
+- Dead individuals & \texttt{u\_D} & 0.00 & constant \\
+Treatment A effectiveness & & & \\
+- Utility for treated individuals in S1 & \texttt{u\_trtA} & 0.95 & beta(300, 15) \\
+Treatment B effectiveness & & & \\
+- Reduction in rate of disease progression (S1 to S2) as hazard ratio (HR) & \texttt{hr\_S1S2\_trtB} & log(0.6) & lognormal(log(0.6), 0.1) \\
+Transition rewards & & & \\
+- Utility decrement of healthy individuals & \texttt{du\_HS1} & 0.01 & beta(11,1088) \\
+when transitioning to S1 & & & \\
+- Cost of healthy individuals & \texttt{ic\_HS1} & \$1,000 & gamma(25, 40) \\
+when transitioning to S1 & & & \\
+- Cost of dying when transitioning to D & \texttt{ic\_D} & \$2,000 & gamma(100, 20) \\
 \bottomrule
 \end{longtable}
 
@@ -790,11 +381,11 @@ The R code below describes the initialization of the input parameters.
 \hypertarget{simulation-time-dependency-1}{%
 \subsection{Simulation-time dependency}\label{simulation-time-dependency-1}}
 
-To illustrate the implementation of this time dependency in the Sick-Sicker cSTM, we model all-cause mortality as a function of age. It is common to obtain all-cause mortality from life tables in the form of age-specific mortality hazard rates, \(\mu(a)\), where \(a\) refers to age. For this example, we create a vector \texttt{v\_r\_mort\_by\_age} with age-specific background mortality hazard rates for 0 to 100 year-olds obtained from the 2015 US life-tables.\textsuperscript{\protect\hyperlink{ref-Arias2017}{13}} To compute the transition probability from state H to state D, corresponding to cohort's age at each cycle, we transform \(\mu(a)\) to a transition probability assuming a constant exponential hazard rate within each year of age
+To illustrate the implementation of simulation-time dependency in the Sick-Sicker cSTM, we model all-cause mortality as a function of age. We obtain all-cause mortality from life tables in the form of age-specific mortality hazard rates, \(\mu(a)\), where \(a\) refers to age. For this example, we create a vector \texttt{v\_r\_mort\_by\_age} with age-specific background mortality hazard rates for 0 to 100 year-olds obtained from the 2015 US life-tables.\textsuperscript{\protect\hyperlink{ref-Arias2017}{13}} To compute the transition probability from state H to state D, corresponding to cohort's age at each cycle, we transform the rate \(\mu(a)\) to a transition probability assuming a constant exponential hazard rate within each year of age
 \[
   p_{[H,D,t]} = 1-\exp\left\{{-\mu(a_0 + t)}\right\},
 \]
-where \(a_0 =\) 25 is the starting age of the cohort. We will run the Sick-Sicker model for 75 cycles for ages 25 through 100. Instead of iterating through the mortality hazard rates, we obtain a vector of background mortality hazard rates for the ages of interest between 25 through 100 by subsetting \(\mu(a)\) (R variable name \texttt{v\_r\_mort\_by\_age}) for these ages. We transform the resulting R variable, \texttt{v\_r\_HDage}, to a probability.
+where \(a_0 =\) 25 is the starting age of the cohort. Instead of iterating through the mortality hazard rates, we obtain a vector of background mortality hazard rates for the ages of interest between 25 through 100 by subsetting \(\mu(a)\) (R variable name \texttt{v\_r\_mort\_by\_age}) for these ages. We transform the resulting R variable, \texttt{v\_r\_HDage}, to a probability.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -805,7 +396,7 @@ where \(a_0 =\) 25 is the starting age of the cohort. We will run the Sick-Sicke
 \end{Highlighting}
 \end{Shaded}
 
-Because mortality in S1 and S2 are relative to background mortality, adding age dependency on background mortality results in age-dependent mortality in S1 and S2 as well as in H. To generate the age-specific mortality in S1 and S2, we multiply the age-specific background mortality rate, \texttt{v\_r\_HDage}, by the constant hazard ratios \texttt{hr\_S1} and \texttt{hr\_S2}, respectively. We then convert the resulting stage-specific mortality rates to probabilities to ensure that the transition probabilities to D are bounded between 0 and 1.
+Because mortality in S1 and S2 are relative to background mortality, adding age dependency to background mortality results in age-dependent mortality in S1 and S2 as well as in H. To generate the age-specific mortality in S1 and S2, we multiply the age-specific background mortality rate, \texttt{v\_r\_HDage}, by the constant hazard ratios \texttt{hr\_S1} and \texttt{hr\_S2}, respectively. We then convert the resulting age-specific mortality rates to probabilities.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -818,7 +409,7 @@ Because mortality in S1 and S2 are relative to background mortality, adding age 
 \end{Highlighting}
 \end{Shaded}
 
-To incorporate age-dependency into the transition probability matrix, we expand the dimensions of the matrix and create a 3-dimensional transition probability array, \(\mathbf{P}\) and \texttt{a\_P} in R, of dimensions \(n_S \times n_S \times n_T\), where the first two dimensions correspond to transitions between states and the third dimension to time. The \(t\)-th element in the third dimension corresponds to the transition probability matrix at cycle \(t\). A visual representation of \texttt{a\_P} is shown in Figure \ref{fig:Array-Time-Dependent}.
+To incorporate simulation-time dependency into the transition probability matrix, we expand the dimensions of the matrix and create a 3-dimensional transition probability array, \(\mathbf{P}\) and \texttt{a\_P} in R, of dimensions \(n_S \times n_S \times n_T\). The first two dimensions of this array correspond to transitions between states and the third dimension to time. The \(t\)-th element in the third dimension corresponds to the transition probability matrix at cycle \(t\). A visual representation of \texttt{a\_P} is shown in Figure \ref{fig:Array-Time-Dependent}.
 
 \begin{figure}[H]
 
@@ -826,7 +417,7 @@ To incorporate age-dependency into the transition probability matrix, we expand 
 
 }
 
-\caption{A 3-dimensional representation of the transition probability array of the age-dependent Sick-Sicker model with simulation-time dependency.}\label{fig:Array-Time-Dependent}
+\caption{A 3-dimensional representation of the transition probability array of the Sick-Sicker model with simulation-time dependency.}\label{fig:Array-Time-Dependent}
 \end{figure}
 
 First, we initialize \texttt{a\_P} with a default value of zero for all transition probabilities.
@@ -839,7 +430,7 @@ First, we initialize \texttt{a\_P} with a default value of zero for all transiti
 \end{Highlighting}
 \end{Shaded}
 
-Filling \texttt{a\_P} with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling \texttt{m\_P} for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For those transitions that are constant over time, we only need to provide one transition probability. R replicates the value of such transitions as many times as the length of the time dimension, for our example \(n_T+1\) times.
+Filling \texttt{a\_P} with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling \texttt{m\_P} for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For constant transitions over time, we only need to provide one value for the transition probability. R replicates the value of such transitions as many times as the number of cycles (\(n_T+1\) times in our example).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -861,7 +452,7 @@ Filling \texttt{a\_P} with the corresponding transition probabilities of the coh
 \end{Highlighting}
 \end{Shaded}
 
-As mentioned above, each of the elements on the third dimension of \texttt{a\_P} correspond to a transition probability matrix. For example, the transition matrix for 25-year-olds in the Sick-Sicker model under the SoC strategy can be retrieved using:
+As mentioned above, each slice along the third dimension of \texttt{a\_P} corresponds to a transition probability matrix. For example, the transition matrix for 25-year-olds in the Sick-Sicker model under the SoC strategy can be retrieved using:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -877,7 +468,7 @@ As mentioned above, each of the elements on the third dimension of \texttt{a\_P}
 ## D  0.0000000 0.0000000 0.0000000 1.000000000
 \end{verbatim}
 
-Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, \texttt{a\_P\_trtB} as a copy of \texttt{a\_P} and update only the transition probabilities from S1 to S2 (i.e., \texttt{p\_S1S2} is replaced with \texttt{p\_S1S2\_trtB}).
+Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, \texttt{a\_P\_trtB} as a copy of \texttt{a\_P} and update only the probability of remaining in S1 and the transition probability from S1 to S2 (i.e., \texttt{p\_S1S2} is replaced with \texttt{p\_S1S2\_trtB}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -889,7 +480,7 @@ Similar to the time-independent cSTM, treatment A does not change the transition
 \end{Highlighting}
 \end{Shaded}
 
-Once we create both three-dimensional transition probability arrays, we check they are valid using the functions \texttt{check\_sum\_of\_transition\_array} and \texttt{check\_transition\_probability},which are provided in the \texttt{darthtools} package (\url{https://github.com/DARTH-git/darthtools}).
+Once we create the transition probability arrays, we check they are valid by ensuring transition probabilities are between 0 and 1 and all rows sum to 1 using the functions \texttt{check\_sum\_of\_transition\_array} and \texttt{check\_transition\_probability}, provided in the \texttt{darthtools} package (\url{https://github.com/DARTH-git/darthtools}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -903,19 +494,16 @@ Once we create both three-dimensional transition probability arrays, we check th
 \end{Highlighting}
 \end{Shaded}
 
-For the time-dependent Sick-Sicker model, the entire cohort starts in the Healthy state. Therefore, we create the \(1 \times n_S\) initial state vector \texttt{v\_s\_init} with all of the cohort assigned to the H state:
+In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefore, we create the \(1 \times n_S\) initial state vector \texttt{v\_s\_init} with all of the cohort assigned to the H state:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{v\_s\_init }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =} \DecValTok{1}\NormalTok{, }\AttributeTok{S1 =} \DecValTok{0}\NormalTok{, }\AttributeTok{S2 =} \DecValTok{0}\NormalTok{, }\AttributeTok{D =} \DecValTok{0}\NormalTok{) }\CommentTok{\# initial state vector}
 \NormalTok{v\_s\_init}
+\CommentTok{\#  H S1 S2  D }
+\CommentTok{\#  1  0  0  0}
 \end{Highlighting}
 \end{Shaded}
-
-\begin{verbatim}
-##  H S1 S2  D 
-##  1  0  0  0
-\end{verbatim}
 
 We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \texttt{m\_M} for the cohorts under SoC strategy and strategy A because the transition probabilities are the same under both strategies, and by \texttt{m\_M\_trtB} for the cohorts under strategies B and AB because both transition probabilities under both strategies are affected by treatment B. Note that the initial state vector, \texttt{v\_s\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the age-dependent cSTM, we initialize two new cohort trace matrices \texttt{m\_M\_ad} and \texttt{m\_M\_ad\_trtB}.
 
@@ -1578,14 +1166,14 @@ The total expected discounted QALYs and costs for the age-dependent Sick-Sicker 
 \caption{\label{tab:Expected-outcomes-table}Total expected discounted QALYs and costs per average individual in the cohort of the age-dependent Sick-Sicker model by strategy accounting for within-cycle correction .}
 \centering
 \begin{tabular}[t]{llc}
-\toprule
+\toprule{}
   & Costs & QALYs\\
-\midrule
+\midrule{}
 Standard of care & \$114,560 & 19.142\\
 Strategy A & \$211,911 & 19.840\\
 Strategy B & \$194,481 & 20.480\\
 Strategy AB & \$282,370 & 21.302\\
-\bottomrule
+\bottomrule{}
 \end{tabular}
 \end{table}
 
@@ -1615,14 +1203,14 @@ In terms of their costs and effectiveness, SoC is the least costly and effective
 \caption{\label{tab:table-cea}Cost-effectiveness analysis results for the age-dependent Sick-Sicker model. ND: Non-dominated strategy; D: Dominated strategy.}
 \centering
 \begin{tabular}[t]{rcccccc}
-\toprule
+\toprule{}
 Strategy & Costs (\$) & QALYs & Incremental Costs (\$) & Incremental QALYs & ICER (\$/QALY) & Status\\
-\midrule
+\midrule{}
 Standard of care & 114,560 & 19.142 & NA & NA & NA & ND\\
 Strategy B & 194,481 & 20.480 & 79,920 & 1.338 & 59,726 & ND\\
 Strategy AB & 282,370 & 21.302 & 87,890 & 0.822 & 106,927 & ND\\
 Strategy A & 211,911 & 19.840 & NA & NA & NA & D\\
-\bottomrule
+\bottomrule{}
 \end{tabular}
 \end{table}
 
@@ -1682,7 +1270,7 @@ There are several alternative approaches to incorporate time-dependency in cSTMs
 
 The parameterization of our example model assumes all parameters are known, or at least, the characterization of their uncertainty is known (i.e., we know their distributions). However, to construct a real-world cSTM, modelers must conduct a thorough synthesis of current evidence to determine these models' appropriate structure and inform all parameters. For example, determining whether transitions between non-death health states are estimated conditional on being alive or as competing risks.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{23}} Similarly, our PSA analysis simplifies reality where all model parameters are assumed to be independent of each other. However, parameters could be correlated with each other or have a rank order, and appropriate statistical methods that simulate these correlations or rank order might be needed.\textsuperscript{\protect\hyperlink{ref-Goldhaber-Fiebert2015}{28}} We encourage modelers to use appropriate statistical methods to synthesize and quantify model parameters uncertainty accurately. Also, modelers should correctly specify all model parameters for the cycle length of the model. For example, adjusting an annual mortality rate to a weekly probability requires some probability revision.\textsuperscript{\protect\hyperlink{ref-Hunink2014}{29}}
 
-In general, cSTMs are recommended when the number of states is ``not too large''.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{14}} This recommendation arises because as the number of states increases, it becomes more difficult to keep track of their construction but not because of the added computational expense. It is possible to build fairly complex cSTMs in R as long as the size of the transition probability matrix and outputs of interest can be stored in the RAM memory of the computer running the analysis. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1000 states and 600 slices. However, these matrices can grow quickly, and if the required number of state descriptions gets too large and difficult to manage its coding, it becomes preferable to use a stochastic (Monte Carlo) version of the state-transition model --often called individual-based state-transition models (iSTM) or microsimulation models-- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{14}} In iSTM, the risks and rewards of simulated individuals do not need to depend only on a specific health state and can depend on their individual characteristics and attributes. Besides, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. It is recommended to think about the required model structure before implementing the model in R or any other tool because turning a cSTM into an iSTM requires a different code structure. However, most input parameters and some model structures might remain the same. Still, an iSTM will also require additional functions to describe the dependency of transition probabilities and rewards on individuals' history. In a previous tutorial, we showed how to write these additional functions for the Sick-Sicker example model.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{11}}
+As described in the accompanying tutorial, cSTMs are recommended when the number of states is considered ``not too large''.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{14}} This recommendation arises because as the number of states increases, it becomes more difficult to keep track of their construction. It is possible to build fairly complex cSTMs in R as long as the size of the transition probability matrix and outputs of interest can be stored in the RAM memory of the computer running the analysis. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1000 states and 600 time slices. However, these matrices can grow quickly, and if the required number of states gets too large and difficult to manage its coding, it becomes preferable to use a stochastic (Monte Carlo) version of the state-transition model -- often called individual-based state-transition models (iSTM) or microsimulation models -- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{14}} In an iSTM, the risks and rewards of simulated individuals need not depend only on a current health state; it may also depend on their characteristics and attributes. In addition, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. Thus, we recommend thinking about the required model structure before implementing it some model structures might remain the same. An iSTM will also require additional functions to describe the dependency of transition probabilities and rewards on individuals' history. In a previous tutorial, we showed how to construct these functions for an iSTM using the Sick-Sicker example.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{11}}
 
 In summary, this tutorial provides a conceptualization of time-dependent cSTMs and a step-by-step guide to implement them in R. We aim to add to the current body of literature and material on building this type of decision models, so health decision scientists and health economists can develop cSTMs in a more flexible, efficient, open-source manner, and encouraging increased transparency and reproducibility.
 
@@ -1747,7 +1335,7 @@ Dr Alarid-Escudero was supported by a grant from the National Cancer Institute (
 
 \leavevmode\hypertarget{ref-Arias2017}{}%
 \CSLLeftMargin{13. }
-\CSLRightInline{Arias E, Heron M, Xu J. {United States Life Tables, 2014}. \emph{National Vital Statistics Reports}; 66: 63, \url{https://www.cdc.gov/nchs/data/nvsr/nvsr66/nvsr66_04.pdf} (2017).}
+\CSLRightInline{Arias E, Heron M, Xu J. {United States Life Tables, 2014}. \emph{National Vital Statistics Reports}; 66: 63, \url{https://www.cdc.gov/nchs/data/nvsr/nvsr66/nvsr66\%7B/_\%7D04.pdf} (2017).}
 
 \leavevmode\hypertarget{ref-Siebert2012c}{}%
 \CSLLeftMargin{14. }
@@ -1767,7 +1355,7 @@ Dr Alarid-Escudero was supported by a grant from the National Cancer Institute (
 
 \leavevmode\hypertarget{ref-Klein2003}{}%
 \CSLLeftMargin{18. }
-\CSLRightInline{Klein JP, Moeschberger ML. \emph{{Survival Analysis: Techniques for Censored and Truncated Data}}. 2nd ed. Springer-Verlag, \url{http://www.springer.com/statistics/life+sciences,+medicine+\&+health/book/978-0-387-95399-1} (2003).}
+\CSLRightInline{Klein JP, Moeschberger ML. \emph{{Survival Analysis: Techniques for Censored and Truncated Data}}. 2nd ed. Springer-Verlag, \url{http://www.springer.com/statistics/life+sciences,+medicine+\%7B/\&\%7D+health/book/978-0-387-95399-1} (2003).}
 
 \leavevmode\hypertarget{ref-Krijkamp2019}{}%
 \CSLLeftMargin{19. }
@@ -1783,7 +1371,7 @@ Dr Alarid-Escudero was supported by a grant from the National Cancer Institute (
 
 \leavevmode\hypertarget{ref-Alarid-Escudero2021}{}%
 \CSLLeftMargin{22. }
-\CSLRightInline{Alarid-Escudero F, Easterly CA, Knowlton G, et al. {dampack: Decision-Analytic Modeling Package}, \url{https://cran.r-project.org/web/packages/dampack/\%20https://github.com/DARTH-git/dampack} (2021).}
+\CSLRightInline{Alarid-Escudero F, Knowlton G, Easterly CA, et al. Decision analytic modeling package (dampack), \url{https://cran.r-project.org/web/packages/dampack/\%20https://github.com/DARTH-git/dampack} (2021).}
 
 \leavevmode\hypertarget{ref-Briggs2012}{}%
 \CSLLeftMargin{23. }
