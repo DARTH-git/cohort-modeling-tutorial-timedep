@@ -658,16 +658,16 @@ ggplot(melt(m_M_tunnels_sum), aes(x = Var1, y = value,
         legend.background = element_rect(fill = NA))
 ```
 # Epidemiological and economic outputs
-cSTMs can be used to generate different epidemiological and economic outputs. In a CEA, the main outcomes are typically the total expected QALYs and total costs accrued by the cohort over a predefined time horizon. However, epidemiological outcomes are often used to produce other measures of interest or model calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.[@Siebert2012c]
+cSTMs can be used to generate different epidemiological and economic outputs. In a CEA, the main outcomes are typically the total discounted expected QALYs and total costs accrued by the cohort over the predefined time horizon. However, epidemiological outcomes can be helpful for complementary analyses, such as calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.[@Siebert2012c] We show how to obtain some of these outcomes from the trace and transition probability objects.
 
-## Epidemiological outcomes
-In this tutorial, we provide the epidemiological definition of some of these outcomes and how they can be generated from a cSTM using the age-dependent Sick-Sicker cSTM under SoC. In the supplementary material, we provide the code to generate these outcomes from the state-residence-dependent cSTM.
+## Epidemiological measures
+Here we provide the epidemiological definition of some of these outcomes and how they can be generated from a cSTM using the simulation-time-dependent Sick-Sicker cSTM under SoC. In the GitHub repository, we provide the code to generate these outcomes from the state-residence-dependent cSTM.
 
 ### Survival probability
-The survival function, $S(t)$, captures the probability of the cohort remaining alive by cycle $t$. To estimate $S(t)$ from the simulated cohort of the age-dependent Sick-Sicker model, shown in Figure \@ref(fig:Sick-Sicker-Surv-AgeDep), we sum the proportions of the non-death states for all $n_T$ cycles in `m_M_ad`.
+The survival probability, $S(t)$, captures the proportion of the cohort remaining alive by cycle $t$. To estimate $S(t)$ from the simulated cohort of the simulation-time-dependent Sick-Sicker model, shown in Figure \@ref(fig:Sick-Sicker-Surv-AgeDep), we sum the proportions of the non-death states for all $n_T$ cycles in `m_M_ad`.
 
 ```{r Sick-Sicker-TimeDependent-Surv}
-v_S_ad <- rowSums(m_M_ad[, -which(v_names_states=="D")]) # vector with survival curve
+v_S_ad <- rowSums(m_M_ad[, -which(v_names_states == "D")]) # vector with survival curve
 ``` 
 
 ```{r Sick-Sicker-Surv-AgeDep, echo=FALSE, fig.cap='Survival curve of the age-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
@@ -680,6 +680,31 @@ ggplot(data.frame(Cycle = 0:n_cycles, Survival = v_S_ad),
   theme_bw(base_size = 16) +
   theme()
 ```
+
+### Life expectancy
+Life expectancy (LE) refers to the expected number of time units remaining to be alive.[@Lee2003a] In continuous-time, LE is the area under the entire survival curve.[@Klein2003]
+
+$$
+LE = \int_{t=0}^{\infty}{S(t) dt}.
+$$
+
+In discrete-time using cSTMs, we often calculate restricted LE over a fixed time horizon (e.g., $n_T$) at which most of the cohort has transitioned to the Dead state and is defined as
+
+$$
+  LE = \sum_{t=0}^{n_T}{S(t)}.
+$$
+
+```{r Expected-life-years-NoShow, echo=FALSE}
+le_ad <- sum(v_S_ad)
+```
+
+In the simulation-time-dependent Sick-Sicker model, where we simulated a cohort over  $n_T$= `r n_cycles` cycles, life expectancy `le_ad` is `r round(le_ad, 1)` cycles, which is calculated as
+
+```{r Life-expectancy, eval=FALSE}
+le_ad <- sum(v_S_ad) # life expectancy
+```
+
+Note that this equation expresses LE in the units of $t$. We use an annual cycle length; thus, the resulting LE will be in years. Analysts can also use other cycle lengths (e.g., monthly or daily), but the LE must be correctly converted to the desired unit if different than the cycle length units.
 
 ### Prevalence
 Prevalence is defined as the proportion of the population or cohort with a specific condition (or being in a particular health state) among those alive.[@Rothman2008h] To calculate the prevalence of S1 at cycle $t$, $\text{prev}(t)_i$, we compute the ratio between the proportion of the cohort in S1 and the proportion alive at that cycle.[@Keiding1991] The proportion of the cohort alive is given by the survival probability $S(t)$ defined above. The individual prevalence of the S1 and S2 health states and the overall prevalence of sick individuals (i.e., S1 + S2) of the age-dependent Sick-Sicker cSTM at each cycle $t$ is computed as follows and are shown in Figure \@ref(fig:Sick-Sicker-Prev-AgeDep).
@@ -731,31 +756,6 @@ ggplot(data.frame(Cycle = 1:n_cycles,
   theme_bw(base_size = 16) +
   theme()
 ```
-
-### Life expectancy
-Life expectancy (LE) refers to the expected number of years remaining to be alive.[@Lee2003a] In continuous-time, LE is the area under the entire survival curve.[@Klein2003]
-
-$$
-LE = \int_{t=0}^{\infty}{S(t) dt}.
-$$
-
-In discrete-time using cSTMs, we often calculate LE over a fixed time horizon at which most of the cohort has transitioned to the Dead state, $n_T$, and is defined as
-
-$$
-  LE = \sum_{t=0}^{n_T}{S(t)}.
-$$
-
-```{r Expected-life-years-NoShow, echo=FALSE}
-le_ad <- sum(v_S_ad)
-```
-
-In the age-dependent Sick-Sicker model, where we simulated a cohort over  $n_T$= `r n_cycles` cycles, life expectancy `le_ad` is `r round(le_ad, 1)` cycles, which is calculated as
-
-```{r Life-expectancy, eval=FALSE}
-le_ad <- sum(v_S_ad) # life expectancy
-```
-
-Note that this equation expresses LE in the units of $t$. We use an annual cycle length; thus, the resulting LE will be in years. Analysts can also use other cycle lengths (e.g., monthly or daily), but the LE must be correctly converted to the desired unit if different than the cycle length units.
 
 ## Economic outcomes
 In CEA, we can calculate economic outcomes by using either state or transition rewards. A "state reward" refers to a value assigned to individuals for being in a given state. In a cost-utility context, these could be either utilities or costs associated with remaining in a specific health state for one cycle. In the accompanying tutorial, we describe how to incorporate state rewards in CEA.[@Alarid-Escudero2021a] A "transition reward" refers to the increase or decrease in either costs or utilities of transitioning from one state to another, which may be associated with a one-time cost or utility impact. 
