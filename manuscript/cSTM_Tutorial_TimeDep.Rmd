@@ -715,7 +715,7 @@ v_prev_S2   <- m_M_ad[, "S2"] / v_S_ad          # vector with prevalence of Sick
 v_prev_S1S2 <- rowSums(m_M_ad[, c("S1", "S2")])/v_S_ad # prevalence of Sick and Sicker
 ```
 
-```{r Sick-Sicker-Prev-AgeDep, echo=FALSE, fig.cap='Prevalence of sick states in age-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
+```{r Sick-Sicker-Prev-AgeDep, echo=FALSE, fig.cap='Prevalence of sick states in simulation-time-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
 df_prev_states <- data.frame(Cycle = 0:n_cycles, 
                   States  = ordered(rep(c("S1", "S2", "S1 + S2"),
                                 each = (n_cycles + 1)), 
@@ -735,26 +735,6 @@ ggplot(df_prev_states,
   ylab("Prevalence (%)") +
   theme_bw(base_size = 16) +
   theme(legend.position = "bottom")
-```
-
-Another epidemiological outcome that could be of interest, is the proportion S1 among all individuals with the disease. To compute this outcome at each cycle $t$, we divide $m_{[S2, t]}$ by $\text{prev}(t)_{\{S1,S2\}}$ where $t>0$, as presented in Figure \@ref(fig:Sick-Sicker-PropS2-AgeDep). Note that $t$ does not start at 0 because it takes one cycle for the cohort to get sick.
-
-```{r Sick-Sicker-TimeDependent-PropS2}
-# Vector with proportion of Sicker among sick individuals
-v_prop_S2 <- m_M_ad[-1, "S2"] / v_prev_S1S2[-1] 
-```
-
-```{r Sick-Sicker-PropS2-AgeDep, echo=FALSE, fig.cap='Proportion of Sicker (S2) individuals among all sick patients of age-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
-ggplot(data.frame(Cycle = 1:n_cycles, 
-                  Proportion = v_prop_S2), 
-       aes(x = Cycle, y = Proportion)) +
-  geom_line(size = 1) +
-  scale_y_continuous(breaks = number_ticks(6)) + # labels = scales::percent
-  scale_x_continuous(breaks = number_ticks(8)) +
-  xlab("Cycle") +
-  ylab("Proportion") +
-  theme_bw(base_size = 16) +
-  theme()
 ```
 
 ## Economic outcomes

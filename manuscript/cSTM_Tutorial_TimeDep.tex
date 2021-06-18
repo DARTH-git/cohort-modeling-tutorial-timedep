@@ -154,7 +154,7 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Pittsburgh, Pittsburgh, PA, USA}}
-\date{2021-06-17}
+\date{2021-06-18}
 
 \begin{document}
 \maketitle
@@ -480,7 +480,7 @@ Similar to the time-independent cSTM, treatment A does not change the transition
 \end{Highlighting}
 \end{Shaded}
 
-Once we create the transition probability arrays, we check they are valid by ensuring transition probabilities are between 0 and 1 and all rows sum to 1 using the functions \texttt{check\_sum\_of\_transition\_array} and \texttt{check\_transition\_probability}, provided in the \texttt{darthtools} package (\url{https://github.com/DARTH-git/darthtools}).
+Once we create the transition probability arrays, we check they are valid (i.e., ensuring transition probabilities are between 0 and 1, and transition probabilities from each state sum to 1) using the functions \texttt{check\_sum\_of\_transition\_array} and \texttt{check\_transition\_probability}, provided in the \texttt{darthtools} package (\url{https://github.com/DARTH-git/darthtools}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -505,7 +505,7 @@ In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefo
 \end{Highlighting}
 \end{Shaded}
 
-We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \texttt{m\_M} for the cohorts under SoC strategy and strategy A because the transition probabilities are the same under both strategies, and by \texttt{m\_M\_trtB} for the cohorts under strategies B and AB because both transition probabilities under both strategies are affected by treatment B. Note that the initial state vector, \texttt{v\_s\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the age-dependent cSTM, we initialize two new cohort trace matrices \texttt{m\_M\_ad} and \texttt{m\_M\_ad\_trtB}.
+We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \texttt{m\_M} for the cohorts under SoC strategy and strategy A because the transition probabilities are the same under both strategies, and by \texttt{m\_M\_trtB} for the cohorts under strategies B and AB because both transition probabilities under both strategies are affected by treatment B. Note that the initial state vector, \texttt{v\_s\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the simulation-time-dependent cSTM, we initialize two new cohort trace matrices \texttt{m\_M\_ad} and \texttt{m\_M\_ad\_trtB}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -548,13 +548,13 @@ A graphical representation of the cohort trace for all cycles of the age-depende
 \hypertarget{time-dependency-on-state-residence-1}{%
 \subsection{Time dependency on state residence}\label{time-dependency-on-state-residence-1}}
 
-To illustrate state-residence dependency in the age-dependent Sick-Sicker model defined above, we assume the risk of progression from S1 to S2 increases the longer the cohort has been Sick. This increase follows a Weibull hazard function, defined as
+To add a state-residence dependency to the simulation-time-dependent Sick-Sicker model defined above, we assume the risk of progression from S1 to S2 increases the longer the cohort remains in the S1 state. This increase follows a Weibull hazard function, defined as
 \[
   p_{\left[S1_{\tau},S2, \tau\right]} = \lambda \gamma \tau^{(\lambda-1)},
 \]
-where \(\tau = 1, \ldots, n_{tunnels}\) represents the duration that the cohort has been in S1, and \(\lambda\) and \(\gamma\) are the scale and shape parameters of the Weibull function, respectively. We assume that state-residence dependency lasts the whole simulation (i.e., \(n_{tunnels}=n_T\)) and create a new variable called \texttt{n\_tunnel\_size} with the length of the tunnel equal to \texttt{n\_cycles}. Thus, there will be 75 S1 tunnel states plus 3 more states (H, S2, D) resulting in a total of \(n_{S_{tunnels}}\) = 78.
+where \(\tau = 1, \ldots, n_{\text{tunnels}}\) represents the duration that the cohort has been in S1, and \(\lambda\) and \(\gamma\) are the scale and shape parameters of the Weibull function, respectively. We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., \(n_{\text{tunnels}}=n_T\)) and create a new variable called \texttt{n\_tunnel\_size} with the length of the tunnel equal to \texttt{n\_cycles}. Thus, there will be 75 S1 tunnel states plus 3 more states (H, S2, D) resulting in a total of \(n_{S_{\text{tunnels}}}\) = 78.
 
-Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the Sick-Sicker model's state-transition diagram with state-residence dependency with \(n_{tunnels}\) tunnel states for S1.
+Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the Sick-Sicker model's state-transition diagram with state-residence dependency with \(n_{\text{tunnels}}\) tunnel states for S1.
 
 \begin{figure}[H]
 
@@ -562,10 +562,10 @@ Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the Sick-Sicker model's state-tra
 
 }
 
-\caption{State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{tunnels}}$).}\label{fig:STD-Sick-Sicker-tunnels}
+\caption{State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{ ext{tunnels}}}$).}\label{fig:STD-Sick-Sicker-tunnels}
 \end{figure}
 
-To implement state residency in the Sick-Sicker model using tunnels, we create the vector variables \texttt{v\_Sick\_tunnel} and \texttt{v\_names\_states\_tunnels} with the Sick tunnel states' names and all the states of the cSTM with tunnels, respectively, and use the tunnel-specific parameters listed in Table \ref{tab:Timedep-cSTM-components-table}.
+To implement state-residence dependency in the Sick-Sicker, we create the vector variables \texttt{v\_Sick\_tunnel} and \texttt{v\_names\_states\_tunnels} with the names of the Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \ref{tab:Timedep-cSTM-components-table}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -587,14 +587,14 @@ Based on the updated parameters, the state-residence-dependent transition probab
 \begin{Highlighting}[]
 \CommentTok{\# Weibull parameters}
 \NormalTok{p\_S1S2\_scale }\OtherTok{\textless{}{-}} \FloatTok{0.08} \CommentTok{\# scale}
-\NormalTok{p\_S1S2\_shape  }\OtherTok{\textless{}{-}} \FloatTok{1.1}  \CommentTok{\# shape}
+\NormalTok{p\_S1S2\_shape }\OtherTok{\textless{}{-}} \FloatTok{1.1}  \CommentTok{\# shape}
 \CommentTok{\# Weibull function}
 \NormalTok{v\_p\_S1S2\_tunnels }\OtherTok{\textless{}{-}}\NormalTok{ p\_S1S2\_scale }\SpecialCharTok{*}\NormalTok{ p\_S1S2\_shape }\SpecialCharTok{*}
 \NormalTok{  (}\DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_tunnel\_size)}\SpecialCharTok{\^{}}\NormalTok{\{p\_S1S2\_shape}\DecValTok{{-}1}\NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
 
-To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, \texttt{a\_P\_tunnels}, of dimensions \(n_{S_{tunnels}} \times n_{S_{tunnels}} \times n_T\). A visual representation of \texttt{a\_P\_tunnels} of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \ref{fig:Array-Time-Dependent-Tunnels}.
+To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, \texttt{a\_P\_tunnels}. The dimensions of this array are \(n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T\). A visual representation of \texttt{a\_P\_tunnels} of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \ref{fig:Array-Time-Dependent-Tunnels}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -615,7 +615,7 @@ To adapt the 3-dimensional transition probability array to incorporate both age 
 \caption{The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for age-dependence and S1 state-residence using tunnel states.}\label{fig:Array-Time-Dependent-Tunnels}
 \end{figure}
 
-Filling \texttt{a\_P\_tunnels} with the corresponding transition probabilities is similar to the \texttt{a\_P} above, with the difference being that we now fill the transition probabilities from all the S1 tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
+Filling \texttt{a\_P\_tunnels} with the corresponding transition probabilities is similar to how it's done with \texttt{a\_P} above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -649,7 +649,7 @@ Filling \texttt{a\_P\_tunnels} with the corresponding transition probabilities i
 \end{Highlighting}
 \end{Shaded}
 
-Accounting for the effectiveness of treatment B is similar to the age-dependent approaches. We first transform \texttt{v\_p\_S1S2\_tunnels} to a vector of rates, \texttt{v\_r\_S1S2\_tunnels}, assuming exponentially distributed transitions across the tunnel states, and multiply times the hazard ratio of treatment B. Then, we transform back to probabilities to produce \texttt{v\_p\_S1S2\_tunnels\_trtB}, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
+Accounting for the effectiveness of treatment B is done similarly to the simulation-time-dependent approach above. We first transform \texttt{v\_p\_S1S2\_tunnels} to a vector of rates, \texttt{v\_r\_S1S2\_tunnels}, assuming exponentially distributed transitions across the tunnel states, and multiply it by the hazard ratio of treatment B. Then, we transform back to probabilities to produce \texttt{v\_p\_S1S2\_tunnels\_trtB}, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -665,7 +665,7 @@ Accounting for the effectiveness of treatment B is similar to the age-dependent 
 \end{Highlighting}
 \end{Shaded}
 
-Then, we initialize the three-dimensional transition probability array for treatment B, \texttt{a\_P\_tunnels\_trtB}, based on \texttt{a\_P\_tunnels}. The only difference is that we update only the transition probabilities from S1 involving \texttt{v\_p\_S1S2\_tunnels} to using \texttt{v\_p\_S1S2\_tunnels\_trtB} instead.
+Then, we initialize the three-dimensional transition probability array for treatment B, \texttt{a\_P\_tunnels\_trtB}, based on \texttt{a\_P\_tunnels}. The only difference is that we update the transition probabilities from S1 involving \texttt{v\_p\_S1S2\_tunnels} to using \texttt{v\_p\_S1S2\_tunnels\_trtB} instead.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -691,7 +691,7 @@ Then, we initialize the three-dimensional transition probability array for treat
 \end{Highlighting}
 \end{Shaded}
 
-Once we create both three-dimensional transition probability arrays with tunnels, we check they are valid.
+Once we have created both three-dimensional transition probability arrays with tunnels, we check they are valid (i.e., between 0 and 1 and transition probabilities from each state sum to 1).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -707,7 +707,7 @@ Once we create both three-dimensional transition probability arrays with tunnels
 \end{Highlighting}
 \end{Shaded}
 
-To simulate the cohort over the \(n_T\) cycles for the state-residence cSTM, we initialize two new cohort trace matrices for the SoC and treatment B, \texttt{m\_M\_tunnels} and \texttt{m\_M\_tunnels\_trtB}, respectively. The dimensions of both matrices are \((n_T+1) \times n_{S_{tunnels}}\).
+To simulate the cohort over the \(n_T\) cycles for the cSTM accounting for state-residence dependency, we initialize two new cohort trace matrices for the SoC and treatment B, \texttt{m\_M\_tunnels} and \texttt{m\_M\_tunnels\_trtB}, respectively. The dimensions of both matrices are \((n_T+1) \times n_{S_{\text{tunnels}}}\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -722,7 +722,7 @@ To simulate the cohort over the \(n_T\) cycles for the state-residence cSTM, we 
 \end{Highlighting}
 \end{Shaded}
 
-and then we use the matrix product, similar to the age-dependent cSTM, to generate the full cohort trace
+We then use the matrix product, similar to the simulation-time-dependent cSTM, to generate the full cohort trace.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -736,7 +736,7 @@ and then we use the matrix product, similar to the age-dependent cSTM, to genera
 \end{Highlighting}
 \end{Shaded}
 
-To compute a summarized cohort trace under SoC comparable with the time-independent and age-dependent cSTM, we aggregate over the tunnel states of S1 in each cycle (Figure \ref{fig:Sick-Sicker-Trace-HistDep}).
+To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D states under SoC, we aggregate over the tunnel states in each cycle(Figure \ref{fig:Sick-Sicker-Trace-HistDep}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -761,21 +761,21 @@ To compute a summarized cohort trace under SoC comparable with the time-independ
 \hypertarget{epidemiological-and-economic-outputs}{%
 \section{Epidemiological and economic outputs}\label{epidemiological-and-economic-outputs}}
 
-cSTMs can be used to generate different epidemiological and economic outputs. In a CEA, the main outcomes are typically the total expected QALYs and total costs accrued by the cohort over a predefined time horizon. However, epidemiological outcomes are often used to produce other measures of interest or model calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{14}}
+cSTMs can be used to generate different epidemiological and economic outputs. In a CEA, the main outcomes are typically the total discounted expected QALYs and total costs accrued by the cohort over the predefined time horizon. However, epidemiological outcomes can be helpful for complementary analyses, such as calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{14}} We show how to obtain some of these outcomes from the trace and transition probability objects.
 
-\hypertarget{epidemiological-outcomes}{%
-\subsection{Epidemiological outcomes}\label{epidemiological-outcomes}}
+\hypertarget{epidemiological-measures}{%
+\subsection{Epidemiological measures}\label{epidemiological-measures}}
 
-In this tutorial, we provide the epidemiological definition of some of these outcomes and how they can be generated from a cSTM using the age-dependent Sick-Sicker cSTM under SoC. In the supplementary material, we provide the code to generate these outcomes from the state-residence-dependent cSTM.
+Here we provide the epidemiological definition of some of these outcomes and how they can be generated from a cSTM using the simulation-time-dependent Sick-Sicker cSTM under SoC. In the GitHub repository, we provide the code to generate these outcomes from the state-residence-dependent cSTM.
 
 \hypertarget{survival-probability}{%
 \subsubsection{Survival probability}\label{survival-probability}}
 
-The survival function, \(S(t)\), captures the probability of the cohort remaining alive by cycle \(t\). To estimate \(S(t)\) from the simulated cohort of the age-dependent Sick-Sicker model, shown in Figure \ref{fig:Sick-Sicker-Surv-AgeDep}, we sum the proportions of the non-death states for all \(n_T\) cycles in \texttt{m\_M\_ad}.
+The survival probability, \(S(t)\), captures the proportion of the cohort remaining alive by cycle \(t\). To estimate \(S(t)\) from the simulated cohort of the simulation-time-dependent Sick-Sicker model, shown in Figure \ref{fig:Sick-Sicker-Surv-AgeDep}, we sum the proportions of the non-death states for all \(n_T\) cycles in \texttt{m\_M\_ad}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{v\_S\_ad }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(m\_M\_ad[, }\SpecialCharTok{{-}}\FunctionTok{which}\NormalTok{(v\_names\_states}\SpecialCharTok{==}\StringTok{"D"}\NormalTok{)]) }\CommentTok{\# vector with survival curve}
+\NormalTok{v\_S\_ad }\OtherTok{\textless{}{-}} \FunctionTok{rowSums}\NormalTok{(m\_M\_ad[, }\SpecialCharTok{{-}}\FunctionTok{which}\NormalTok{(v\_names\_states }\SpecialCharTok{==} \StringTok{"D"}\NormalTok{)]) }\CommentTok{\# vector with survival curve}
 \end{Highlighting}
 \end{Shaded}
 
@@ -788,10 +788,35 @@ The survival function, \(S(t)\), captures the probability of the cohort remainin
 \caption{Survival curve of the age-dependent cSTM}\label{fig:Sick-Sicker-Surv-AgeDep}
 \end{figure}
 
+\hypertarget{life-expectancy}{%
+\subsubsection{Life expectancy}\label{life-expectancy}}
+
+Life expectancy (LE) refers to the expected number of time units remaining to be alive.\textsuperscript{\protect\hyperlink{ref-Lee2003a}{15}} In continuous-time, LE is the area under the entire survival curve.\textsuperscript{\protect\hyperlink{ref-Klein2003}{16}}
+
+\[
+LE = \int_{t=0}^{\infty}{S(t) dt}.
+\]
+
+In discrete-time using cSTMs, we often calculate restricted LE over a fixed time horizon (e.g., \(n_T\)) at which most of the cohort has transitioned to the Dead state and is defined as
+
+\[
+  LE = \sum_{t=0}^{n_T}{S(t)}.
+\]
+
+In the simulation-time-dependent Sick-Sicker model, where we simulated a cohort over \(n_T\)= 75 cycles, life expectancy \texttt{le\_ad} is 41.2 cycles, which is calculated as
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{le\_ad }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(v\_S\_ad) }\CommentTok{\# life expectancy}
+\end{Highlighting}
+\end{Shaded}
+
+Note that this equation expresses LE in the units of \(t\). We use an annual cycle length; thus, the resulting LE will be in years. Analysts can also use other cycle lengths (e.g., monthly or daily), but the LE must be correctly converted to the desired unit if different than the cycle length units.
+
 \hypertarget{prevalence}{%
 \subsubsection{Prevalence}\label{prevalence}}
 
-Prevalence is defined as the proportion of the population or cohort with a specific condition (or being in a particular health state) among those alive.\textsuperscript{\protect\hyperlink{ref-Rothman2008h}{15}} To calculate the prevalence of S1 at cycle \(t\), \(\text{prev}(t)_i\), we compute the ratio between the proportion of the cohort in S1 and the proportion alive at that cycle.\textsuperscript{\protect\hyperlink{ref-Keiding1991}{16}} The proportion of the cohort alive is given by the survival probability \(S(t)\) defined above. The individual prevalence of the S1 and S2 health states and the overall prevalence of sick individuals (i.e., S1 + S2) of the age-dependent Sick-Sicker cSTM at each cycle \(t\) is computed as follows and are shown in Figure \ref{fig:Sick-Sicker-Prev-AgeDep}.
+Prevalence is defined as the proportion of the population or cohort with a specific condition (or being in a particular health state) among those alive.\textsuperscript{\protect\hyperlink{ref-Rothman2008h}{17}} To calculate the prevalence of S1 at cycle \(t\), \(\text{prev}(t)_i\), we compute the ratio between the proportion of the cohort in S1 and the proportion alive at that cycle.\textsuperscript{\protect\hyperlink{ref-Keiding1991}{18}} The proportion of the cohort alive is given by the survival probability \(S(t)\) defined above. The individual prevalence of the S1 and S2 health states and the overall prevalence of sick individuals (i.e., S1 + S2) of the age-dependent Sick-Sicker cSTM at each cycle \(t\) is computed as follows and are shown in Figure \ref{fig:Sick-Sicker-Prev-AgeDep}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -809,49 +834,6 @@ Prevalence is defined as the proportion of the population or cohort with a speci
 
 \caption{Prevalence of sick states in age-dependent cSTM}\label{fig:Sick-Sicker-Prev-AgeDep}
 \end{figure}
-
-Another epidemiological outcome that could be of interest, is the proportion S1 among all individuals with the disease. To compute this outcome at each cycle \(t\), we divide \(m_{[S2, t]}\) by \(\text{prev}(t)_{\{S1,S2\}}\) where \(t>0\), as presented in Figure \ref{fig:Sick-Sicker-PropS2-AgeDep}. Note that \(t\) does not start at 0 because it takes one cycle for the cohort to get sick.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# Vector with proportion of Sicker among sick individuals}
-\NormalTok{v\_prop\_S2 }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_ad[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{, }\StringTok{"S2"}\NormalTok{] }\SpecialCharTok{/}\NormalTok{ v\_prev\_S1S2[}\SpecialCharTok{{-}}\DecValTok{1}\NormalTok{] }
-\end{Highlighting}
-\end{Shaded}
-
-\begin{figure}[H]
-
-{\centering \includegraphics{figs/Sick-Sicker-PropS2-AgeDep-1} 
-
-}
-
-\caption{Proportion of Sicker (S2) individuals among all sick patients of age-dependent cSTM}\label{fig:Sick-Sicker-PropS2-AgeDep}
-\end{figure}
-
-\hypertarget{life-expectancy}{%
-\subsubsection{Life expectancy}\label{life-expectancy}}
-
-Life expectancy (LE) refers to the expected number of years remaining to be alive.\textsuperscript{\protect\hyperlink{ref-Lee2003a}{17}} In continuous-time, LE is the area under the entire survival curve.\textsuperscript{\protect\hyperlink{ref-Klein2003}{18}}
-
-\[
-LE = \int_{t=0}^{\infty}{S(t) dt}.
-\]
-
-In discrete-time using cSTMs, we often calculate LE over a fixed time horizon at which most of the cohort has transitioned to the Dead state, \(n_T\), and is defined as
-
-\[
-  LE = \sum_{t=0}^{n_T}{S(t)}.
-\]
-
-In the age-dependent Sick-Sicker model, where we simulated a cohort over \(n_T\)= 75 cycles, life expectancy \texttt{le\_ad} is 41.2 cycles, which is calculated as
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{le\_ad }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(v\_S\_ad) }\CommentTok{\# life expectancy}
-\end{Highlighting}
-\end{Shaded}
-
-Note that this equation expresses LE in the units of \(t\). We use an annual cycle length; thus, the resulting LE will be in years. Analysts can also use other cycle lengths (e.g., monthly or daily), but the LE must be correctly converted to the desired unit if different than the cycle length units.
 
 \hypertarget{economic-outcomes}{%
 \subsection{Economic outcomes}\label{economic-outcomes}}
@@ -1341,21 +1323,21 @@ Dr Alarid-Escudero was supported by a grant from the National Cancer Institute (
 \CSLLeftMargin{14. }
 \CSLRightInline{Siebert U, Alagoz O, Bayoumi AM, et al. {State-Transition Modeling: A Report of the ISPOR-SMDM Modeling Good Research Practices Task Force-3}. \emph{Medical Decision Making}; 32: 690--700, \url{http://mdm.sagepub.com/cgi/doi/10.1177/0272989X12455463} (2012).}
 
-\leavevmode\hypertarget{ref-Rothman2008h}{}%
-\CSLLeftMargin{15. }
-\CSLRightInline{Rothman KJ, Greenland S, Lash TL. \emph{{Modern Epidemiology}}. 3rd ed. Lippincott Williams {\&} Wilkins, 2008.}
-
-\leavevmode\hypertarget{ref-Keiding1991}{}%
-\CSLLeftMargin{16. }
-\CSLRightInline{Keiding N. {Age-Specific Incidence and Prevalence: A Statistical Perspective}. \emph{Journal of the Royal Statistical Society Series A (Statistics in Society)} 1991; 154: 371--412.}
-
 \leavevmode\hypertarget{ref-Lee2003a}{}%
-\CSLLeftMargin{17. }
+\CSLLeftMargin{15. }
 \CSLRightInline{Lee ET, Wang JW. \emph{{Statistical methods for Survival Data Analysis}}. 3rd ed. Hoboken, NJ: Wiley, 2003.}
 
 \leavevmode\hypertarget{ref-Klein2003}{}%
-\CSLLeftMargin{18. }
+\CSLLeftMargin{16. }
 \CSLRightInline{Klein JP, Moeschberger ML. \emph{{Survival Analysis: Techniques for Censored and Truncated Data}}. 2nd ed. Springer-Verlag, \url{http://www.springer.com/statistics/life+sciences,+medicine+\%7B/\&\%7D+health/book/978-0-387-95399-1} (2003).}
+
+\leavevmode\hypertarget{ref-Rothman2008h}{}%
+\CSLLeftMargin{17. }
+\CSLRightInline{Rothman KJ, Greenland S, Lash TL. \emph{{Modern Epidemiology}}. 3rd ed. Lippincott Williams {\&} Wilkins, 2008.}
+
+\leavevmode\hypertarget{ref-Keiding1991}{}%
+\CSLLeftMargin{18. }
+\CSLRightInline{Keiding N. {Age-Specific Incidence and Prevalence: A Statistical Perspective}. \emph{Journal of the Royal Statistical Society Series A (Statistics in Society)} 1991; 154: 371--412.}
 
 \leavevmode\hypertarget{ref-Krijkamp2019}{}%
 \CSLLeftMargin{19. }

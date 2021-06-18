@@ -6,16 +6,16 @@
 \contentsline {subsection}{\numberline {3.1}Simulation-time dependency}{8}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Time dependency on state residence}{12}{subsection.3.2}%
 \contentsline {section}{\numberline {4}Epidemiological and economic outputs}{17}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Epidemiological outcomes}{18}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.1}Epidemiological measures}{18}{subsection.4.1}%
 \contentsline {subsubsection}{\numberline {4.1.1}Survival probability}{18}{subsubsection.4.1.1}%
-\contentsline {subsubsection}{\numberline {4.1.2}Prevalence}{18}{subsubsection.4.1.2}%
-\contentsline {subsubsection}{\numberline {4.1.3}Life expectancy}{20}{subsubsection.4.1.3}%
-\contentsline {subsection}{\numberline {4.2}Economic outcomes}{21}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}State rewards}{21}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Transition rewards}{22}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.1.2}Life expectancy}{19}{subsubsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.3}Prevalence}{19}{subsubsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.2}Economic outcomes}{20}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}State rewards}{20}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Transition rewards}{21}{subsubsection.4.2.2}%
 \contentsline {subsubsection}{\numberline {4.2.3}Within-cycle correction and discounting future rewards}{26}{subsubsection.4.2.3}%
 \contentsline {section}{\numberline {5}Cost-effectiveness analysis and incremental cost-effectiveness ratios (ICERs)}{27}{section.5}%
-\contentsline {section}{\numberline {6}Probabilistic sensitivity analysis}{29}{section.6}%
-\contentsline {section}{\numberline {7}Discussion}{32}{section.7}%
-\contentsline {section}{\numberline {8}Acknowledgements}{33}{section.8}%
-\contentsline {section}{References}{34}{section*.2}%
+\contentsline {section}{\numberline {6}Probabilistic sensitivity analysis}{28}{section.6}%
+\contentsline {section}{\numberline {7}Discussion}{31}{section.7}%
+\contentsline {section}{\numberline {8}Acknowledgements}{32}{section.8}%
+\contentsline {section}{References}{33}{section*.2}%
