@@ -472,11 +472,27 @@ ggplot(melt(m_M_ad), aes(x = Var1, y = value,
 ```
 
 ## Time dependency on state residence
-To add a state-residence dependency to the simulation-time-dependent Sick-Sicker model defined above, we assume the risk of progression from S1 to S2 increases the longer the cohort remains in the S1 state. This increase follows a Weibull hazard function, defined as 
+To add a state-residence dependency to the simulation-time-dependent Sick-Sicker model defined above, we assume the risk of progression from S1 to S2 increases as a function of the time $\tau = 1, \ldots, n_{\text{tunnels}}$ the cohort remains in the S1 state. This increase follows a Weibull hazard function, $h(\tau)$, defined as
 $$
-  p_{\left[S1_{\tau},S2, \tau\right]} = \lambda \gamma \tau^{(\lambda-1)},
+  h(\tau) = \gamma \lambda (\lambda \tau)^{\gamma-1},
 $$
-where $\tau = 1, \ldots, n_{\text{tunnels}}$ represents the duration that the cohort has been in S1, and $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull function, respectively. We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., $n_{\text{tunnels}}=n_T$) and create a new variable called `n_tunnel_size` with the length of the tunnel equal to `n_cycles`. Thus, there will be `r n_cycles` S1 tunnel states plus `r (n_states-1)` more states (H, S2, D) resulting in a total of $n_{S_{\text{tunnels}}}$ = `r (n_states-1) + n_cycles`.
+with a corresponding cumulative hazard, $H(\tau)$,
+$$
+H(\tau) = (\lambda \tau)^{\gamma},
+$$
+where $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull function, respectively.
+
+To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, from $H(\tau)$, we use the following equation[@Diaby2014]
+\begin{equation}
+p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}
+(\#eq:tp-from-H)
+\end{equation}
+
+Substituting the Weibull cumulative hazard in Equation \@ref(eq:tp-from-H), the transition probability is $p_{\left[S1_{\tau},S2, \tau\right]}$, is
+$$
+p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}.
+$$
+We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., $n_{\text{tunnels}}=n_T$) and create a new variable called `n_tunnel_size` with the length of the tunnel equal to `n_cycles`. Thus, there will be `r n_cycles` S1 tunnel states plus `r (n_states-1)` more states (H, S2, D) resulting in a total of $n_{S_{\text{tunnels}}}$ = `r (n_states-1) + n_cycles`.
 
 Figure \@ref(fig:STD-Sick-Sicker-tunnels) shows the Sick-Sicker model's state-transition diagram with state-residence dependency with $n_{\text{tunnels}}$ tunnel states for S1.
  
@@ -489,8 +505,8 @@ To implement state-residence dependency in the Sick-Sicker, we create the vector
 ```{r}
 ## Number of tunnels
 n_tunnel_size <- n_cycles 
-## Vector with times for tunnels
-v_time_tunnel <- 1:n_tunnel_size
+## Vector with cycles for tunnels
+v_cycles_tunnel <- 1:n_tunnel_size
 ## Vector with names for tunnel states of Sick state
 v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
 ## Create variables for model with tunnels
@@ -506,8 +522,8 @@ Based on the updated parameters, the state-residence-dependent transition probab
 p_S1S2_scale <- 0.08 # scale
 p_S1S2_shape <- 1.1  # shape
 # Weibull function
-v_p_S1S2_tunnels <- p_S1S2_scale * p_S1S2_shape *
-  (1:n_tunnel_size)^{p_S1S2_shape-1}
+v_p_S1S2_tunnels <- 1-exp(((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape - 
+                            (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape)
 ```
 
 To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, `a_P_tunnels`. The dimensions of this array are $n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T$. A visual representation of `a_P_tunnels` of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \@ref(fig:Array-Time-Dependent-Tunnels).
@@ -1151,7 +1167,7 @@ ceac_obj$Strategy <- ordered(ceac_obj$Strategy, v_names_str)
 elc_obj <- calc_exp_loss(wtp = v_wtp, psa = l_psa)
 ```
 
-To conduct the PSA of the CEA using the simulation-time-dependent Sick-Sicker cSTM, we sampled `r comma(n_sim)` parameter sets. For each set, we computed the total discounted costs and QALYs of each simulated strategy. Results from a PSA can be represented in various ways. For example, the joint distribution, 95% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy can be plotted in a cost-effectiveness (CE) scatter plot (Figure \@ref(fig:CE-scatter-TimeDep)),[@Briggs2002] where each of the `r 4*comma(n_sim)` simulations (i.e., `r comma(n_sim)` combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph. The CE scatter plot for the CEA using the simulation-time-dependent model shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
+To conduct the PSA of the CEA using the simulation-time-dependent Sick-Sicker cSTM, we sampled `r comma(n_sim)` parameter sets. For each set, we computed the total discounted costs and QALYs of each simulated strategy. Results from a PSA can be represented in various ways. For example, the joint distribution, 95% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy can be plotted in a cost-effectiveness (CE) scatter plot (Figure \@ref(fig:CE-scatter-TimeDep)),[@Briggs2002] where each of the `r comma(4*n_sim)` simulations (i.e., `r comma(n_sim)` combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph. The CE scatter plot for the CEA using the simulation-time-dependent model shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
 
 ```{r CE-scatter-TimeDep, echo=FALSE, fig.cap='Cost-effectiveness scatter plot.', message=FALSE, warning=FALSE, fig.pos="H"} 
 # CEAC & CEAF plot

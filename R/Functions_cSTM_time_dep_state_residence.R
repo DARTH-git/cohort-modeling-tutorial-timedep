@@ -24,7 +24,8 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     ## State-residence-dependent transition probability of becoming Sicker when 
     # Sick conditional on surviving
     # Weibull function
-    v_p_S1S2_tunnels <- p_S1S2_scale * p_S1S2_shape * (1:n_tunnel_size)^{p_S1S2_shape-1}
+    v_p_S1S2_tunnels <- 1-exp(((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape - 
+                                (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape)
     
     ## State-residence-dependent transition probability of becoming Sicker when 
     ## Sick for treatment B 
