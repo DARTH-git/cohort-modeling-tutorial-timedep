@@ -75,7 +75,9 @@ n_states    <- length(v_names_states)   # number of health states
 ## Tunnel inputs
 # Number of tunnels
 n_tunnel_size <- n_cycles
-# Name for tunnels states of Sick state
+# Vector with times for tunnels
+v_time_tunnel <- 1:n_tunnel_size
+# Vector with names for tunnel states of Sick state
 v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
 # Create variables for model with tunnels
 v_names_states_tunnels <- c("H", v_Sick_tunnel, "S2", "D") # health state names
@@ -157,7 +159,8 @@ v_p_S2Dage <- rate_to_prob(v_r_S2Dage) # Age-specific mortality risk in the Sick
 ## History-dependent transition probability of becoming Sicker when Sick
 # conditional on surviving
 # Weibull hazard
-v_p_S1S2_tunnels <- p_S1S2_scale * p_S1S2_shape * (1:n_tunnel_size)^{p_S1S2_shape-1}
+v_p_S1S2_tunnels <- 1-exp(((v_time_tunnel-1)*p_S1S2_scale)^p_S1S2_shape - 
+                            (v_time_tunnel*p_S1S2_scale)^p_S1S2_shape)
 
 ## History-dependent transition probability of becoming Sicker when Sick for treatment B
 # transform probability to rate
