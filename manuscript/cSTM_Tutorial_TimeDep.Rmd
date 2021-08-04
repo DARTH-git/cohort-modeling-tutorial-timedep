@@ -489,7 +489,9 @@ To implement state-residence dependency in the Sick-Sicker, we create the vector
 ```{r}
 ## Number of tunnels
 n_tunnel_size <- n_cycles 
-## Name for tunnel states of Sick state
+## Vector with times for tunnels
+v_time_tunnel <- 1:n_tunnel_size
+## Vector with names for tunnel states of Sick state
 v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
 ## Create variables for model with tunnels
 v_names_states_tunnels <- c("H", v_Sick_tunnel, "S2", "D") # state names
