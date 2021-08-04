@@ -19,19 +19,23 @@ $$
 $$
 with a corresponding cumulative hazard, $H(\tau)$,
 $$
-H(t) = (\lambda \tau)^{\gamma},
+H(\tau) = (\lambda \tau)^{\gamma},
 $$
 <!-- where $\tau = 1, \ldots, n_{\text{tunnels}}$ represents the duration that the cohort has been in S1, and $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull function, respectively. -->
 where $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull function, respectively.
 
 ## Weibull transition probability
-To derive a transition probability, $\text{tp}(\tau)$, as a function of time from $H(\tau)$, we use the following equation[@Diaby2014]
+To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, from $H(\tau)$, we use the following equation[@Diaby2014]
 \begin{equation}
 p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}
 (\#eq:tp-from-H)
 \end{equation}
 
-Substituting the Weibull cumulative hazard in Equation \@ref(eq:tp-from-H), the transition probability from S1 to S2 as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, is
+Substituting the Weibull cumulative hazard in Equation \@ref(eq:tp-from-H), the transition probability is
 $$
 p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}
+$$
+and simplifies to
+$$
+p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(\lambda^{\gamma}((\tau-1)^{\gamma} - \tau^{\gamma}))}
 $$
