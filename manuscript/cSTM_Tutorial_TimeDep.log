@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.4.17)  4 AUG 2021 15:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.4.17)  5 AUG 2021 13:34
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -664,522 +664,522 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <5> on input line 161.
 (./cSTM_Tutorial_TimeDep.toc
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 3.
+(Font)              <10> on input line 5.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 3.
+(Font)              <7> on input line 5.
 [1
 
 {/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map}])
 \tf@toc=\write4
 \openout4 = `cSTM_Tutorial_TimeDep.toc'.
 
-[2] [3]
+[2] [3] [4]
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2
-37.
+44.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-Overfull \hbox (10.2622pt too wide) in paragraph at lines 244--244
+Overfull \hbox (10.2622pt too wide) in paragraph at lines 251--251
  []|\T1/lmtt/m/n/10 n_states_tunnels| 
  []
 
 
-Overfull \hbox (10.2622pt too wide) in paragraph at lines 245--245
+Overfull \hbox (10.2622pt too wide) in paragraph at lines 252--252
  []|\T1/lmtt/m/n/10 v_s_init_tunnels| 
  []
 
-<figs/Sick-Sicker.png, id=99, 369.0588pt x 255.8358pt>
+<figs/Sick-Sicker.png, id=102, 369.0588pt x 255.8358pt>
 File: figs/Sick-Sicker.png Graphic file (type png)
 <use figs/Sick-Sicker.png>
-Package pdftex.def Info: figs/Sick-Sicker.png  used on input line 258.
+Package pdftex.def Info: figs/Sick-Sicker.png  used on input line 265.
 (pdftex.def)             Requested size: 369.06352pt x 255.83907pt.
-[4] [5pdfTeX warning (ext4): destination with the same identifier (name{figure.
+[5] [6pdfTeX warning (ext4): destination with the same identifier (name{figure.
 1}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.268 
+l.275 
        <./figs/Sick-Sicker.png>]
-Overfull \hbox (4.0974pt too wide) in paragraph at lines 286--286
+Overfull \hbox (4.0974pt too wide) in paragraph at lines 293--293
  []|\T1/lmtt/m/n/10 v_names_states| 
  []
 
 
-Overfull \hbox (14.59737pt too wide) in paragraph at lines 294--294
+Overfull \hbox (14.59737pt too wide) in paragraph at lines 301--301
  []|\T1/lmtt/m/n/10 v_p_S1S2_tunnels| 
  []
 
-[6]
+[7]
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 331.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 338.
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 331.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 338.
 
-[7] [8]
-<figs/3D-state-transition-array-sick-sicker-without-tunnels.png, id=143, 748.71
+[8] [9]
+<figs/3D-state-transition-array-sick-sicker-without-tunnels.png, id=145, 748.71
 72pt x 271.7352pt>
 File: figs/3D-state-transition-array-sick-sicker-without-tunnels.png Graphic fi
 le (type png)
 <use figs/3D-state-transition-array-sick-sicker-without-tunnels.png>
 Package pdftex.def Info: figs/3D-state-transition-array-sick-sicker-without-tun
-nels.png  used on input line 416.
+nels.png  used on input line 423.
 (pdftex.def)             Requested size: 469.76358pt x 170.49333pt.
-[9pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) 
-has been already used, duplicate ignored
+[10pdfTeX warning (ext4): destination with the same identifier (name{figure.2})
+ has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.425 \begin{Shaded}
+l.432 \begin{Shaded}
                      <./figs/3D-state-transition-array-sick-sicker-without-tunn
-els.png>] [10] [11]
-<figs/Sick-Sicker-Trace-AgeDep-1.pdf, id=160, 564.1075pt x 408.52625pt>
+els.png>] [11] [12]
+<figs/Sick-Sicker-Trace-AgeDep-1.pdf, id=162, 564.1075pt x 408.52625pt>
 File: figs/Sick-Sicker-Trace-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/Sick-Sicker-Trace-AgeDep-1.pdf>
 Package pdftex.def Info: figs/Sick-Sicker-Trace-AgeDep-1.pdf  used on input lin
-e 541.
+e 548.
 (pdftex.def)             Requested size: 469.75845pt x 340.19875pt.
-[12pdfTeX warning (ext4): destination with the same identifier (name{figure.3})
+[13pdfTeX warning (ext4): destination with the same identifier (name{figure.3})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.558 \]
+l.565 \]
          <./figs/Sick-Sicker-Trace-AgeDep-1.pdf>]
-<figs/Sick-Sicker-with-tunnels.png, id=180, 719.3274pt x 330.9966pt>
+<figs/Sick-Sicker-with-tunnels.png, id=183, 719.3274pt x 330.9966pt>
 File: figs/Sick-Sicker-with-tunnels.png Graphic file (type png)
 <use figs/Sick-Sicker-with-tunnels.png>
 Package pdftex.def Info: figs/Sick-Sicker-with-tunnels.png  used on input line 
-577.
+584.
 (pdftex.def)             Requested size: 469.76344pt x 216.1604pt.
-[13pdfTeX warning (ext4): destination with the same identifier (name{figure.4})
+[14pdfTeX warning (ext4): destination with the same identifier (name{figure.4})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.586 \begin{Shaded}
+l.593 \begin{Shaded}
                      <./figs/Sick-Sicker-with-tunnels.png>]
-<figs/3D-state-transition-array-sick-sicker-tunnels.png, id=192, 1335.5496pt x 
+<figs/3D-state-transition-array-sick-sicker-tunnels.png, id=194, 1335.5496pt x 
 398.4486pt>
 File: figs/3D-state-transition-array-sick-sicker-tunnels.png Graphic file (type
  png)
 <use figs/3D-state-transition-array-sick-sicker-tunnels.png>
 Package pdftex.def Info: figs/3D-state-transition-array-sick-sicker-tunnels.png
-  used on input line 629.
+  used on input line 636.
 (pdftex.def)             Requested size: 469.75218pt x 140.14612pt.
-[14pdfTeX warning (ext4): destination with the same identifier (name{figure.5})
+[15pdfTeX warning (ext4): destination with the same identifier (name{figure.5})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.637 
+l.644 
        <./figs/3D-state-transition-array-sick-sicker-tunnels.png>]
-Underfull \vbox (badness 2393) detected at line 684
+Underfull \vbox (badness 2393) detected at line 691
  []
 
-[15] [16]
-<figs/Sick-Sicker-Trace-HistDep-1.pdf, id=208, 564.1075pt x 408.52625pt>
+[16] [17]
+<figs/Sick-Sicker-Trace-HistDep-1.pdf, id=210, 564.1075pt x 408.52625pt>
 File: figs/Sick-Sicker-Trace-HistDep-1.pdf Graphic file (type pdf)
 <use figs/Sick-Sicker-Trace-HistDep-1.pdf>
 Package pdftex.def Info: figs/Sick-Sicker-Trace-HistDep-1.pdf  used on input li
-ne 772.
+ne 779.
 (pdftex.def)             Requested size: 469.75845pt x 340.19875pt.
-[17] [18pdfTeX warning (ext4): destination with the same identifier (name{figur
+[18] [19pdfTeX warning (ext4): destination with the same identifier (name{figur
 e.6}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.793 
+l.800 
        <./figs/Sick-Sicker-Trace-HistDep-1.pdf>]
-<figs/Sick-Sicker-Surv-AgeDep-1.pdf, id=231, 564.1075pt x 418.56375pt>
+<figs/Sick-Sicker-Surv-AgeDep-1.pdf, id=234, 564.1075pt x 418.56375pt>
 File: figs/Sick-Sicker-Surv-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/Sick-Sicker-Surv-AgeDep-1.pdf>
 Package pdftex.def Info: figs/Sick-Sicker-Surv-AgeDep-1.pdf  used on input line
- 802.
+ 809.
 (pdftex.def)             Requested size: 469.75845pt x 348.55743pt.
-[19pdfTeX warning (ext4): destination with the same identifier (name{figure.7})
+[20pdfTeX warning (ext4): destination with the same identifier (name{figure.7})
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.822 \]
+l.829 \]
          <./figs/Sick-Sicker-Surv-AgeDep-1.pdf>]
-<figs/Sick-Sicker-Prev-AgeDep-1.pdf, id=255, 564.1075pt x 410.53375pt>
+<figs/Sick-Sicker-Prev-AgeDep-1.pdf, id=257, 564.1075pt x 410.53375pt>
 File: figs/Sick-Sicker-Prev-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/Sick-Sicker-Prev-AgeDep-1.pdf>
 Package pdftex.def Info: figs/Sick-Sicker-Prev-AgeDep-1.pdf  used on input line
- 849.
+ 856.
 (pdftex.def)             Requested size: 469.75845pt x 341.87048pt.
-[20] [21pdfTeX warning (ext4): destination with the same identifier (name{figur
+[21] [22pdfTeX warning (ext4): destination with the same identifier (name{figur
 e.8}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.876 
-       <./figs/Sick-Sicker-Prev-AgeDep-1.pdf>] [22] [23] [24] [25] [26] [27]
-Overfull \hbox (45.16193pt too wide) in paragraph at lines 1205--1215
+l.883 
+       <./figs/Sick-Sicker-Prev-AgeDep-1.pdf>] [23] [24] [25] [26] [27] [28]
+Overfull \hbox (45.16193pt too wide) in paragraph at lines 1212--1222
  [][] 
  []
 
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<figs/Sick-Sicker-CEA-AgeDep-1.pdf, id=331, 569.12625pt x 423.5825pt>
+<figs/Sick-Sicker-CEA-AgeDep-1.pdf, id=332, 569.12625pt x 423.5825pt>
 File: figs/Sick-Sicker-CEA-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/Sick-Sicker-CEA-AgeDep-1.pdf>
 Package pdftex.def Info: figs/Sick-Sicker-CEA-AgeDep-1.pdf  used on input line 
-1219.
+1226.
 (pdftex.def)             Requested size: 469.7781pt x 349.64085pt.
-[28pdfTeX warning (ext4): destination with the same identifier (name{table.3}) 
+[29pdfTeX warning (ext4): destination with the same identifier (name{table.3}) 
 has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.1225 
-       ] [29pdfTeX warning (ext4): destination with the same identifier (name{t
+l.1232 
+       ] [30pdfTeX warning (ext4): destination with the same identifier (name{t
 able.4}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.1230 
+l.1237 
        pdfTeX warning (ext4): destination with the same identifier (name{figure
 .9}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.1230 
+l.1237 
         <./figs/Sick-Sicker-CEA-AgeDep-1.pdf>]
-<figs/CE-scatter-TimeDep-1.pdf, id=360, 569.12625pt x 415.5525pt>
+<figs/CE-scatter-TimeDep-1.pdf, id=361, 569.12625pt x 415.5525pt>
 File: figs/CE-scatter-TimeDep-1.pdf Graphic file (type pdf)
 <use figs/CE-scatter-TimeDep-1.pdf>
-Package pdftex.def Info: figs/CE-scatter-TimeDep-1.pdf  used on input line 1235
+Package pdftex.def Info: figs/CE-scatter-TimeDep-1.pdf  used on input line 1242
 .
 (pdftex.def)             Requested size: 469.7781pt x 343.01259pt.
-[30pdfTeX warning (ext4): destination with the same identifier (name{figure.10}
+[31pdfTeX warning (ext4): destination with the same identifier (name{figure.10}
 ) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.1243 
+l.1250 
         <./figs/CE-scatter-TimeDep-1.pdf>]
-<figs/CEAC-AgeDep-1.pdf, id=381, 568.1225pt x 423.5825pt>
+<figs/CEAC-AgeDep-1.pdf, id=383, 568.1225pt x 423.5825pt>
 File: figs/CEAC-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/CEAC-AgeDep-1.pdf>
-Package pdftex.def Info: figs/CEAC-AgeDep-1.pdf  used on input line 1246.
+Package pdftex.def Info: figs/CEAC-AgeDep-1.pdf  used on input line 1253.
 (pdftex.def)             Requested size: 469.7731pt x 350.25487pt.
-<figs/ELC-AgeDep-1.pdf, id=384, 569.12625pt x 423.5825pt>
+<figs/ELC-AgeDep-1.pdf, id=386, 569.12625pt x 423.5825pt>
 File: figs/ELC-AgeDep-1.pdf Graphic file (type pdf)
 <use figs/ELC-AgeDep-1.pdf>
-Package pdftex.def Info: figs/ELC-AgeDep-1.pdf  used on input line 1257.
+Package pdftex.def Info: figs/ELC-AgeDep-1.pdf  used on input line 1264.
 (pdftex.def)             Requested size: 469.7781pt x 349.64085pt.
-[31pdfTeX warning (ext4): destination with the same identifier (name{figure.11}
+[32pdfTeX warning (ext4): destination with the same identifier (name{figure.11}
 ) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.1262 \end{figure}
-                    <./figs/CEAC-AgeDep-1.pdf>] [32pdfTeX warning (ext4): desti
+l.1269 \end{figure}
+                    <./figs/CEAC-AgeDep-1.pdf>] [33pdfTeX warning (ext4): desti
 nation with the same identifier (name{figure.12}) has been already used, duplic
 ate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   
-l.1270 
-        <./figs/ELC-AgeDep-1.pdf>] [33]
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1288--1291
+l.1277 
+        <./figs/ELC-AgeDep-1.pdf>] [34]
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1295--1298
 [][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1288--1291
+Underfull \hbox (badness 10000) in paragraph at lines 1295--1298
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1292--1295
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1299--1302
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1292--1295
+Underfull \hbox (badness 10000) in paragraph at lines 1299--1302
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1296--1299
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1303--1306
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1296--1299
+Underfull \hbox (badness 10000) in paragraph at lines 1303--1306
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1300--1303
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1307--1310
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1300--1303
+Underfull \hbox (badness 10000) in paragraph at lines 1307--1310
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1304--1307
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1311--1314
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1304--1307
+Underfull \hbox (badness 10000) in paragraph at lines 1311--1314
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1308--1311
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1315--1318
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1308--1311
+Underfull \hbox (badness 10000) in paragraph at lines 1315--1318
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1312--1315
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1319--1322
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1312--1315
-
- []
-
-[34]
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1316--1319
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1316--1319
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1320--1323
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1320--1323
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1324--1327
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1324--1327
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1328--1331
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1328--1331
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1332--1335
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1332--1335
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1336--1339
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1336--1339
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1340--1343
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1340--1343
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1344--1347
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1344--1347
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1348--1351
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1348--1351
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1352--1355
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1352--1355
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1356--1359
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1356--1359
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1360--1363
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1360--1363
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1364--1367
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1364--1367
-
- []
-
-
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1368--1371
-[][][] []
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1368--1371
+Underfull \hbox (badness 10000) in paragraph at lines 1319--1322
 
  []
 
 [35]
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1372--1375
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1323--1326
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1372--1375
+Underfull \hbox (badness 10000) in paragraph at lines 1323--1326
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1376--1379
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1327--1330
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1376--1379
+Underfull \hbox (badness 10000) in paragraph at lines 1327--1330
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1380--1383
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1331--1334
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1380--1383
+Underfull \hbox (badness 10000) in paragraph at lines 1331--1334
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1384--1387
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1335--1338
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1384--1387
+Underfull \hbox (badness 10000) in paragraph at lines 1335--1338
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1388--1391
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1339--1342
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1388--1391
+Underfull \hbox (badness 10000) in paragraph at lines 1339--1342
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1392--1395
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1343--1346
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1392--1395
+Underfull \hbox (badness 10000) in paragraph at lines 1343--1346
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1396--1399
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1347--1350
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1396--1399
+Underfull \hbox (badness 10000) in paragraph at lines 1347--1350
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1400--1403
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1351--1354
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1400--1403
+Underfull \hbox (badness 10000) in paragraph at lines 1351--1354
 
  []
 
 
-Overfull \hbox (2.22221pt too wide) in paragraph at lines 1404--1407
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1355--1358
 [][][] []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1404--1407
+Underfull \hbox (badness 10000) in paragraph at lines 1355--1358
 
  []
 
-[36] (./cSTM_Tutorial_TimeDep.aux) ) 
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1359--1362
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1359--1362
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1363--1366
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1363--1366
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1367--1370
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1367--1370
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1371--1374
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1371--1374
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1375--1378
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1375--1378
+
+ []
+
+[36]
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1379--1382
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1379--1382
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1383--1386
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1383--1386
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1387--1390
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1387--1390
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1391--1394
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1391--1394
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1395--1398
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1395--1398
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1399--1402
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1399--1402
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1403--1406
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1403--1406
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1407--1410
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1407--1410
+
+ []
+
+
+Overfull \hbox (2.22221pt too wide) in paragraph at lines 1411--1414
+[][][] []
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1411--1414
+
+ []
+
+[37] (./cSTM_Tutorial_TimeDep.aux) ) 
 Here is how much of TeX's memory you used:
- 15173 strings out of 478994
- 227143 string characters out of 5858184
- 596706 words of memory out of 5000000
- 31960 multiletter control sequences out of 15000+600000
+ 15170 strings out of 478994
+ 227083 string characters out of 5858184
+ 596650 words of memory out of 5000000
+ 31958 multiletter control sequences out of 15000+600000
  492462 words of font info for 200 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 85i,12n,88p,2346b,451s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 85i,12n,88p,2179b,451s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/e
 nc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/l
 m/lm-ec.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/
@@ -1207,10 +1207,10 @@ ve/2021/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/texlive/2021/te
 xmf-dist/fonts/type1/public/lm/lmtko10.pfb></usr/local/texlive/2021/texmf-dist/
 fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type
 1/public/lm/lmtti10.pfb>
-Output written on cSTM_Tutorial_TimeDep.pdf (36 pages, 1195861 bytes).
+Output written on cSTM_Tutorial_TimeDep.pdf (37 pages, 1199657 bytes).
 PDF statistics:
- 633 PDF objects out of 1000 (max. 8388607)
+ 634 PDF objects out of 1000 (max. 8388607)
  533 compressed objects within 6 object streams
- 132 named destinations out of 1000 (max. 500000)
- 51381 words of extra memory for PDF output out of 51595 (max. 10000000)
+ 131 named destinations out of 1000 (max. 500000)
+ 51373 words of extra memory for PDF output out of 51595 (max. 10000000)
 
