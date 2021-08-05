@@ -32,37 +32,37 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     ###################### Construct state-transition models ###################
     #### Create transition arrays ####
     # Initialize 3-D array
-    a_P <- array(0, dim   = c(n_states, n_states, n_cycles),
+    a_P_SoC <- array(0, dim   = c(n_states, n_states, n_cycles),
                  dimnames = list(v_names_states, v_names_states, 0:(n_cycles - 1)))
     ### Fill in array
     ## From H
-    a_P["H", "H", ]   <- (1 - v_p_HDage) * (1 - p_HS1)
-    a_P["H", "S1", ]  <- (1 - v_p_HDage) * p_HS1
-    a_P["H", "D", ]   <- v_p_HDage
+    a_P_SoC["H", "H", ]   <- (1 - v_p_HDage) * (1 - p_HS1)
+    a_P_SoC["H", "S1", ]  <- (1 - v_p_HDage) * p_HS1
+    a_P_SoC["H", "D", ]   <- v_p_HDage
     ## From S1
-    a_P["S1", "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-    a_P["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2))
-    a_P["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2
-    a_P["S1", "D", ]  <- v_p_S1Dage
+    a_P_SoC["S1", "H", ]  <- (1 - v_p_S1Dage) * p_S1H
+    a_P_SoC["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2))
+    a_P_SoC["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2
+    a_P_SoC["S1", "D", ]  <- v_p_S1Dage
     ## From S2
-    a_P["S2", "S2", ] <- 1 - v_p_S2Dage
-    a_P["S2", "D", ]  <- v_p_S2Dage
+    a_P_SoC["S2", "S2", ] <- 1 - v_p_S2Dage
+    a_P_SoC["S2", "D", ]  <- v_p_S2Dage
     ## From D
-    a_P["D", "D", ]   <- 1
+    a_P_SoC["D", "D", ]   <- 1
     
     ### For strategies B and AB
     ## Initialize transition probability array for strategies B and AB
-    a_P_strB <- a_P
+    a_P_strB <- a_P_SoC
     ## Only need to update the probabilities involving the transition from Sick to Sicker, p_S1S2
     # From S1
     a_P_strB["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2_trtB))
     a_P_strB["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2_trtB
     
     ### Check if transition probability matrix is valid (i.e., elements cannot < 0 or > 1) 
-    check_transition_probability(a_P,      verbose = TRUE)
+    check_transition_probability(a_P_SoC,      verbose = TRUE)
     check_transition_probability(a_P_strB, verbose = TRUE)
     ### Check if transition probability matrix sum to 1 (i.e., each row should sum to 1)
-    check_sum_of_transition_array(a_P,      n_states = n_states, n_cycles = n_cycles, verbose = TRUE)
+    check_sum_of_transition_array(a_P_SoC,      n_states = n_states, n_cycles = n_cycles, verbose = TRUE)
     check_sum_of_transition_array(a_P_strB, n_states = n_states, n_cycles = n_cycles, verbose = TRUE)
     
     #### Run Markov model ####
@@ -72,49 +72,49 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     v_s_init
     
     ## Initialize cohort trace for age-dependent (ad) cSTM for strategies SoC and A
-    m_M_ad <- matrix(0, 
+    m_M_SoC <- matrix(0, 
                      nrow     = (n_cycles + 1), ncol = n_states, 
                      dimnames = list(0:n_cycles, v_names_states))
     # Store the initial state vector in the first row of the cohort trace
-    m_M_ad[1, ] <- v_s_init
+    m_M_SoC[1, ] <- v_s_init
     ## Initialize cohort trace for strategies B and AB
-    m_M_ad_strB <- m_M_ad # structure and initial states remain the same.
+    m_M_strB <- m_M_SoC # structure and initial states remain the same.
     
     ## Initialize transition array which will capture transitions from each state to another over time 
     # for strategies SoC and A
-    a_A <- array(0,
+    a_A_SoC <- array(0,
                  dim      = c(n_states, n_states, n_cycles + 1),
                  dimnames = list(v_names_states, v_names_states, 0:n_cycles))
-    # Set first slice of a_A with the initial state vector in its diagonal
-    diag(a_A[, , 1]) <- v_s_init
+    # Set first slice of a_A_SoC with the initial state vector in its diagonal
+    diag(a_A_SoC[, , 1]) <- v_s_init
     # For strategies B and AB, the array structure and initial state are identical 
-    a_A_strB <- a_A
+    a_A_strB <- a_A_SoC
     
     ## Iterative solution of age-dependent cSTM
     for(t in 1:n_cycles){
       ## Fill in cohort trace
       # For strategies SoC and A
-      m_M_ad[t + 1, ]      <- m_M_ad[t, ]      %*% a_P[, , t]
+      m_M_SoC[t + 1, ]      <- m_M_SoC[t, ]      %*% a_P_SoC[, , t]
       # For strategies B and AB
-      m_M_ad_strB[t + 1, ] <- m_M_ad_strB[t, ] %*% a_P_strB[, , t]
+      m_M_strB[t + 1, ] <- m_M_strB[t, ] %*% a_P_strB[, , t]
       
       ## Fill in transition-dynamics array
       # For strategies SoC and A
-      a_A[, , t + 1]       <- m_M_ad[t, ]      * a_P[, , t]
+      a_A_SoC[, , t + 1]       <- m_M_SoC[t, ]      * a_P_SoC[, , t]
       # For strategies B and AB
-      a_A_strB[, , t + 1]  <- m_M_ad_strB[t, ] * a_P_strB[, , t]
+      a_A_strB[, , t + 1]  <- m_M_strB[t, ] * a_P_strB[, , t]
     }
     
     ## Store the cohort traces in a list
-    l_m_M <- list(m_M_ad,
-                  m_M_ad,
-                  m_M_ad_strB,
-                  m_M_ad_strB)
+    l_m_M <- list(m_M_SoC,
+                  m_M_SoC,
+                  m_M_strB,
+                  m_M_strB)
     names(l_m_M) <- v_names_str
     
     ## Store the transition array for each strategy in a list
-    l_a_A <- list(a_A,
-                  a_A,
+    l_a_A <- list(a_A_SoC,
+                  a_A_SoC,
                   a_A_strB,
                   a_A_strB)
     names(l_m_M) <- names(l_a_A) <- v_names_str

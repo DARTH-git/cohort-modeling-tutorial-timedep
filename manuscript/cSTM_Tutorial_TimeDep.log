@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.4.17)  5 AUG 2021 13:34
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2021) (preloaded format=pdflatex 2021.4.17)  5 AUG 2021 13:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1173,13 +1173,13 @@ Underfull \hbox (badness 10000) in paragraph at lines 1411--1414
 
 [37] (./cSTM_Tutorial_TimeDep.aux) ) 
 Here is how much of TeX's memory you used:
- 15170 strings out of 478994
- 227083 string characters out of 5858184
+ 15168 strings out of 478994
+ 227061 string characters out of 5858184
  596650 words of memory out of 5000000
  31958 multiletter control sequences out of 15000+600000
- 492462 words of font info for 200 fonts, out of 8000000 for 9000
+ 492379 words of font info for 199 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 85i,12n,88p,2179b,451s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 85i,12n,88p,2323b,451s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/e
 nc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/l
 m/lm-ec.enc}{/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/
@@ -1207,7 +1207,7 @@ ve/2021/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/texlive/2021/te
 xmf-dist/fonts/type1/public/lm/lmtko10.pfb></usr/local/texlive/2021/texmf-dist/
 fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type
 1/public/lm/lmtti10.pfb>
-Output written on cSTM_Tutorial_TimeDep.pdf (37 pages, 1199657 bytes).
+Output written on cSTM_Tutorial_TimeDep.pdf (37 pages, 1199620 bytes).
 PDF statistics:
  634 PDF objects out of 1000 (max. 8388607)
  533 compressed objects within 6 object streams

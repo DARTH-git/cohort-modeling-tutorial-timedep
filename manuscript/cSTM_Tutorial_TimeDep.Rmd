@@ -372,45 +372,45 @@ To incorporate simulation-time dependency into the transition probability matrix
 knitr::include_graphics("figs/3D-state-transition-array-sick-sicker-without-tunnels.png")
 ```
 
-First, we initialize `a_P` with a default value of zero for all transition probabilities.
+First, we initialize the transition probability array for SoC, `a_P_SoC`, with a default value of zero for all transition probabilities.
 
 ```{r Init-Sick-Sicker-TimeDep-P}
 # Initialize the transition probability array
-a_P <- array(0, dim = c(n_states, n_states, n_cycles),
+a_P_SoC <- array(0, dim = c(n_states, n_states, n_cycles),
               dimnames = list(v_names_states, v_names_states, 0:(n_cycles - 1)))
 ```
 
-Filling `a_P` with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling `m_P` for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For constant transitions  over time, we only need to provide one value for the transition probability. R replicates the value of such transitions as many times as the number of cycles ($n_T+1$ times in our example).
+Filling `a_P_SoC` with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling `m_P` for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For constant transitions  over time, we only need to provide one value for the transition probability. R replicates the value of such transitions as many times as the number of cycles ($n_T+1$ times in our example).
 
 ```{r Sick-Sicker-TimeDep-P}
 ### Fill in array
 ## From H
-a_P["H", "H", ]   <- (1 - v_p_HDage) * (1 - p_HS1)
-a_P["H", "S1", ]  <- (1 - v_p_HDage) * p_HS1
-a_P["H", "D", ]   <- v_p_HDage
+a_P_SoC["H", "H", ]   <- (1 - v_p_HDage) * (1 - p_HS1)
+a_P_SoC["H", "S1", ]  <- (1 - v_p_HDage) * p_HS1
+a_P_SoC["H", "D", ]   <- v_p_HDage
 ## From S1
-a_P["S1", "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-a_P["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2))
-a_P["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2
-a_P["S1", "D", ]  <- v_p_S1Dage
+a_P_SoC["S1", "H", ]  <- (1 - v_p_S1Dage) * p_S1H
+a_P_SoC["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2))
+a_P_SoC["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2
+a_P_SoC["S1", "D", ]  <- v_p_S1Dage
 ## From S2
-a_P["S2", "S2", ] <- 1 - v_p_S2Dage
-a_P["S2", "D", ]  <- v_p_S2Dage
+a_P_SoC["S2", "S2", ] <- 1 - v_p_S2Dage
+a_P_SoC["S2", "D", ]  <- v_p_S2Dage
 ## From D
-a_P["D", "D", ]   <- 1
+a_P_SoC["D", "D", ]   <- 1
 ```
 
-As mentioned above, each slice along the third dimension of `a_P` corresponds to a transition probability matrix. For example, the transition matrix for 25-year-olds in the Sick-Sicker model under the SoC strategy can be retrieved using:
+As mentioned above, each slice along the third dimension of `a_P_SoC` corresponds to a transition probability matrix. For example, the transition matrix for 25-year-olds in the Sick-Sicker model under the SoC strategy can be retrieved using:
 
 ```{r Transition-Probability-Array-1}
-a_P[, , 1]
+a_P_SoC[, , 1]
 ```
 
-Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, `a_P_trtB` as a copy of `a_P` and update only the probability of remaining in S1 and the transition probability from S1 to S2 (i.e., `p_S1S2` is replaced with `p_S1S2_trtB`).
+Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, `a_P_trtB` as a copy of `a_P_SoC` and update only the probability of remaining in S1 and the transition probability from S1 to S2 (i.e., `p_S1S2` is replaced with `p_S1S2_trtB`).
 
 ```{r Sick-Sicker-Time-Dependent-Age-New-Treatment2}
 ## Initialize transition probability array for treatment B
-a_P_trtB <- a_P
+a_P_trtB <- a_P_SoC
 ## Update only transition probabilities from S1 involving p_S1S2
 a_P_trtB["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2_trtB))
 a_P_trtB["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2_trtB
@@ -421,10 +421,10 @@ Once we create the transition probability arrays, we check they are valid (i.e.,
 ```{r}
 ### Check if transition probability matrices are valid
 ## Check that transition probabilities are [0, 1]
-check_transition_probability(a_P)
+check_transition_probability(a_P_SoC)
 check_transition_probability(a_P_trtB)
 ## Check that all rows sum to 1
-check_sum_of_transition_array(a_P,      n_states = n_states, n_cycles = n_cycles)
+check_sum_of_transition_array(a_P_SoC,      n_states = n_states, n_cycles = n_cycles)
 check_sum_of_transition_array(a_P_trtB, n_states = n_states, n_cycles = n_cycles)
 ```
 
@@ -436,28 +436,28 @@ v_s_init
 #  1  0  0  0
 ```
 
-We use the variable `v_s_init` to initialize $M$ represented by `m_M` for the cohorts under SoC strategy and strategy A because the transition probabilities are the same under both strategies, and by `m_M_trtB` for the cohorts under strategies B and AB because both transition probabilities under both strategies are affected by treatment B. Note that the initial state vector, `v_s_init`, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the $n_T$ cycles for the simulation-time-dependent cSTM, we initialize two new cohort trace matrices `m_M_ad` and `m_M_ad_trtB`.
+We use the variable `v_s_init` to initialize $M$ represented by `m_M` for the cohorts under SoC strategy and strategy A because the transition probabilities are the same under both strategies, and by `m_M_trtB` for the cohorts under strategies B and AB because both transition probabilities under both strategies are affected by treatment B. Note that the initial state vector, `v_s_init`, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the $n_T$ cycles for the simulation-time-dependent cSTM, we initialize two new cohort trace matrices `m_M_SoC` and `m_M_trtB`.
 
 ```{r Init-Sick-Sicker-TimeDependent-Trace}
-## Initialize cohort trace for age-dependent (ad) cSTM under SoC
-m_M_ad <- matrix(NA, 
+## Initialize cohort trace for age-dependent cSTM under SoC
+m_M_SoC <- matrix(NA, 
                  nrow = (n_cycles + 1), ncol = n_states, 
                  dimnames = list(0:n_cycles, v_names_states))
 # Store the initial state vector in the first row of the cohort trace
-m_M_ad[1, ] <- v_s_init
+m_M_SoC[1, ] <- v_s_init
 ## Initialize cohort trace under treatment B
-m_M_ad_trtB <- m_M_ad # structure and initial states remain the same.
+m_M_trtB <- m_M_SoC # structure and initial states remain the same.
 ```
 
-We then use the matrix product to get the state vector at cycle $t$. This equation is similar to the one described for the time-independent model. The only modification required is to index the transition probability arrays `a_P` and `a_P_trtB` by $t$ to obtain the cycle-specific transition probability matrices.
+We then use the matrix product to get the state vector at cycle $t$. This equation is similar to the one described for the time-independent model. The only modification required is to index the transition probability arrays `a_P_SoC` and `a_P_trtB` by $t$ to obtain the cycle-specific transition probability matrices.
 
 ```{r Sick-Sicker-TimeDependent-Solution}
 # Iterative solution of age-dependent cSTM
 for(t in 1:n_cycles){
   # For SoC
-  m_M_ad[t + 1, ] <- m_M_ad[t, ] %*% a_P[, , t]
+  m_M_SoC[t + 1, ] <- m_M_SoC[t, ] %*% a_P_SoC[, , t]
   # For treatment B
-  m_M_ad_trtB[t + 1, ] <- m_M_ad_trtB[t, ] %*% a_P_trtB[, , t]
+  m_M_trtB[t + 1, ] <- m_M_trtB[t, ] %*% a_P_trtB[, , t]
 }
 ```
 
@@ -466,7 +466,7 @@ A graphical representation of the cohort trace for all cycles of the age-depende
 ```{r Sick-Sicker-Trace-AgeDep, echo=FALSE, fig.cap='Cohort trace of the age-dependent cSTM under strategies SoC and A.', message=FALSE, warning=FALSE, fig.pos="H"} 
 cols <- get_DARTH_cols()
 lty <-  c("H" = 1, "S1" = 2, "S2" = 4, "D" = 3)
-ggplot(melt(m_M_ad), aes(x = Var1, y = value, 
+ggplot(melt(m_M_SoC), aes(x = Var1, y = value, 
                          color = Var2, linetype = Var2)) +
   geom_line(size = 1) +
   scale_color_manual(name = "Health state", values = cols) +
@@ -548,7 +548,7 @@ a_P_tunnels <- array(0, dim = c(n_states_tunnels, n_states_tunnels, n_cycles),
 knitr::include_graphics("figs/3D-state-transition-array-sick-sicker-tunnels.png")
 ```
 
-Filling `a_P_tunnels` with the corresponding transition probabilities is similar to how it's done with `a_P` above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
+Filling `a_P_tunnels` with the corresponding transition probabilities is similar to how it's done with `a_P_SoC` above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
 
 ```{r Sick-Sicker-TimeDep-P-tunnels}
 ### Fill in array
@@ -690,14 +690,14 @@ cSTMs can be used to generate different epidemiological and economic outputs. In
 Here we provide the epidemiological definition of some of these outcomes and how they can be generated from a cSTM using the simulation-time-dependent Sick-Sicker cSTM under SoC. In the GitHub repository, we provide the code to generate these outcomes from the state-residence-dependent cSTM.
 
 ### Survival probability
-The survival probability, $S(t)$, captures the proportion of the cohort remaining alive by cycle $t$. To estimate $S(t)$ from the simulated cohort of the simulation-time-dependent Sick-Sicker model, shown in Figure \@ref(fig:Sick-Sicker-Surv-AgeDep), we sum the proportions of the non-death states for all $n_T$ cycles in `m_M_ad`.
+The survival probability, $S(t)$, captures the proportion of the cohort remaining alive by cycle $t$. To estimate $S(t)$ from the simulated cohort of the simulation-time-dependent Sick-Sicker model, shown in Figure \@ref(fig:Sick-Sicker-Surv-AgeDep), we sum the proportions of the non-death states for all $n_T$ cycles in `m_M_SoC`.
 
 ```{r Sick-Sicker-TimeDependent-Surv}
-v_S_ad <- rowSums(m_M_ad[, -which(v_names_states == "D")]) # vector with survival curve
+v_S_SoC <- rowSums(m_M_SoC[, -which(v_names_states == "D")]) # vector with survival curve
 ``` 
 
 ```{r Sick-Sicker-Surv-AgeDep, echo=FALSE, fig.cap='Survival curve of the age-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
-ggplot(data.frame(Cycle = 0:n_cycles, Survival = v_S_ad), 
+ggplot(data.frame(Cycle = 0:n_cycles, Survival = v_S_SoC), 
        aes(x = Cycle, y = Survival)) +
   geom_line(size = 1.3) +
   scale_x_continuous(breaks = number_ticks(8)) + 
@@ -721,13 +721,13 @@ $$
 $$
 
 ```{r Expected-life-years-NoShow, echo=FALSE}
-le_ad <- sum(v_S_ad)
+le_SoC <- sum(v_S_SoC)
 ```
 
-In the simulation-time-dependent Sick-Sicker model, where we simulated a cohort over  $n_T$= `r n_cycles` cycles, life expectancy `le_ad` is `r round(le_ad, 1)` cycles, which is calculated as
+In the simulation-time-dependent Sick-Sicker model, where we simulated a cohort over  $n_T$= `r n_cycles` cycles, life expectancy `le_SoC` is `r round(le_SoC, 1)` cycles, which is calculated as
 
 ```{r Life-expectancy, eval=FALSE}
-le_ad <- sum(v_S_ad) # life expectancy
+le_SoC <- sum(v_S_SoC) # life expectancy
 ```
 
 Note that this equation expresses LE in the units of $t$. We use an annual cycle length; thus, the resulting LE will be in years. Analysts can also use other cycle lengths (e.g., monthly or daily), but the LE must be correctly converted to the desired unit if different than the cycle length units.
@@ -736,9 +736,9 @@ Note that this equation expresses LE in the units of $t$. We use an annual cycle
 Prevalence is defined as the proportion of the population or cohort with a specific condition (or being in a particular health state) among those alive.[@Rothman2008h] To calculate the prevalence of S1 at cycle $t$, $\text{prev}(t)_i$, we compute the ratio between the proportion of the cohort in S1 and the proportion alive at that cycle.[@Keiding1991] The proportion of the cohort alive is given by the survival probability $S(t)$ defined above. The individual prevalence of the S1 and S2 health states and the overall prevalence of sick individuals (i.e., S1 + S2) of the age-dependent Sick-Sicker cSTM at each cycle $t$ is computed as follows and are shown in Figure \@ref(fig:Sick-Sicker-Prev-AgeDep).
 
 ```{r Sick-Sicker-TimeDependent-Prevalence}
-v_prev_S1   <- m_M_ad[, "S1"] / v_S_ad          # vector with prevalence of Sick
-v_prev_S2   <- m_M_ad[, "S2"] / v_S_ad          # vector with prevalence of Sicker
-v_prev_S1S2 <- rowSums(m_M_ad[, c("S1", "S2")])/v_S_ad # prevalence of Sick and Sicker
+v_prev_S1_SoC   <- m_M_SoC[, "S1"] / v_S_SoC          # vector with prevalence of Sick
+v_prev_S2_SoC   <- m_M_SoC[, "S2"] / v_S_SoC          # vector with prevalence of Sicker
+v_prev_S1S2_SoC <- rowSums(m_M_SoC[, c("S1", "S2")])/v_S_SoC # prevalence of Sick and Sicker
 ```
 
 ```{r Sick-Sicker-Prev-AgeDep, echo=FALSE, fig.cap='Prevalence of sick states in simulation-time-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
@@ -746,9 +746,9 @@ df_prev_states <- data.frame(Cycle = 0:n_cycles,
                   States  = ordered(rep(c("S1", "S2", "S1 + S2"),
                                 each = (n_cycles + 1)), 
                                 levels = c("S1", "S2", "S1 + S2")), 
-                  Prevalence = c(v_prev_S1, 
-                                 v_prev_S2, 
-                                 v_prev_S1S2))
+                  Prevalence = c(v_prev_S1_SoC, 
+                                 v_prev_S2_SoC, 
+                                 v_prev_S1S2_SoC))
 ggplot(df_prev_states, 
        aes(x = Cycle, y = Prevalence, 
            color = States, linetype = States)) +
@@ -807,25 +807,25 @@ v_c_strAB <- c(H  = c_H,
                D  = c_D)
 ```
 
-<!-- To compute the expected QALYs and costs for the age-dependent Sick-Sicker model under SoC and strategy A, we multiply the cohort trace matrix, `m_M_ad`, times the corresponding strategy-specific state vectors of rewards. Similarly, To compute the expected rewards for strategies B and AB, we multiply the cohort trace matrix accounting for the effectiveness of treatment B, `m_M_ad_trtB`, times their corresponding state vectors of rewards. -->
+<!-- To compute the expected QALYs and costs for the age-dependent Sick-Sicker model under SoC and strategy A, we multiply the cohort trace matrix, `m_M_SoC`, times the corresponding strategy-specific state vectors of rewards. Similarly, To compute the expected rewards for strategies B and AB, we multiply the cohort trace matrix accounting for the effectiveness of treatment B, `m_M_trtB`, times their corresponding state vectors of rewards. -->
 
 <!-- ```{r Expected-outcomes-each-cycle} -->
 <!-- # Vector of QALYs under SoC -->
-<!-- v_qaly_SoC <- m_M_ad %*% v_u_SoC -->
+<!-- v_qaly_SoC <- m_M_SoC %*% v_u_SoC -->
 <!-- # Vector of costs under SoC -->
-<!-- v_cost_SoC <- m_M_ad %*% v_c_SoC -->
+<!-- v_cost_SoC <- m_M_SoC %*% v_c_SoC -->
 <!-- # Vector of QALYs for strategy A -->
-<!-- v_qaly_strA <- m_M_ad %*% v_u_strA -->
+<!-- v_qaly_strA <- m_M_SoC %*% v_u_strA -->
 <!-- # Vector of costs for strategy A -->
-<!-- v_cost_strA <- m_M_ad %*% v_c_strA -->
+<!-- v_cost_strA <- m_M_SoC %*% v_c_strA -->
 <!-- # Vector of QALYs for strategy B -->
-<!-- v_qaly_strB <- m_M_ad_trtB %*% v_u_strB -->
+<!-- v_qaly_strB <- m_M_trtB %*% v_u_strB -->
 <!-- # Vector of costs for strategy B -->
-<!-- v_cost_strB <- m_M_ad_trtB %*% v_c_strB -->
+<!-- v_cost_strB <- m_M_trtB %*% v_c_strB -->
 <!-- # Vector of QALYs for strategy AB -->
-<!-- v_qaly_strAB <- m_M_ad_trtB %*% v_u_strAB -->
+<!-- v_qaly_strAB <- m_M_trtB %*% v_u_strAB -->
 <!-- # Vector of costs for strategy AB -->
-<!-- v_cost_strAB <- m_M_ad_trtB %*% v_c_strAB -->
+<!-- v_cost_strAB <- m_M_trtB %*% v_c_strAB -->
 <!-- ``` -->
 
 ### Transition rewards
@@ -835,28 +835,28 @@ Incorporating transition rewards requires keeping track of the proportion of the
 
 To account for both state and transition rewards, we create a *matrix* of rewards $R_t$ of dimensions $n_S \times n_S$. The off-diagonal entries of $R_t$ store the transition rewards, and the diagonal of $R_t$ stores the state rewards for cycle $t$ and assumes that rewards occur at the beginning of the cycle.[@Krijkamp2019] Finally, we multiply this matrix by $A_t$, the $t$-th slice of $A$, apply discounting, within-cycle correction, and compute the overall reward for each strategy outcome. Below, we illustrate these concepts in R.
 
-To compute $\mathbf{A}$ for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array `a_A` of dimensions $n_S \times n_S \times [n_T+1]$ and set the diagonal of the first slice to the initial state vector `v_s_init`. Next, we create a three-dimensional array for the cohort under treatment B, `a_A_trtB`, as a copy of the array under SoC.
+To compute $\mathbf{A}$ for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array `a_A_SoC` of dimensions $n_S \times n_S \times [n_T+1]$ and set the diagonal of the first slice to the initial state vector `v_s_init`. Next, we create a three-dimensional array for the cohort under treatment B, `a_A_trtB`, as a copy of the array under SoC.
 
 ```{r Init-Transition-Array}
 # Initialize transition-dynamics array under SoC
-a_A <- array(0,
+a_A_SoC <- array(0,
              dim = c(n_states, n_states, (n_cycles + 1)),
              dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 # Set first slice to the initial state vector in its diagonal
-diag(a_A[, , 1]) <- v_s_init
+diag(a_A_SoC[, , 1]) <- v_s_init
 # Initialize transition-dynamics array under treatment B
-a_A_trtB <- a_A
+a_A_trtB <- a_A_SoC
 ```
 
-We then compute a matrix multiplication between a diagonal matrix of each of the $t$-th rows of the cohort trace matrix under SoC and treatment B, denoted as `diag(m_M_ad[t, ])` and `diag(m_M_ad_trtB[t, ])`, by the $t$-th matrix of the array of transition matrices, `a_P[, , t]` and `a_P_trtB[, , t]`, respectively,  over all $n_T$ cycles.
+We then compute a matrix multiplication between a diagonal matrix of each of the $t$-th rows of the cohort trace matrix under SoC and treatment B, denoted as `diag(m_M_SoC[t, ])` and `diag(m_M_trtB[t, ])`, by the $t$-th matrix of the array of transition matrices, `a_P_SoC[, , t]` and `a_P_trtB[, , t]`, respectively,  over all $n_T$ cycles.
 
 ```{r Compute-Transition-Array}
 # Iterative solution to produce the transition-dynamics array
 for (t in 1:n_cycles){
   # For SoC
-  a_A[, , t + 1] <- diag(m_M_ad[t, ]) %*% a_P[, , t]
+  a_A_SoC[, , t + 1] <- diag(m_M_SoC[t, ]) %*% a_P_SoC[, , t]
   # For treatment B
-  a_A_trtB[, , t + 1] <- m_M_ad_trtB[t, ]  * a_P_trtB[, , t]
+  a_A_trtB[, , t + 1] <- m_M_trtB[t, ]  * a_P_trtB[, , t]
 }
 ```
 
@@ -949,15 +949,15 @@ The state and transition rewards are applied to the model dynamics by element-wi
   (\#eq:array-outputs)
 \end{equation}
 
-To obtain $\mathbf{Y}$ for QALYs and costs for all four strategies, we apply Equation \@ref(eq:array-outputs) by the element-wise multiplication of the transition array `a_A` by the corresponding array of rewards.
+To obtain $\mathbf{Y}$ for QALYs and costs for all four strategies, we apply Equation \@ref(eq:array-outputs) by the element-wise multiplication of the transition array `a_A_SoC` by the corresponding array of rewards.
 
 ```{r Expected-Outcomes-Transitions-Cycle}
 # For SoC
-a_Y_c_SoC <- a_A * a_R_c_SoC
-a_Y_u_SoC <- a_A * a_R_u_SoC
+a_Y_c_SoC <- a_A_SoC * a_R_c_SoC
+a_Y_u_SoC <- a_A_SoC * a_R_u_SoC
 # For Strategy A
-a_Y_c_strA <- a_A * a_R_c_strA
-a_Y_u_strA <- a_A * a_R_u_strA
+a_Y_c_strA <- a_A_SoC * a_R_c_strA
+a_Y_u_strA <- a_A_SoC * a_R_u_strA
 # For Strategy B
 a_Y_c_strB <- a_A_trtB * a_R_c_strB
 a_Y_u_strB <- a_A_trtB * a_R_u_strB
