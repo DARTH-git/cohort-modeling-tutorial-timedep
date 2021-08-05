@@ -626,7 +626,7 @@ Once we have created both three-dimensional transition probability arrays with t
 check_transition_probability(a_P_tunnels)
 check_transition_probability(a_P_tunnels_trtB)
 ## Check that all rows sum to 1
-check_sum_of_transition_array(a_P_tunnels,      n_states = n_states_tunnels, 
+check_sum_of_transition_array(a_P_tunnels, n_states = n_states_tunnels, 
                               n_cycles = n_cycles)
 check_sum_of_transition_array(a_P_tunnels_trtB, n_states = n_states_tunnels, 
                               n_cycles = n_cycles)
