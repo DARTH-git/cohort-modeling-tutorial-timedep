@@ -764,7 +764,7 @@ ggplot(df_prev_states,
 ```
 
 ## Economic measures
-In CEA, we can calculate economic outcomes by using either state or transition rewards. A "state reward" refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A "transition reward" refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. In the accompanying introductory tutorial, we describe how to incorporate state rewards in CEA.[@Alarid-Escudero2021a] 
+In CEA, we can calculate economic outcomes by using either state or transition rewards. A "state reward" refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A "transition reward" refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. In the accompanying tutorial, we describe how to incorporate state rewards in CEA in detail.[@Alarid-Escudero2021a] Here, we describe and illustrate how to implement both state and transition rewards together using a transition array.
 
 ### State rewards
 As shown in the introductory tutorial, to add state rewards to the Sick-Sicker model, we first create a vector of utilities and costs for each of the four strategies considered. The vectors of utilities and costs, `v_u_SoC` and `v_c_SoC`, respectively, contain the utilities and costs corresponding to being in each of the four health states under SoC, shown in Table \@ref(tab:param-table).
