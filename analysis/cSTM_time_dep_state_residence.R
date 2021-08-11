@@ -566,6 +566,8 @@ colnames(df_e) <- v_names_str
 
 #### Conduct probabilistic sensitivity analysis ####
 ## Run Markov model on each parameter set of PSA input dataset in series
+## (Running this model in series can be slow. We suggest running it in parallel 
+## with the code in the next section)
 n_time_init_psa_series <- Sys.time()
 for(i in 1:n_sim){
   l_out_temp <- calculate_ce_out(df_psa_input[i, ])
@@ -583,74 +585,75 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
              units(n_time_total_psa_series)))
 
 ### Run Markov model on each parameter set of PSA input dataset in parallel
-## Get OS
-os <- get_os()
-
-no_cores <- parallel::detectCores() - 1
-
-print(paste0("Parallelized PSA on ", os, " using ", no_cores, " cores."))
-
-n_time_init_psa_parallel <- Sys.time()
-
-## Run parallelized PSA based on OS
-if(os == "macosx"){
-  # Initialize cluster object
-  cl <- parallel::makeForkCluster(no_cores)
-  # Register clusters
-  doParallel::registerDoParallel(cl)
-  # Run parallelized PSA
-  df_ce <- foreach::foreach(i = 1:n_sim, .combine = rbind) %dopar% {
-    l_out_temp <- calculate_ce_out(df_psa_input[i, ])
-    df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
-  }
-  # Extract costs and effects from the PSA dataset
-  df_c <- df_ce[, 1:n_str]
-  df_e <- df_ce[, (n_str+1):(2*n_str)]
-  # Register end time of parallelized PSA
-  n_time_end_psa_parallel <- Sys.time()
-}
-if(os == "windows"){
-  # Initialize cluster object
-  cl <- parallel::makeCluster(no_cores)
-  # Register clusters
-  doParallel::registerDoParallel(cl)
-  opts <- list(attachExportEnv = TRUE)
-  # Run parallelized PSA
-  df_ce <- foreach::foreach(i = 1:n_samp, .combine = rbind,
-                           .export = ls(globalenv()),
-                           .packages=c("dampack"),
-                           .options.snow = opts) %dopar% {
-                             l_out_temp <- calculate_ce_out(df_psa_input[i, ])
-                             df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
-                           }
-  # Extract costs and effects from the PSA dataset
-  df_c <- df_ce[, 1:n_str]
-  df_e <- df_ce[, (n_str+1):(2*n_str)]
-  # Register end time of parallelized PSA
-  n_time_end_psa_parallel <- Sys.time()
-}
-if(os == "linux"){
-  # Initialize cluster object
-  cl <- parallel::makeCluster(no_cores)
-  # Register clusters
-  doParallel::registerDoMC(cl)
-  # Run parallelized PSA
-  df_ce <- foreach::foreach(i = 1:n_sim, .combine = rbind) %dopar% {
-    l_out_temp <- calculate_ce_out(df_psa_input[i, ])
-    df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
-  }
-  # Extract costs and effects from the PSA dataset
-  df_c <- df_ce[, 1:n_str]
-  df_e <- df_ce[, (n_str+1):(2*n_str)]
-  # Register end time of parallelized PSA
-  n_time_end_psa_parallel <- Sys.time()
-}
-# Stop clusters
-stopCluster(cl)
-n_time_total_psa_parallel <- n_time_end_psa_parallel - n_time_init_psa_parallel
-print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
-             round(n_time_total_psa_parallel, 2), " ",
-             units(n_time_total_psa_parallel)))
+## (Uncomment next section to run in parallel)
+# ## Get OS
+# os <- get_os()
+# 
+# no_cores <- parallel::detectCores() - 1
+# 
+# print(paste0("Parallelized PSA on ", os, " using ", no_cores, " cores."))
+# 
+# n_time_init_psa_parallel <- Sys.time()
+# 
+# ## Run parallelized PSA based on OS
+# if(os == "macosx"){
+#   # Initialize cluster object
+#   cl <- parallel::makeForkCluster(no_cores)
+#   # Register clusters
+#   doParallel::registerDoParallel(cl)
+#   # Run parallelized PSA
+#   df_ce <- foreach::foreach(i = 1:n_sim, .combine = rbind) %dopar% {
+#     l_out_temp <- calculate_ce_out(df_psa_input[i, ])
+#     df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
+#   }
+#   # Extract costs and effects from the PSA dataset
+#   df_c <- df_ce[, 1:n_str]
+#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   # Register end time of parallelized PSA
+#   n_time_end_psa_parallel <- Sys.time()
+# }
+# if(os == "windows"){
+#   # Initialize cluster object
+#   cl <- parallel::makeCluster(no_cores)
+#   # Register clusters
+#   doParallel::registerDoParallel(cl)
+#   opts <- list(attachExportEnv = TRUE)
+#   # Run parallelized PSA
+#   df_ce <- foreach::foreach(i = 1:n_samp, .combine = rbind,
+#                            .export = ls(globalenv()),
+#                            .packages=c("dampack"),
+#                            .options.snow = opts) %dopar% {
+#                              l_out_temp <- calculate_ce_out(df_psa_input[i, ])
+#                              df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
+#                            }
+#   # Extract costs and effects from the PSA dataset
+#   df_c <- df_ce[, 1:n_str]
+#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   # Register end time of parallelized PSA
+#   n_time_end_psa_parallel <- Sys.time()
+# }
+# if(os == "linux"){
+#   # Initialize cluster object
+#   cl <- parallel::makeCluster(no_cores)
+#   # Register clusters
+#   doParallel::registerDoMC(cl)
+#   # Run parallelized PSA
+#   df_ce <- foreach::foreach(i = 1:n_sim, .combine = rbind) %dopar% {
+#     l_out_temp <- calculate_ce_out(df_psa_input[i, ])
+#     df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
+#   }
+#   # Extract costs and effects from the PSA dataset
+#   df_c <- df_ce[, 1:n_str]
+#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   # Register end time of parallelized PSA
+#   n_time_end_psa_parallel <- Sys.time()
+# }
+# # Stop clusters
+# stopCluster(cl)
+# n_time_total_psa_parallel <- n_time_end_psa_parallel - n_time_init_psa_parallel
+# print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
+#              round(n_time_total_psa_parallel, 2), " ",
+#              units(n_time_total_psa_parallel)))
 
 # Create PSA object for dampack
 l_psa <- make_psa_obj(cost          = df_c, 
