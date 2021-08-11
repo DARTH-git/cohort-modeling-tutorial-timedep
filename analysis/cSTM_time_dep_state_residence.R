@@ -178,39 +178,42 @@ v_p_S1S2_tunnels_trtB <- rate_to_prob(r = r_S1S2_tunnels_trtB) # probability to 
 ###################### Construct state-transition models #####################
 #### Create transition matrix ####
 # Initialize 3-D array
-a_P_tunnels <- array(0, dim   = c(n_states_tunnels, n_states_tunnels, n_cycles),
+a_P_tunnels_SoC <- array(0, dim   = c(n_states_tunnels, n_states_tunnels, n_cycles),
                      dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:(n_cycles - 1)))
 ### Fill in array
 ## From H
-a_P_tunnels["H", "H", ]              <- (1 - v_p_HDage) * (1 - p_HS1)
-a_P_tunnels["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
-a_P_tunnels["H", "D", ]              <- v_p_HDage
+a_P_tunnels_SoC["H", "H", ]              <- (1 - v_p_HDage) * (1 - p_HS1)
+a_P_tunnels_SoC["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
+a_P_tunnels_SoC["H", "D", ]              <- v_p_HDage
 ## From S1
 for(i in 1:(n_tunnel_size - 1)){
-  a_P_tunnels[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-  a_P_tunnels[v_Sick_tunnel[i], 
+  a_P_tunnels_SoC[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
+  a_P_tunnels_SoC[v_Sick_tunnel[i], 
               v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
                                            (1 - (p_S1H + v_p_S1S2_tunnels[i]))
-  a_P_tunnels[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
-  a_P_tunnels[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
+  a_P_tunnels_SoC[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
+  a_P_tunnels_SoC[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
 }
 # repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size],
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size],
             v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) *
                                                (1 - (p_S1H + v_p_S1S2_tunnels[n_tunnel_size]))
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) * 
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) * 
                                                      v_p_S1S2_tunnels[n_tunnel_size]
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 ## From S2
-a_P_tunnels["S2", "S2", ] <- 1 - v_p_S2Dage
-a_P_tunnels["S2", "D", ]  <- v_p_S2Dage
+a_P_tunnels_SoC["S2", "S2", ] <- 1 - v_p_S2Dage
+a_P_tunnels_SoC["S2", "D", ]  <- v_p_S2Dage
 ## From D
-a_P_tunnels["D", "D", ] <- 1
+a_P_tunnels_SoC["D", "D", ] <- 1
+
+## Initialize transition probability matrix for strategy A as a copy of SoC's
+a_P_tunnels_strA <- a_P_tunnels_SoC
 
 ### For strategies B and AB
 ## Initialize transition probability array for strategies B and AB
-a_P_tunnels_strB <- a_P_tunnels
+a_P_tunnels_strB <- a_P_tunnels_SoC
 ## Only need to update the probabilities involving the transition from Sick to Sicker, v_p_S1S2_tunnels
 # From S1
 for(i in 1:(n_tunnel_size - 1)){
@@ -230,12 +233,20 @@ a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) *
                                                            v_p_S1S2_tunnels_trtB[n_tunnel_size]
 a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 
+## Initialize transition probability matrix for strategy AB as a copy of B's
+a_P_tunnels_strAB <- a_P_tunnels_strB
+
+
 ### Check if transition probability matrix is valid (i.e., elements cannot < 0 or > 1) 
-check_transition_probability(a_P_tunnels,      verbose = TRUE)
+check_transition_probability(a_P_tunnels_SoC, verbose = TRUE)
+check_transition_probability(a_P_tunnels_strA, verbose = TRUE)
 check_transition_probability(a_P_tunnels_strB, verbose = TRUE)
+check_transition_probability(a_P_tunnels_strAB, verbose = TRUE)
 ### Check if transition probability matrix sum to 1 (i.e., each row should sum to 1)
-check_sum_of_transition_array(a_P_tunnels,      n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
+check_sum_of_transition_array(a_P_tunnels_SoC, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
+check_sum_of_transition_array(a_P_tunnels_strA, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
 check_sum_of_transition_array(a_P_tunnels_strB, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
+check_sum_of_transition_array(a_P_tunnels_strAB, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
 
 #### Run Markov model ####
 ## Initial state vector
@@ -243,58 +254,88 @@ check_sum_of_transition_array(a_P_tunnels_strB, n_states = n_states_tunnels, n_c
 v_s_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
 
 ## Initialize cohort trace for history-dependent cSTM
-m_M_tunnels <- matrix(0, 
+m_M_tunnels_SoC <- matrix(0, 
                       nrow     = (n_cycles + 1), ncol = n_states_tunnels, 
                       dimnames = list(0:n_cycles, v_names_states_tunnels))
 # Store the initial state vector in the first row of the cohort trace
-m_M_tunnels[1, ] <- v_s_init_tunnels
-# For strategies B and AB
-m_M_tunnels_strB <- m_M_tunnels
+m_M_tunnels_SoC[1, ] <- v_s_init_tunnels
+
+## Initialize cohort trace for strategies A, B, and AB
+# Structure and initial states are the same as for SoC
+m_M_tunnels_strA  <- m_M_tunnels_SoC # Strategy A
+m_M_tunnels_strB  <- m_M_tunnels_SoC # Strategy B
+m_M_tunnels_strAB <- m_M_tunnels_SoC # Strategy AB
 
 ## Initialize transition array
-a_A_tunnels <- array(0,
+a_A_tunnels_SoC <- array(0,
                      dim = c(n_states_tunnels, n_states_tunnels, n_cycles + 1),
                      dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:n_cycles))
 # Set first slice of A with the initial state vector in its diagonal
-diag(a_A_tunnels[, , 1]) <- v_s_init_tunnels
-# For strategies B and AB
-a_A_tunnels_strB <- a_A_tunnels
+diag(a_A_tunnels_SoC[, , 1]) <- v_s_init_tunnels
+# Initialize transition-dynamics array for strategies A, B, and AB
+# Structure and initial states are the same as for SoC
+a_A_tunnels_strA  <- a_A_tunnels_SoC
+a_A_tunnels_strB  <- a_A_tunnels_SoC
+a_A_tunnels_strAB <- a_A_tunnels_SoC
 
 ## Iterative solution of age-dependent cSTM
 for(t in 1:n_cycles){
-  # Fill in cohort trace
-  # For srategies SoC and A
-  m_M_tunnels[t + 1, ]     <- m_M_tunnels[t, ]      %*% a_P_tunnels[, , t]
-  # For srategies B and AB
-  m_M_tunnels_strB[t + 1,] <- m_M_tunnels_strB[t, ] %*% a_P_tunnels_strB[, , t]
+  ## Fill in cohort trace
+  # For SoC
+  m_M_tunnels_SoC[t + 1, ]   <- m_M_tunnels_SoC[t, ] %*% a_P_tunnels_SoC[, , t]
+  # For strategy A
+  m_M_tunnels_strA[t + 1, ]  <- m_M_tunnels_strA[t, ] %*% a_P_tunnels_strA[, , t]
+  # For strategy B
+  m_M_tunnels_strB[t + 1, ]  <- m_M_tunnels_strB[t, ] %*% a_P_tunnels_strB[, , t]
+  # For strategy AB
+  m_M_tunnels_strAB[t + 1, ] <- m_M_tunnels_strAB[t, ] %*% a_P_tunnels_strAB[, , t]
   
-  # Fill in transition dynamics array
-  # For srategies SoC and A
-  a_A_tunnels[, , t + 1]       <- m_M_tunnels[t, ]      * a_P_tunnels[, , t]
-  # For srategies B and AB
-  a_A_tunnels_strB[, , t + 1]  <- m_M_tunnels_strB[t, ] * a_P_tunnels_strB[, , t]
+  ## Fill in transition-dynamics array
+  # For SoC
+  a_A_tunnels_SoC[, , t + 1]   <- diag(m_M_tunnels_SoC[t, ]) %*% a_P_tunnels_SoC[, , t]
+  # For strategy A
+  a_A_tunnels_strA[, , t + 1]  <- diag(m_M_tunnels_strA[t, ]) %*% a_P_tunnels_strA[, , t]
+  # For strategy B
+  a_A_tunnels_strB[, , t + 1]  <- diag(m_M_tunnels_strB[t, ]) %*% a_P_tunnels_strB[, , t]
+  # For strategy AB
+  a_A_tunnels_strAB[, , t + 1] <- diag(m_M_tunnels_strAB[t, ]) %*% a_P_tunnels_strAB[, , t]
 }
 
 # Create aggregated trace
-m_M_tunnels_sum <- cbind(H  = m_M_tunnels[, "H"], 
-                         S1 = rowSums(m_M_tunnels[, 2:(n_tunnel_size +1)]), 
-                         S2 = m_M_tunnels[, "S2"],
-                         D  = m_M_tunnels[, "D"])
-m_M_tunnels_sum_strB <- cbind(H  = m_M_tunnels_strB[, "H"], 
+m_M_tunnels_SoC_sum <- cbind(H  = m_M_tunnels_SoC[, "H"], 
+                             S1 = rowSums(m_M_tunnels_SoC[, 2:(n_tunnel_size +1)]), 
+                             S2 = m_M_tunnels_SoC[, "S2"],
+                             D  = m_M_tunnels_SoC[, "D"])
+m_M_tunnels_strA_sum <- cbind(H  = m_M_tunnels_strA[, "H"], 
+                              S1 = rowSums(m_M_tunnels_strA[, 2:(n_tunnel_size +1)]), 
+                              S2 = m_M_tunnels_strA[, "S2"],
+                              D  = m_M_tunnels_strA[, "D"])
+m_M_tunnels_strB_sum <- cbind(H  = m_M_tunnels_strA[, "H"], 
                               S1 = rowSums(m_M_tunnels_strB[, 2:(n_tunnel_size +1)]), 
                               S2 = m_M_tunnels_strB[, "S2"],
                               D  = m_M_tunnels_strB[, "D"])
+m_M_tunnels_strAB_sum <- cbind(H  = m_M_tunnels_strAB[, "H"], 
+                               S1 = rowSums(m_M_tunnels_strAB[, 2:(n_tunnel_size +1)]), 
+                               S2 = m_M_tunnels_strAB[, "S2"],
+                               D  = m_M_tunnels_strAB[, "D"])
 
 ## Store the cohort traces in a list
-l_m_M <- list(m_M_tunnels_sum,      
-              m_M_tunnels_sum,      
-              m_M_tunnels_sum_strB, 
-              m_M_tunnels_sum_strB)
+l_m_M <- list(m_M_tunnels_SoC_sum,      
+              m_M_tunnels_strA_sum,      
+              m_M_tunnels_strB_sum, 
+              m_M_tunnels_strAB_sum)
 names(l_m_M) <- v_names_str
+
+## Store the transition array for each strategy in a list
+l_a_A <- list(a_A_tunnels_SoC,
+              a_A_tunnels_strA,
+              a_A_tunnels_strB,
+              a_A_tunnels_strAB)
+names(l_a_A) <- v_names_str
 
 #### Plot Outputs ####
 ## Plot the cohort trace for strategies SoC and A
-plot_trace(m_M_tunnels_sum)
+plot_trace(m_M_tunnels_SoC_sum)
 plot_trace_strategy(l_m_M)
 
 #### State Rewards ####
@@ -376,14 +417,9 @@ l_c   <- list(v_c_SoC,
               v_c_strA,
               v_c_strB,
               v_c_strAB)
-## Store the transition array for each strategy in a list
-l_a_A <- list(a_A_tunnels,
-              a_A_tunnels,
-              a_A_tunnels_strB,
-              a_A_tunnels_strB)
 
 # assign strategy names to matching items in the lists
-names(l_u) <- names(l_c) <- names(l_a_A) <- v_names_str
+names(l_u) <- names(l_c) <- v_names_str
 
 ## create empty vectors to store total utilities and costs 
 v_tot_qaly <- v_tot_cost <- vector(mode = "numeric", length = n_str)
@@ -508,7 +544,6 @@ head(df_psa_input)
 ggplot(melt(df_psa_input, variable.name = "Parameter"), aes(x = value)) +
   facet_wrap(~Parameter, scales = "free") +
   geom_histogram(aes(y = ..density..)) +
-  scale_x_continuous(breaks = dampack::number_ticks(4)) + 
   ylab("") +
   theme_bw(base_size = 16) + 
   theme(axis.text = element_text(size = 6),
@@ -550,11 +585,12 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
 ### Run Markov model on each parameter set of PSA input dataset in parallel
 ## Get OS
 os <- get_os()
-print(paste0("Parallelized PSA on ", os))
 
 no_cores <- parallel::detectCores() - 1
 
-n_time_init_psa <- Sys.time()
+print(paste0("Parallelized PSA on ", os, " using ", no_cores, " cores."))
+
+n_time_init_psa_parallel <- Sys.time()
 
 ## Run parallelized PSA based on OS
 if(os == "macosx"){
@@ -571,7 +607,7 @@ if(os == "macosx"){
   df_c <- df_ce[, 1:n_str]
   df_e <- df_ce[, (n_str+1):(2*n_str)]
   # Register end time of parallelized PSA
-  n_time_end_psa <- Sys.time()
+  n_time_end_psa_parallel <- Sys.time()
 }
 if(os == "windows"){
   # Initialize cluster object
@@ -591,7 +627,7 @@ if(os == "windows"){
   df_c <- df_ce[, 1:n_str]
   df_e <- df_ce[, (n_str+1):(2*n_str)]
   # Register end time of parallelized PSA
-  n_time_end_psa <- Sys.time()
+  n_time_end_psa_parallel <- Sys.time()
 }
 if(os == "linux"){
   # Initialize cluster object
@@ -607,14 +643,14 @@ if(os == "linux"){
   df_c <- df_ce[, 1:n_str]
   df_e <- df_ce[, (n_str+1):(2*n_str)]
   # Register end time of parallelized PSA
-  n_time_end_psa <- Sys.time()
+  n_time_end_psa_parallel <- Sys.time()
 }
 # Stop clusters
 stopCluster(cl)
-n_time_total_psa <- n_time_end_psa - n_time_init_psa
+n_time_total_psa_parallel <- n_time_end_psa_parallel - n_time_init_psa_parallel
 print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
-             round(n_time_total_psa, 2), " ",
-             units(n_time_total_psa_series)))
+             round(n_time_total_psa_parallel, 2), " ",
+             units(n_time_total_psa_parallel)))
 
 # Create PSA object for dampack
 l_psa <- make_psa_obj(cost          = df_c, 
