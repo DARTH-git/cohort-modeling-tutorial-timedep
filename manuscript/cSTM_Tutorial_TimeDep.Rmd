@@ -690,10 +690,10 @@ To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D st
 ```{r}
 # Create aggregated trace
 m_M_tunnels_SoC_sum <- cbind(H = m_M_tunnels_SoC[, "H"], 
-                         S1 = rowSums(m_M_tunnels_SoC[, which(v_names_states=="S1"):
-                                                    (n_tunnel_size +1)]), 
-                         S2 = m_M_tunnels_SoC[, "S2"],
-                         D = m_M_tunnels_SoC[, "D"])
+                             S1 = rowSums(m_M_tunnels_SoC[, which(v_names_states=="S1"):
+                                                        (n_tunnel_size +1)]), 
+                             S2 = m_M_tunnels_SoC[, "S2"],
+                             D = m_M_tunnels_SoC[, "D"])
 ```
 
 ```{r Sick-Sicker-Trace-HistDep, echo=FALSE, fig.cap='Cohort trace of the age-dependent cSTM accounting for state-residence dependency under strategies SoC and A.', message=FALSE, warning=FALSE, fig.pos="H"} 

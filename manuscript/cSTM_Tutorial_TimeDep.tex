@@ -786,10 +786,10 @@ To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D st
 \begin{Highlighting}[]
 \CommentTok{\# Create aggregated trace}
 \NormalTok{m\_M\_tunnels\_SoC\_sum }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\AttributeTok{H =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"H"}\NormalTok{], }
-                         \AttributeTok{S1 =} \FunctionTok{rowSums}\NormalTok{(m\_M\_tunnels\_SoC[, }\FunctionTok{which}\NormalTok{(v\_names\_states}\SpecialCharTok{==}\StringTok{"S1"}\NormalTok{)}\SpecialCharTok{:}
-\NormalTok{                                                    (n\_tunnel\_size }\SpecialCharTok{+}\DecValTok{1}\NormalTok{)]), }
-                         \AttributeTok{S2 =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"S2"}\NormalTok{],}
-                         \AttributeTok{D =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"D"}\NormalTok{])}
+                             \AttributeTok{S1 =} \FunctionTok{rowSums}\NormalTok{(m\_M\_tunnels\_SoC[, }\FunctionTok{which}\NormalTok{(v\_names\_states}\SpecialCharTok{==}\StringTok{"S1"}\NormalTok{)}\SpecialCharTok{:}
+\NormalTok{                                                        (n\_tunnel\_size }\SpecialCharTok{+}\DecValTok{1}\NormalTok{)]), }
+                             \AttributeTok{S2 =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"S2"}\NormalTok{],}
+                             \AttributeTok{D =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"D"}\NormalTok{])}
 \end{Highlighting}
 \end{Shaded}
 
