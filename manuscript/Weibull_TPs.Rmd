@@ -39,3 +39,14 @@ and simplifies to
 $$
 p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(\lambda^{\gamma}((\tau-1)^{\gamma} - \tau^{\gamma}))}
 $$
+
+## Effectiveness of a treatment as a hazard ratio
+To account for the effectiveness of a treatment, we multiply the hazard ratio of the treatment by the difference of the cumulative hazards.
+$$
+p\_treat_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(hr\cdot\left((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})\right)}
+$$
+or
+$$
+p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(hr\cdot\lambda^{\gamma}((\tau-1)^{\gamma} - \tau^{\gamma}))},
+$$
+which is equivalent to transform $p_{\left[S1_{\tau},S2, \tau\right]}$ to a vector of rates, $r_{\left[S1_{\tau},S2, \tau\right]}$, and multiply it by the hazard ratio of the treatment, $hr$. Then, we transform back to probabilities to produce $p\_treat_{\left[S1_{\tau},S2, \tau\right]}$, a transition probabilities that accounts for the duration of S1 state-residence under the treatment.
