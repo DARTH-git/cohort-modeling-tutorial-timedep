@@ -638,15 +638,15 @@ Then, the transition probability dependent on state residence from Sick to Sicke
 \end{Highlighting}
 \end{Shaded}
 
-To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, \texttt{a\_P\_tunnels}. The dimensions of this array are \(n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T\). A visual representation of \texttt{a\_P\_tunnels} of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \ref{fig:Array-Time-Dependent-Tunnels}.
+To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, \texttt{a\_P\_tunnels\_SoC}. The dimensions of this array are \(n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T\). A visual representation of \texttt{a\_P\_tunnels\_SoC} of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \ref{fig:Array-Time-Dependent-Tunnels}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Initialize array}
-\NormalTok{a\_P\_tunnels }\OtherTok{\textless{}{-}} \FunctionTok{array}\NormalTok{(}\DecValTok{0}\NormalTok{, }\AttributeTok{dim =} \FunctionTok{c}\NormalTok{(n\_states\_tunnels, n\_states\_tunnels, n\_cycles),}
-                     \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(v\_names\_states\_tunnels, }
-\NormalTok{                                     v\_names\_states\_tunnels, }
-                                     \DecValTok{0}\SpecialCharTok{:}\NormalTok{(n\_cycles }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{)))}
+\NormalTok{a\_P\_tunnels\_SoC }\OtherTok{\textless{}{-}} \FunctionTok{array}\NormalTok{(}\DecValTok{0}\NormalTok{, }\AttributeTok{dim =} \FunctionTok{c}\NormalTok{(n\_states\_tunnels, n\_states\_tunnels, n\_cycles),}
+                         \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(v\_names\_states\_tunnels, }
+\NormalTok{                                         v\_names\_states\_tunnels, }
+                                         \DecValTok{0}\SpecialCharTok{:}\NormalTok{(n\_cycles }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{)))}
 \end{Highlighting}
 \end{Shaded}
 
@@ -659,37 +659,37 @@ To adapt the 3-dimensional transition probability array to incorporate both age 
 \caption{The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for age-dependence and S1 state-residence using tunnel states.}\label{fig:Array-Time-Dependent-Tunnels}
 \end{figure}
 
-Filling \texttt{a\_P\_tunnels} with the corresponding transition probabilities is similar to how it's done with \texttt{a\_P\_SoC} above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
+Filling \texttt{a\_P\_tunnels\_SoC} with the corresponding transition probabilities is similar to how it's done with \texttt{a\_P\_SoC} above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \DocumentationTok{\#\#\# Fill in array}
 \DocumentationTok{\#\# From H}
-\NormalTok{a\_P\_tunnels[}\StringTok{"H"}\NormalTok{, }\StringTok{"H"}\NormalTok{, ]              }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_HDage) }\SpecialCharTok{*}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ p\_HS1)}
-\NormalTok{a\_P\_tunnels[}\StringTok{"H"}\NormalTok{, v\_Sick\_tunnel[}\DecValTok{1}\NormalTok{], ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_HDage) }\SpecialCharTok{*}\NormalTok{ p\_HS1}
-\NormalTok{a\_P\_tunnels[}\StringTok{"H"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]              }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_HDage}
+\NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"H"}\NormalTok{, }\StringTok{"H"}\NormalTok{, ]              }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_HDage) }\SpecialCharTok{*}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ p\_HS1)}
+\NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"H"}\NormalTok{, v\_Sick\_tunnel[}\DecValTok{1}\NormalTok{], ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_HDage) }\SpecialCharTok{*}\NormalTok{ p\_HS1}
+\NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"H"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]              }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_HDage}
 \DocumentationTok{\#\# From S1}
 \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{(n\_tunnel\_size }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{))\{}
-\NormalTok{  a\_P\_tunnels[v\_Sick\_tunnel[i], }\StringTok{"H"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1H}
-\NormalTok{  a\_P\_tunnels[v\_Sick\_tunnel[i], }
-\NormalTok{              v\_Sick\_tunnel[i }\SpecialCharTok{+} \DecValTok{1}\NormalTok{], ]   }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}
-\NormalTok{                                           (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ (p\_S1H }\SpecialCharTok{+}\NormalTok{ v\_p\_S1S2\_tunnels[i]))}
-\NormalTok{  a\_P\_tunnels[v\_Sick\_tunnel[i], }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ v\_p\_S1S2\_tunnels[i]}
-\NormalTok{  a\_P\_tunnels[v\_Sick\_tunnel[i], }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S1Dage}
+\NormalTok{  a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i], }\StringTok{"H"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1H}
+\NormalTok{  a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i], }
+\NormalTok{                  v\_Sick\_tunnel[i }\SpecialCharTok{+} \DecValTok{1}\NormalTok{], ]   }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}
+\NormalTok{                                               (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ (p\_S1H }\SpecialCharTok{+}\NormalTok{ v\_p\_S1S2\_tunnels[i]))}
+\NormalTok{  a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i], }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ v\_p\_S1S2\_tunnels[i]}
+\NormalTok{  a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i], }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S1Dage}
 \NormalTok{\}}
 \CommentTok{\# Repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick}
-\NormalTok{a\_P\_tunnels[v\_Sick\_tunnel[n\_tunnel\_size], }\StringTok{"H"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1H}
-\NormalTok{a\_P\_tunnels[v\_Sick\_tunnel[n\_tunnel\_size],}
-\NormalTok{            v\_Sick\_tunnel[n\_tunnel\_size], ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}
-\NormalTok{                                               (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ (p\_S1H }\SpecialCharTok{+}\NormalTok{ v\_p\_S1S2\_tunnels[n\_tunnel\_size]))}
-\NormalTok{a\_P\_tunnels[v\_Sick\_tunnel[n\_tunnel\_size], }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*} 
+\NormalTok{a\_P\_tunnels\_SoC[v\_Sick\_tunnel[n\_tunnel\_size], }\StringTok{"H"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1H}
+\NormalTok{a\_P\_tunnels\_SoC[v\_Sick\_tunnel[n\_tunnel\_size],}
+\NormalTok{                v\_Sick\_tunnel[n\_tunnel\_size], ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}
+\NormalTok{                                                   (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ (p\_S1H }\SpecialCharTok{+}\NormalTok{ v\_p\_S1S2\_tunnels[n\_tunnel\_size]))}
+\NormalTok{a\_P\_tunnels\_SoC[v\_Sick\_tunnel[n\_tunnel\_size], }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*} 
 \NormalTok{                                                     v\_p\_S1S2\_tunnels[n\_tunnel\_size]}
-\NormalTok{a\_P\_tunnels[v\_Sick\_tunnel[n\_tunnel\_size], }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S1Dage}
+\NormalTok{a\_P\_tunnels\_SoC[v\_Sick\_tunnel[n\_tunnel\_size], }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S1Dage}
 \DocumentationTok{\#\#\# From S2}
-\NormalTok{a\_P\_tunnels[}\StringTok{"S2"}\NormalTok{, }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}} \DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S2Dage}
-\NormalTok{a\_P\_tunnels[}\StringTok{"S2"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S2Dage}
+\NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"S2"}\NormalTok{, }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}} \DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S2Dage}
+\NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"S2"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S2Dage}
 \CommentTok{\# From D}
-\NormalTok{a\_P\_tunnels[}\StringTok{"D"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ] }\OtherTok{\textless{}{-}} \DecValTok{1}
+\NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"D"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ] }\OtherTok{\textless{}{-}} \DecValTok{1}
 \end{Highlighting}
 \end{Shaded}
 
@@ -709,12 +709,12 @@ Accounting for the effectiveness of treatment B is done similarly to the simulat
 \end{Highlighting}
 \end{Shaded}
 
-Then, we initialize the three-dimensional transition probability array for treatment B, \texttt{a\_P\_tunnels\_trtB}, based on \texttt{a\_P\_tunnels}. The only difference is that we update the transition probabilities from S1 involving \texttt{v\_p\_S1S2\_tunnels} to using \texttt{v\_p\_S1S2\_tunnels\_trtB} instead.
+Then, we initialize the three-dimensional transition probability array for treatment B, \texttt{a\_P\_tunnels\_trtB}, based on \texttt{a\_P\_tunnels\_SoC}. The only difference is that we update the transition probabilities from S1 involving \texttt{v\_p\_S1S2\_tunnels} to using \texttt{v\_p\_S1S2\_tunnels\_trtB} instead.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \DocumentationTok{\#\# Initialize transition probability array for treatment B}
-\NormalTok{a\_P\_tunnels\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_tunnels}
+\NormalTok{a\_P\_tunnels\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_tunnels\_SoC}
 \DocumentationTok{\#\# Update only transition probabilities from S1 involving v\_p\_S1S2\_tunnels}
 \ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{(n\_tunnel\_size }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{))\{}
 \NormalTok{  a\_P\_tunnels\_trtB[v\_Sick\_tunnel[i], }\StringTok{"H"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1H}
@@ -741,28 +741,28 @@ Once we have created both three-dimensional transition probability arrays with t
 \begin{Highlighting}[]
 \DocumentationTok{\#\#\# Check if transition probability matrices are valid}
 \DocumentationTok{\#\# Check that transition probabilities are [0, 1]}
-\FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_tunnels)}
+\FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_tunnels\_SoC)}
 \FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_tunnels\_trtB)}
 \DocumentationTok{\#\# Check that all rows sum to 1}
-\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_tunnels, }\AttributeTok{n\_states =}\NormalTok{ n\_states\_tunnels, }
+\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_tunnels\_SoC, }\AttributeTok{n\_states =}\NormalTok{ n\_states\_tunnels, }
                               \AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
 \FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_tunnels\_trtB, }\AttributeTok{n\_states =}\NormalTok{ n\_states\_tunnels, }
                               \AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
 \end{Highlighting}
 \end{Shaded}
 
-To simulate the cohort over the \(n_T\) cycles for the cSTM accounting for state-residence dependency, we initialize two new cohort trace matrices for the SoC and treatment B, \texttt{m\_M\_tunnels} and \texttt{m\_M\_tunnels\_trtB}, respectively. The dimensions of both matrices are \((n_T+1) \times n_{S_{\text{tunnels}}}\).
+To simulate the cohort over the \(n_T\) cycles for the cSTM accounting for state-residence dependency, we initialize two new cohort trace matrices for the SoC and treatment B, \texttt{m\_M\_tunnels\_SoC} and \texttt{m\_M\_tunnels\_trtB}, respectively. The dimensions of both matrices are \((n_T+1) \times n_{S_{\text{tunnels}}}\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Initialize cohort for state{-}residence cSTM under SoC}
-\NormalTok{m\_M\_tunnels }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }
+\NormalTok{m\_M\_tunnels\_SoC }\OtherTok{\textless{}{-}} \FunctionTok{matrix}\NormalTok{(}\DecValTok{0}\NormalTok{, }
                       \AttributeTok{nrow =}\NormalTok{ (n\_cycles }\SpecialCharTok{+} \DecValTok{1}\NormalTok{), }\AttributeTok{ncol =}\NormalTok{ n\_states\_tunnels, }
                       \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(}\DecValTok{0}\SpecialCharTok{:}\NormalTok{n\_cycles, v\_names\_states\_tunnels))}
 \CommentTok{\# Store the initial state vector in the first row of the cohort trace}
-\NormalTok{m\_M\_tunnels[}\DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ v\_s\_init\_tunnels}
+\NormalTok{m\_M\_tunnels\_SoC[}\DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ v\_s\_init\_tunnels}
 \DocumentationTok{\#\# Initialize cohort trace under treatment B}
-\NormalTok{m\_M\_tunnels\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_tunnels}
+\NormalTok{m\_M\_tunnels\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_tunnels\_SoC}
 \end{Highlighting}
 \end{Shaded}
 
@@ -773,7 +773,7 @@ We then use the matrix product, similar to the simulation-time-dependent cSTM, t
 \CommentTok{\# Iterative solution of state{-}residence{-}dependent cSTM}
 \ControlFlowTok{for}\NormalTok{(t }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_cycles)\{}
   \CommentTok{\# For SoC}
-\NormalTok{  m\_M\_tunnels[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_tunnels[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_tunnels[, , t]}
+\NormalTok{  m\_M\_tunnels\_SoC[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_tunnels\_SoC[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_tunnels\_SoC[, , t]}
   \CommentTok{\# Under treatment B}
 \NormalTok{  m\_M\_tunnels\_trtB[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{,] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_tunnels\_trtB[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_tunnels\_trtB[, , t]}
 \NormalTok{\}}
@@ -785,11 +785,11 @@ To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D st
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Create aggregated trace}
-\NormalTok{m\_M\_tunnels\_sum }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\AttributeTok{H =}\NormalTok{ m\_M\_tunnels[, }\StringTok{"H"}\NormalTok{], }
-                         \AttributeTok{S1 =} \FunctionTok{rowSums}\NormalTok{(m\_M\_tunnels[, }\FunctionTok{which}\NormalTok{(v\_names\_states}\SpecialCharTok{==}\StringTok{"S1"}\NormalTok{)}\SpecialCharTok{:}
+\NormalTok{m\_M\_tunnels\_SoC\_sum }\OtherTok{\textless{}{-}} \FunctionTok{cbind}\NormalTok{(}\AttributeTok{H =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"H"}\NormalTok{], }
+                         \AttributeTok{S1 =} \FunctionTok{rowSums}\NormalTok{(m\_M\_tunnels\_SoC[, }\FunctionTok{which}\NormalTok{(v\_names\_states}\SpecialCharTok{==}\StringTok{"S1"}\NormalTok{)}\SpecialCharTok{:}
 \NormalTok{                                                    (n\_tunnel\_size }\SpecialCharTok{+}\DecValTok{1}\NormalTok{)]), }
-                         \AttributeTok{S2 =}\NormalTok{ m\_M\_tunnels[, }\StringTok{"S2"}\NormalTok{],}
-                         \AttributeTok{D =}\NormalTok{ m\_M\_tunnels[, }\StringTok{"D"}\NormalTok{])}
+                         \AttributeTok{S2 =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"S2"}\NormalTok{],}
+                         \AttributeTok{D =}\NormalTok{ m\_M\_tunnels\_SoC[, }\StringTok{"D"}\NormalTok{])}
 \end{Highlighting}
 \end{Shaded}
 

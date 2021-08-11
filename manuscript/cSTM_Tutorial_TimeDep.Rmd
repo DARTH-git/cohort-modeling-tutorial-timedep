@@ -553,50 +553,50 @@ v_p_S1S2_tunnels <- 1-exp(((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape -
                             (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape)
 ```
 
-To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, `a_P_tunnels`. The dimensions of this array are $n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T$. A visual representation of `a_P_tunnels` of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \@ref(fig:Array-Time-Dependent-Tunnels).
+To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, `a_P_tunnels_SoC`. The dimensions of this array are $n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T$. A visual representation of `a_P_tunnels_SoC` of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \@ref(fig:Array-Time-Dependent-Tunnels).
 
 ```{r Init-Sick-Sicker-TimeDep-P-tunnels}
 # Initialize array
-a_P_tunnels <- array(0, dim = c(n_states_tunnels, n_states_tunnels, n_cycles),
-                     dimnames = list(v_names_states_tunnels, 
-                                     v_names_states_tunnels, 
-                                     0:(n_cycles - 1)))
+a_P_tunnels_SoC <- array(0, dim = c(n_states_tunnels, n_states_tunnels, n_cycles),
+                         dimnames = list(v_names_states_tunnels, 
+                                         v_names_states_tunnels, 
+                                         0:(n_cycles - 1)))
 ```
 
 ```{r Array-Time-Dependent-Tunnels, echo=FALSE, out.width='100%', fig.cap="The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for age-dependence and S1 state-residence using tunnel states.", fig.pos="H"}
 knitr::include_graphics("figs/3D-state-transition-array-sick-sicker-tunnels.png")
 ```
 
-Filling `a_P_tunnels` with the corresponding transition probabilities is similar to how it's done with `a_P_SoC` above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
+Filling `a_P_tunnels_SoC` with the corresponding transition probabilities is similar to how it's done with `a_P_SoC` above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
 
 ```{r Sick-Sicker-TimeDep-P-tunnels}
 ### Fill in array
 ## From H
-a_P_tunnels["H", "H", ]              <- (1 - v_p_HDage) * (1 - p_HS1)
-a_P_tunnels["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
-a_P_tunnels["H", "D", ]              <- v_p_HDage
+a_P_tunnels_SoC["H", "H", ]              <- (1 - v_p_HDage) * (1 - p_HS1)
+a_P_tunnels_SoC["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
+a_P_tunnels_SoC["H", "D", ]              <- v_p_HDage
 ## From S1
 for(i in 1:(n_tunnel_size - 1)){
-  a_P_tunnels[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-  a_P_tunnels[v_Sick_tunnel[i], 
-              v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
-                                           (1 - (p_S1H + v_p_S1S2_tunnels[i]))
-  a_P_tunnels[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
-  a_P_tunnels[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
+  a_P_tunnels_SoC[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
+  a_P_tunnels_SoC[v_Sick_tunnel[i], 
+                  v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
+                                               (1 - (p_S1H + v_p_S1S2_tunnels[i]))
+  a_P_tunnels_SoC[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
+  a_P_tunnels_SoC[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
 }
 # Repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size],
-            v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) *
-                                               (1 - (p_S1H + v_p_S1S2_tunnels[n_tunnel_size]))
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) * 
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size],
+                v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) *
+                                                   (1 - (p_S1H + v_p_S1S2_tunnels[n_tunnel_size]))
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) * 
                                                      v_p_S1S2_tunnels[n_tunnel_size]
-a_P_tunnels[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
+a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 ### From S2
-a_P_tunnels["S2", "S2", ] <- 1 - v_p_S2Dage
-a_P_tunnels["S2", "D", ]  <- v_p_S2Dage
+a_P_tunnels_SoC["S2", "S2", ] <- 1 - v_p_S2Dage
+a_P_tunnels_SoC["S2", "D", ]  <- v_p_S2Dage
 # From D
-a_P_tunnels["D", "D", ] <- 1
+a_P_tunnels_SoC["D", "D", ] <- 1
 ```
 
 <!-- To account for the effectiveness of treatment B on the progression from the S1 to the S2 state, we multiply the treatment's hazard ratio, `hr_S1S2_trtB`, by the difference of the cumulative hazards in Equation \@ref(eq:tp-from-H-weibull) -->
@@ -622,11 +622,11 @@ r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
 v_p_S1S2_tunnels_trtB <- 1-exp(-r_S1S2_tunnels_trtB*cycle_length) 
 ```
 
-Then, we initialize the three-dimensional transition probability array for treatment B, `a_P_tunnels_trtB`, based on `a_P_tunnels`. The only difference is that we update the transition probabilities from S1 involving `v_p_S1S2_tunnels` to using `v_p_S1S2_tunnels_trtB` instead.
+Then, we initialize the three-dimensional transition probability array for treatment B, `a_P_tunnels_trtB`, based on `a_P_tunnels_SoC`. The only difference is that we update the transition probabilities from S1 involving `v_p_S1S2_tunnels` to using `v_p_S1S2_tunnels_trtB` instead.
 
 ```{r Sick-Sicker-Time-Dependent-State-Residence-New-Treatment2}
 ## Initialize transition probability array for treatment B
-a_P_tunnels_trtB <- a_P_tunnels
+a_P_tunnels_trtB <- a_P_tunnels_SoC
 ## Update only transition probabilities from S1 involving v_p_S1S2_tunnels
 for(i in 1:(n_tunnel_size - 1)){
   a_P_tunnels_trtB[v_Sick_tunnel[i], "H", ] <- (1 - v_p_S1Dage) * p_S1H
@@ -651,26 +651,26 @@ Once we have created both three-dimensional transition probability arrays with t
 ```{r}
 ### Check if transition probability matrices are valid
 ## Check that transition probabilities are [0, 1]
-check_transition_probability(a_P_tunnels)
+check_transition_probability(a_P_tunnels_SoC)
 check_transition_probability(a_P_tunnels_trtB)
 ## Check that all rows sum to 1
-check_sum_of_transition_array(a_P_tunnels, n_states = n_states_tunnels, 
+check_sum_of_transition_array(a_P_tunnels_SoC, n_states = n_states_tunnels, 
                               n_cycles = n_cycles)
 check_sum_of_transition_array(a_P_tunnels_trtB, n_states = n_states_tunnels, 
                               n_cycles = n_cycles)
 ```
 
-To simulate the cohort over the $n_T$ cycles for the cSTM accounting for state-residence dependency, we initialize two new cohort trace matrices for the SoC and treatment B, `m_M_tunnels` and `m_M_tunnels_trtB`, respectively.  The dimensions of both matrices are $(n_T+1) \times n_{S_{\text{tunnels}}}$.
+To simulate the cohort over the $n_T$ cycles for the cSTM accounting for state-residence dependency, we initialize two new cohort trace matrices for the SoC and treatment B, `m_M_tunnels_SoC` and `m_M_tunnels_trtB`, respectively.  The dimensions of both matrices are $(n_T+1) \times n_{S_{\text{tunnels}}}$.
 
 ```{r Init-Sick-Sicker-TimeDependent-Tunnels-Trace}
 # Initialize cohort for state-residence cSTM under SoC
-m_M_tunnels <- matrix(0, 
+m_M_tunnels_SoC <- matrix(0, 
                       nrow = (n_cycles + 1), ncol = n_states_tunnels, 
                       dimnames = list(0:n_cycles, v_names_states_tunnels))
 # Store the initial state vector in the first row of the cohort trace
-m_M_tunnels[1, ] <- v_s_init_tunnels
+m_M_tunnels_SoC[1, ] <- v_s_init_tunnels
 ## Initialize cohort trace under treatment B
-m_M_tunnels_trtB <- m_M_tunnels
+m_M_tunnels_trtB <- m_M_tunnels_SoC
 ```
 
 We then use the matrix product, similar to the simulation-time-dependent cSTM, to generate the full cohort trace.
@@ -679,7 +679,7 @@ We then use the matrix product, similar to the simulation-time-dependent cSTM, t
 # Iterative solution of state-residence-dependent cSTM
 for(t in 1:n_cycles){
   # For SoC
-  m_M_tunnels[t + 1, ] <- m_M_tunnels[t, ] %*% a_P_tunnels[, , t]
+  m_M_tunnels_SoC[t + 1, ] <- m_M_tunnels_SoC[t, ] %*% a_P_tunnels_SoC[, , t]
   # Under treatment B
   m_M_tunnels_trtB[t + 1,] <- m_M_tunnels_trtB[t, ] %*% a_P_tunnels_trtB[, , t]
 }
@@ -689,17 +689,17 @@ To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D st
 
 ```{r}
 # Create aggregated trace
-m_M_tunnels_sum <- cbind(H = m_M_tunnels[, "H"], 
-                         S1 = rowSums(m_M_tunnels[, which(v_names_states=="S1"):
+m_M_tunnels_SoC_sum <- cbind(H = m_M_tunnels_SoC[, "H"], 
+                         S1 = rowSums(m_M_tunnels_SoC[, which(v_names_states=="S1"):
                                                     (n_tunnel_size +1)]), 
-                         S2 = m_M_tunnels[, "S2"],
-                         D = m_M_tunnels[, "D"])
+                         S2 = m_M_tunnels_SoC[, "S2"],
+                         D = m_M_tunnels_SoC[, "D"])
 ```
 
 ```{r Sick-Sicker-Trace-HistDep, echo=FALSE, fig.cap='Cohort trace of the age-dependent cSTM accounting for state-residence dependency under strategies SoC and A.', message=FALSE, warning=FALSE, fig.pos="H"} 
 cols <- get_DARTH_cols()
 lty <-  c("H" = 1, "S1" = 2, "S2" = 4, "D" = 3)
-ggplot(melt(m_M_tunnels_sum), aes(x = Var1, y = value, 
+ggplot(melt(m_M_tunnels_SoC_sum), aes(x = Var1, y = value, 
                          color = Var2, linetype = Var2)) +
   geom_line(size = 1) +
   scale_color_manual(name = "Health state", values = cols) +
