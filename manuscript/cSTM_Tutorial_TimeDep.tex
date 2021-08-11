@@ -154,7 +154,7 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Pittsburgh, Pittsburgh, PA, USA}}
-\date{2021-08-05}
+\date{2021-08-10}
 
 \begin{document}
 \maketitle
@@ -437,7 +437,7 @@ First, we initialize the transition probability array for SoC, \texttt{a\_P\_SoC
 \end{Highlighting}
 \end{Shaded}
 
-Filling \texttt{a\_P\_SoC} with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling \texttt{m\_P} for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For constant transitions over time, we only need to provide one value for the transition probability. R replicates the value of such transitions as many times as the number of cycles (\(n_T+1\) times in our example).
+Filling \texttt{a\_P\_SoC} with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling \texttt{m\_P} for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For constant transitions over time, we only need to provide one value for the transition probability. R replicates the value of such transitions as many times as the number of cycles (\(n_T+1\) times in our example). We create the transition probability array for strategy A as a copy of SoC's because treatment A does not alter the cohort's transition probabilities.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -456,6 +456,9 @@ Filling \texttt{a\_P\_SoC} with the corresponding transition probabilities of th
 \NormalTok{a\_P\_SoC[}\StringTok{"S2"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S2Dage}
 \DocumentationTok{\#\# From D}
 \NormalTok{a\_P\_SoC[}\StringTok{"D"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]   }\OtherTok{\textless{}{-}} \DecValTok{1}
+
+\DocumentationTok{\#\# Initialize transition probability matrix for strategy A as a copy of SoC\textquotesingle{}s}
+\NormalTok{a\_P\_strA }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_SoC}
 \end{Highlighting}
 \end{Shaded}
 
@@ -475,15 +478,18 @@ As mentioned above, each slice along the third dimension of \texttt{a\_P\_SoC} c
 ## D  0.0000000 0.0000000 0.0000000 1.000000000
 \end{verbatim}
 
-Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, \texttt{a\_P\_trtB} as a copy of \texttt{a\_P\_SoC} and update only the probability of remaining in S1 and the transition probability from S1 to S2 (i.e., \texttt{p\_S1S2} is replaced with \texttt{p\_S1S2\_trtB}).
+Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, \texttt{a\_P\_strB} as a copy of \texttt{a\_P\_SoC} and update only the probability of remaining in S1 and the transition probability from S1 to S2 (i.e., \texttt{p\_S1S2} is replaced with \texttt{p\_S1S2\_trtB}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\DocumentationTok{\#\# Initialize transition probability array for treatment B}
-\NormalTok{a\_P\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_SoC}
+\DocumentationTok{\#\# Initialize transition probability array for strategy B}
+\NormalTok{a\_P\_strB }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_SoC}
 \DocumentationTok{\#\# Update only transition probabilities from S1 involving p\_S1S2}
-\NormalTok{a\_P\_trtB[}\StringTok{"S1"}\NormalTok{, }\StringTok{"S1"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ (p\_S1H }\SpecialCharTok{+}\NormalTok{ p\_S1S2\_trtB))}
-\NormalTok{a\_P\_trtB[}\StringTok{"S1"}\NormalTok{, }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1S2\_trtB}
+\NormalTok{a\_P\_strB[}\StringTok{"S1"}\NormalTok{, }\StringTok{"S1"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ (p\_S1H }\SpecialCharTok{+}\NormalTok{ p\_S1S2\_trtB))}
+\NormalTok{a\_P\_strB[}\StringTok{"S1"}\NormalTok{, }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1S2\_trtB}
+
+\DocumentationTok{\#\# Initialize transition probability matrix for strategy AB as a copy of B\textquotesingle{}s}
+\NormalTok{a\_P\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_strB}
 \end{Highlighting}
 \end{Shaded}
 
@@ -494,10 +500,14 @@ Once we create the transition probability arrays, we check they are valid (i.e.,
 \DocumentationTok{\#\#\# Check if transition probability matrices are valid}
 \DocumentationTok{\#\# Check that transition probabilities are [0, 1]}
 \FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_SoC)}
-\FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_trtB)}
+\FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_strA)}
+\FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_strB)}
+\FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_strAB)}
 \DocumentationTok{\#\# Check that all rows sum to 1}
-\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_SoC,      }\AttributeTok{n\_states =}\NormalTok{ n\_states, }\AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
-\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_trtB, }\AttributeTok{n\_states =}\NormalTok{ n\_states, }\AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
+\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_SoC, }\AttributeTok{n\_states =}\NormalTok{ n\_states, }\AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
+\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_strA, }\AttributeTok{n\_states =}\NormalTok{ n\_states, }\AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
+\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_strB, }\AttributeTok{n\_states =}\NormalTok{ n\_states, }\AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
+\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_strAB, }\AttributeTok{n\_states =}\NormalTok{ n\_states, }\AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -512,7 +522,7 @@ In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefo
 \end{Highlighting}
 \end{Shaded}
 
-We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \texttt{m\_M} for the cohorts under SoC strategy and strategy A because the transition probabilities are the same under both strategies, and by \texttt{m\_M\_trtB} for the cohorts under strategies B and AB because both transition probabilities under both strategies are affected by treatment B. Note that the initial state vector, \texttt{v\_s\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the simulation-time-dependent cSTM, we initialize two new cohort trace matrices \texttt{m\_M\_SoC} and \texttt{m\_M\_trtB}.
+We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \texttt{m\_M} for the cohort under SoC strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, \texttt{v\_s\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the simulation-time-dependent cSTM, we initialize four cohort trace matrices.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -522,12 +532,15 @@ We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \text
                  \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(}\DecValTok{0}\SpecialCharTok{:}\NormalTok{n\_cycles, v\_names\_states))}
 \CommentTok{\# Store the initial state vector in the first row of the cohort trace}
 \NormalTok{m\_M\_SoC[}\DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ v\_s\_init}
-\DocumentationTok{\#\# Initialize cohort trace under treatment B}
-\NormalTok{m\_M\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_SoC }\CommentTok{\# structure and initial states remain the same.}
+\DocumentationTok{\#\# Initialize cohort trace for strategies A, B, and AB}
+\CommentTok{\# Structure and initial states are the same as for SoC}
+\NormalTok{m\_M\_strA  }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_SoC }\CommentTok{\# Strategy A}
+\NormalTok{m\_M\_strB  }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_SoC }\CommentTok{\# Strategy B}
+\NormalTok{m\_M\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_SoC }\CommentTok{\# Strategy AB}
 \end{Highlighting}
 \end{Shaded}
 
-We then use the matrix product to get the state vector at cycle \(t\). This equation is similar to the one described for the time-independent model. The only modification required is to index the transition probability arrays \texttt{a\_P\_SoC} and \texttt{a\_P\_trtB} by \(t\) to obtain the cycle-specific transition probability matrices.
+We then use the matrix product to get the state vector at cycle \(t\). This equation is similar to the one described for the time-independent model. The only modification required is to index the transition probability arrays by \(t\) to obtain each strategy's cycle-specific transition probability matrices.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -535,13 +548,17 @@ We then use the matrix product to get the state vector at cycle \(t\). This equa
 \ControlFlowTok{for}\NormalTok{(t }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_cycles)\{}
   \CommentTok{\# For SoC}
 \NormalTok{  m\_M\_SoC[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_SoC[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_SoC[, , t]}
-  \CommentTok{\# For treatment B}
-\NormalTok{  m\_M\_trtB[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_trtB[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_trtB[, , t]}
+  \CommentTok{\# For strategy A}
+\NormalTok{  m\_M\_strA[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_strA[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_strA[, , t]}
+  \CommentTok{\# For strategy B}
+\NormalTok{  m\_M\_strB[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_strB[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_strB[, , t]}
+  \CommentTok{\# For strategy AB}
+\NormalTok{  m\_M\_strAB[t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_strAB[t, ] }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_strAB[, , t]}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
 
-A graphical representation of the cohort trace for all cycles of the age-dependent cSTM under strategies SoC and A is shown in Figure \ref{fig:Sick-Sicker-Trace-AgeDep}.
+A graphical representation of the cohort trace for all cycles of the age-dependent cSTM under SoC is shown in Figure \ref{fig:Sick-Sicker-Trace-AgeDep}.
 
 \begin{figure}[H]
 
@@ -567,14 +584,16 @@ where \(\lambda\) and \(\gamma\) are the scale and shape parameters of the Weibu
 
 To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, \(p_{\left[S1_{\tau},S2, \tau\right]}\), from \(H(\tau)\), we use the following equation\textsuperscript{\protect\hyperlink{ref-Diaby2014}{15}}
 \begin{equation}
-p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}
+p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}.
 \label{eq:tp-from-H}
 \end{equation}
 
 Substituting the Weibull cumulative hazard in Equation \eqref{eq:tp-from-H}, the transition probability is \(p_{\left[S1_{\tau},S2, \tau\right]}\), is
-\[
+\begin{equation}
 p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}.
-\]
+\label{eq:tp-from-H-weibull}
+\end{equation}
+
 We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., \(n_{\text{tunnels}}=n_T\)) and create a new variable called \texttt{n\_tunnel\_size} with the length of the tunnel equal to \texttt{n\_cycles}. Thus, there will be 75 S1 tunnel states plus 3 more states (H, S2, D) resulting in a total of \(n_{S_{\text{tunnels}}}\) = 78.
 
 Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the Sick-Sicker model's state-transition diagram with state-residence dependency with \(n_{\text{tunnels}}\) tunnel states for S1.
@@ -606,7 +625,7 @@ To implement state-residence dependency in the Sick-Sicker, we create the vector
 \end{Highlighting}
 \end{Shaded}
 
-Based on the updated parameters, the state-residence-dependent transition probability from Sick to Sicker based on a Weibull function, \texttt{v\_p\_S1S2\_tunnels}, is:
+Then, the transition probability dependent on state residence from Sick to Sicker, \texttt{v\_p\_S1S2\_tunnels}, based on a Weibull function in Equation \eqref{eq:tp-from-H-weibull} is:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -674,7 +693,7 @@ Filling \texttt{a\_P\_tunnels} with the corresponding transition probabilities i
 \end{Highlighting}
 \end{Shaded}
 
-Accounting for the effectiveness of treatment B is done similarly to the simulation-time-dependent approach above. We first transform \texttt{v\_p\_S1S2\_tunnels} to a vector of rates, \texttt{v\_r\_S1S2\_tunnels}, assuming exponentially distributed transitions across the tunnel states, and multiply it by the hazard ratio of treatment B. Then, we transform back to probabilities to produce \texttt{v\_p\_S1S2\_tunnels\_trtB}, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
+Accounting for the effectiveness of treatment B is done similarly to the simulation-time-dependent approach above. We first transform \texttt{v\_p\_S1S2\_tunnels} to a vector of rates, \texttt{v\_r\_S1S2\_tunnels}, and multiply it by the hazard ratio of treatment B, \texttt{hr\_S1S2\_trtB}. Then, we transform back to probabilities to produce \texttt{v\_p\_S1S2\_tunnels\_trtB}, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -725,7 +744,7 @@ Once we have created both three-dimensional transition probability arrays with t
 \FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_tunnels)}
 \FunctionTok{check\_transition\_probability}\NormalTok{(a\_P\_tunnels\_trtB)}
 \DocumentationTok{\#\# Check that all rows sum to 1}
-\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_tunnels,      }\AttributeTok{n\_states =}\NormalTok{ n\_states\_tunnels, }
+\FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_tunnels, }\AttributeTok{n\_states =}\NormalTok{ n\_states\_tunnels, }
                               \AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
 \FunctionTok{check\_sum\_of\_transition\_array}\NormalTok{(a\_P\_tunnels\_trtB, }\AttributeTok{n\_states =}\NormalTok{ n\_states\_tunnels, }
                               \AttributeTok{n\_cycles =}\NormalTok{ n\_cycles)}
@@ -863,7 +882,7 @@ Prevalence is defined as the proportion of the population or cohort with a speci
 \hypertarget{economic-measures}{%
 \subsection{Economic measures}\label{economic-measures}}
 
-In CEA, we can calculate economic outcomes by using either state or transition rewards. A ``state reward'' refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A ``transition reward'' refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. In the accompanying introductory tutorial, we describe how to incorporate state rewards in CEA.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}}
+In CEA, we can calculate economic outcomes by using either state or transition rewards. A ``state reward'' refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A ``transition reward'' refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. In the accompanying tutorial, we describe how to incorporate state rewards in CEA in detail.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} Here, we describe and illustrate how to implement both state and transition rewards together using a transition array.
 
 \hypertarget{state-rewards}{%
 \subsubsection{State rewards}\label{state-rewards}}
@@ -923,7 +942,7 @@ Incorporating transition rewards requires keeping track of the proportion of the
 
 To account for both state and transition rewards, we create a \emph{matrix} of rewards \(R_t\) of dimensions \(n_S \times n_S\). The off-diagonal entries of \(R_t\) store the transition rewards, and the diagonal of \(R_t\) stores the state rewards for cycle \(t\) and assumes that rewards occur at the beginning of the cycle.\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}} Finally, we multiply this matrix by \(A_t\), the \(t\)-th slice of \(A\), apply discounting, within-cycle correction, and compute the overall reward for each strategy outcome. Below, we illustrate these concepts in R.
 
-To compute \(\mathbf{A}\) for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array \texttt{a\_A\_SoC} of dimensions \(n_S \times n_S \times [n_T+1]\) and set the diagonal of the first slice to the initial state vector \texttt{v\_s\_init}. Next, we create a three-dimensional array for the cohort under treatment B, \texttt{a\_A\_trtB}, as a copy of the array under SoC.
+To compute \(\mathbf{A}\) for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array \texttt{a\_A\_SoC} of dimensions \(n_S \times n_S \times [n_T+1]\) and set the diagonal of the first slice to the initial state vector \texttt{v\_s\_init}. Next, we create a three-dimensional array for each of the strategies as a copy of the array under SoC.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -933,12 +952,15 @@ To compute \(\mathbf{A}\) for the simulation-time-dependent Sick-Sicker model un
              \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(v\_names\_states, v\_names\_states, }\DecValTok{0}\SpecialCharTok{:}\NormalTok{n\_cycles))}
 \CommentTok{\# Set first slice to the initial state vector in its diagonal}
 \FunctionTok{diag}\NormalTok{(a\_A\_SoC[, , }\DecValTok{1}\NormalTok{]) }\OtherTok{\textless{}{-}}\NormalTok{ v\_s\_init}
-\CommentTok{\# Initialize transition{-}dynamics array under treatment B}
-\NormalTok{a\_A\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC}
+\CommentTok{\# Initialize transition{-}dynamics array for strategies A, B, and AB}
+\CommentTok{\# Structure and initial states are the same as for SoC}
+\NormalTok{a\_A\_strA  }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC}
+\NormalTok{a\_A\_strB  }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC}
+\NormalTok{a\_A\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC}
 \end{Highlighting}
 \end{Shaded}
 
-We then compute a matrix multiplication between a diagonal matrix of each of the \(t\)-th rows of the cohort trace matrix under SoC and treatment B, denoted as \texttt{diag(m\_M\_SoC{[}t,\ {]})} and \texttt{diag(m\_M\_trtB{[}t,\ {]})}, by the \(t\)-th matrix of the array of transition matrices, \texttt{a\_P\_SoC{[},\ ,\ t{]}} and \texttt{a\_P\_trtB{[},\ ,\ t{]}}, respectively, over all \(n_T\) cycles.
+We then compute a matrix multiplication between a diagonal matrix of each of the \(t\)-th rows of the cohort trace matrix under SoC and treatment B, denoted as \texttt{diag(m\_M\_SoC{[}t,\ {]})} and \texttt{diag(m\_M\_strB{[}t,\ {]})}, by the \(t\)-th matrix of the array of transition matrices, \texttt{a\_P\_SoC{[},\ ,\ t{]}} and \texttt{a\_P\_strB{[},\ ,\ t{]}}, respectively, over all \(n_T\) cycles.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -946,8 +968,12 @@ We then compute a matrix multiplication between a diagonal matrix of each of the
 \ControlFlowTok{for}\NormalTok{ (t }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_cycles)\{}
   \CommentTok{\# For SoC}
 \NormalTok{  a\_A\_SoC[, , t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \FunctionTok{diag}\NormalTok{(m\_M\_SoC[t, ]) }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_SoC[, , t]}
-  \CommentTok{\# For treatment B}
-\NormalTok{  a\_A\_trtB[, , t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_trtB[t, ]  }\SpecialCharTok{*}\NormalTok{ a\_P\_trtB[, , t]}
+  \CommentTok{\# For strategy A}
+\NormalTok{  a\_A\_strA[, , t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \FunctionTok{diag}\NormalTok{(m\_M\_strA[t, ]) }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_strA[, , t]}
+  \CommentTok{\# For strategy B}
+\NormalTok{  a\_A\_strB[, , t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \FunctionTok{diag}\NormalTok{(m\_M\_strB[t, ]) }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_strB[, , t]}
+  \CommentTok{\# For strategy AB}
+\NormalTok{  a\_A\_strAB[, , t }\SpecialCharTok{+} \DecValTok{1}\NormalTok{] }\OtherTok{\textless{}{-}} \FunctionTok{diag}\NormalTok{(m\_M\_strAB[t, ]) }\SpecialCharTok{\%*\%}\NormalTok{ a\_P\_strAB[, , t]}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
@@ -1065,14 +1091,14 @@ To obtain \(\mathbf{Y}\) for QALYs and costs for all four strategies, we apply E
 \NormalTok{a\_Y\_c\_SoC }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC }\SpecialCharTok{*}\NormalTok{ a\_R\_c\_SoC}
 \NormalTok{a\_Y\_u\_SoC }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC }\SpecialCharTok{*}\NormalTok{ a\_R\_u\_SoC}
 \CommentTok{\# For Strategy A}
-\NormalTok{a\_Y\_c\_strA }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC }\SpecialCharTok{*}\NormalTok{ a\_R\_c\_strA}
-\NormalTok{a\_Y\_u\_strA }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC }\SpecialCharTok{*}\NormalTok{ a\_R\_u\_strA}
+\NormalTok{a\_Y\_c\_strA }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_strA }\SpecialCharTok{*}\NormalTok{ a\_R\_c\_strA}
+\NormalTok{a\_Y\_u\_strA }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_strA }\SpecialCharTok{*}\NormalTok{ a\_R\_u\_strA}
 \CommentTok{\# For Strategy B}
-\NormalTok{a\_Y\_c\_strB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_trtB }\SpecialCharTok{*}\NormalTok{ a\_R\_c\_strB}
-\NormalTok{a\_Y\_u\_strB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_trtB }\SpecialCharTok{*}\NormalTok{ a\_R\_u\_strB}
+\NormalTok{a\_Y\_c\_strB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_strB }\SpecialCharTok{*}\NormalTok{ a\_R\_c\_strB}
+\NormalTok{a\_Y\_u\_strB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_strB }\SpecialCharTok{*}\NormalTok{ a\_R\_u\_strB}
 \CommentTok{\# For Strategy AB}
-\NormalTok{a\_Y\_c\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_trtB }\SpecialCharTok{*}\NormalTok{ a\_R\_c\_strAB}
-\NormalTok{a\_Y\_u\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_trtB }\SpecialCharTok{*}\NormalTok{ a\_R\_u\_strAB}
+\NormalTok{a\_Y\_c\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_strAB }\SpecialCharTok{*}\NormalTok{ a\_R\_c\_strAB}
+\NormalTok{a\_Y\_u\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_strAB }\SpecialCharTok{*}\NormalTok{ a\_R\_u\_strAB}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1233,7 +1259,7 @@ Strategy A & 211,911 & 19.840 & NA & NA & NA & D\\
 \hypertarget{probabilistic-sensitivity-analysis}{%
 \section{Probabilistic sensitivity analysis}\label{probabilistic-sensitivity-analysis}}
 
-We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{24}} In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \ref{tab:param-table} and more detail in the Supplementary Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. In a previously published manuscript, we describe the implementation of these steps in R.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{13}}
+We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{24}} In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \ref{tab:param-table} and more detail in the Supplementary Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{13}}
 
 To conduct the PSA of the CEA using the simulation-time-dependent Sick-Sicker cSTM, we sampled 1,000 parameter sets. For each set, we computed the total discounted costs and QALYs of each simulated strategy. Results from a PSA can be represented in various ways. For example, the joint distribution, 95\% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy can be plotted in a cost-effectiveness (CE) scatter plot (Figure \ref{fig:CE-scatter-TimeDep}),\textsuperscript{\protect\hyperlink{ref-Briggs2002}{25}} where each of the 4,000 simulations (i.e., 1,000 combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph. The CE scatter plot for the CEA using the simulation-time-dependent model shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
 
@@ -1246,7 +1272,7 @@ To conduct the PSA of the CEA using the simulation-time-dependent Sick-Sicker cS
 \caption{Cost-effectiveness scatter plot.}\label{fig:CE-scatter-TimeDep}
 \end{figure}
 
-In Figure \ref{fig:CEAC-AgeDep}, we present the cost-effectiveness acceptability curves (CEACs) showing the probability that each strategy is cost-effective, and the cost-effectiveness frontier (CEAF), which shows the strategy with the highest expected net monetary benefit (NMB), over a range of willingness-to-pay (WTP) thresholds. The NMB for each strategy is defined as the product of total discounted QALYs and the WTP threshold minus the total discounted costs,\textsuperscript{\protect\hyperlink{ref-Stinnett1998b}{26}} calculated for each PSA parameter set sample. At WTP thresholds less than \$65,000 per QALY, SoC is the strategy with the highest probability of being cost-effective and the highest expected NMB. Strategy B has the highest probability of being cost-effective and the highest expected NMB for WTP thresholds greater than \$65,000 and smaller than \$105,000 per QALY. Strategy AB, has the highest expected NMB for WTP thresholds greater than or equal to \$105,000 and is the strategy with the highest probability of being cost-effective.
+In Figure \ref{fig:CEAC-AgeDep}, we present the cost-effectiveness acceptability curves (CEACs) showing the probability that each strategy is cost-effective, and the cost-effectiveness frontier (CEAF), which shows the strategy with the highest expected net monetary benefit (NMB), over a range of willingness-to-pay (WTP) thresholds. Each strategy's NMB is computed using \(\text{NMB} = \text{QALY} \times \text{WTP} - \text{Cost}\)\textsuperscript{\protect\hyperlink{ref-Stinnett1998b}{26}} for each PSA sample. At WTP thresholds less than \$65,000 per QALY, SoC is the strategy with the highest probability of being cost-effective and the highest expected NMB. Strategy B has the highest probability of being cost-effective and the highest expected NMB for WTP thresholds greater than \$65,000 and smaller than \$105,000 per QALY. Strategy AB, has the highest expected NMB for WTP thresholds greater than or equal to \$105,000 and is the strategy with the highest probability of being cost-effective.
 
 \begin{figure}[H]
 
@@ -1257,7 +1283,7 @@ In Figure \ref{fig:CEAC-AgeDep}, we present the cost-effectiveness acceptability
 \caption{Cost-effectiveness acceptability curves (CEACs) and frontier (CEAF).}\label{fig:CEAC-AgeDep}
 \end{figure}
 
-We quantify expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs). (Figure \ref{fig:ELC-AgeDep}). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The expected loss of the optimal strategy represents the lowest envelope of the ELCs because, given current information, the loss cannot be minimized further. The lower envelope also represents the expected value of perfect information (EVPI), which quantifies the value of eliminating parameter uncertainty. The strategy SoC has the lowest expected loss for WTP thresholds less than \$60,000 per QALY, strategy B has the lowest expected loss for WTP threshold greater than or equal to \$65,000 and less than \$105,000. Strategy AB has the lowest expected loss for WTP threshold greater than or equal to \$105,000 per QALY. At a WTP threshold of \$65,000 per QALY, the EVPI is highest at \$6,953. For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019}{27}}
+The CEAC and CEAF do not show the magnitude of the expected net benefit lost (i.e., expected loss) when the chosen strategy is not the cost-effective strategy in all the samples of the PSA. We quantify expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs) to complement these results (Figure \ref{fig:ELC-AgeDep}). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The expected loss of the optimal strategy represents the lowest envelope of the ELCs because, given current information, the loss cannot be minimized further. The lower envelope also represents the expected value of perfect information (EVPI), which quantifies the value of eliminating parameter uncertainty. The strategy SoC has the lowest expected loss for WTP thresholds less than \$60,000 per QALY, strategy B has the lowest expected loss for WTP threshold greater than or equal to \$65,000 and less than \$105,000. Strategy AB has the lowest expected loss for WTP threshold greater than or equal to \$105,000 per QALY. At a WTP threshold of \$65,000 per QALY, the EVPI is highest at \$6,953. For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019}{27}}
 
 \begin{figure}[H]
 
@@ -1284,7 +1310,7 @@ In summary, this tutorial extends our conceptualization of time-independent cSTM
 \hypertarget{acknowledgements}{%
 \section{Acknowledgements}\label{acknowledgements}}
 
-Dr Alarid-Escudero was supported by grants U01-CA199335 and U01-CA253913 from the National Cancer Institute (NCI) as part of the Cancer Intervention and Surveillance Modeling Network (CISNET), and a grant by the Gordon and Betty Moore Foundation. Miss Krijkamp was supported by the Society for Medical Decision Making (SMDM) fellowship through a grant by the Gordon and Betty Moore Foundation (GBMF7853). Dr Enns was supported by a grant from the National Institute of Allergy and Infectious Diseases of the National Institutes of Health under award no. K25AI118476. Dr Hunink receives Royalties from Cambridge University Press for a textbook on Medical Decision Making, reimbursement of expenses from the European Society of Radiology (ESR) for work on the ESR guidelines for imaging referrals, reimbursement of expenses from the European Institute for Biomedical Imaging Research (EIBIR) for membership of the Scientific Advisory Board, and research funding from the American Diabetes Association, the Netherlands Organization for Health Research and Development, the German Innovation Fund, Netherlands Educational Grant (``Studie Voorschot Middelen''), and the Gordon and Betty Moore Foundation. Dr Jalal was supported by a grant from the National Institute on Drug Abuse of the National Institute of Health under award no. K01DA048985. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health. The funding agencies had no role in the design of the study, interpretation of results, or writing of the manuscript. The funding agreement ensured the authors' independence in designing the study, interpreting the data, writing, and publishing the report. We also want to thank the anonymous reviewers of \emph{Medical Decision Making} for their valuable suggestions and the students who took our classes where we refined these materials.
+Dr Alarid-Escudero was supported by grants U01-CA199335 and U01-CA253913 from the National Cancer Institute (NCI) as part of the Cancer Intervention and Surveillance Modeling Network (CISNET), and a grant by the Gordon and Betty Moore Foundation. Miss Krijkamp was supported by the Society for Medical Decision Making (SMDM) fellowship through a grant by the Gordon and Betty Moore Foundation (GBMF7853). Dr Enns was supported by a grant from the National Institute of Allergy and Infectious Diseases of the National Institutes of Health under award no. K25AI118476. Dr.~Hunink received research funding from the American Diabetes Association, the Netherlands Organization for Health Research and Development, the German Innovation Fund, Netherlands Educational Grant (``Studie Voorschot Middelen''), and the Gordon and Betty Moore Foundation. Dr Jalal was supported by a grant from the National Institute on Drug Abuse of the National Institute of Health under award no. K01DA048985. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health. The funding agencies had no role in the design of the study, interpretation of results, or writing of the manuscript. The funding agreement ensured the authors' independence in designing the study, interpreting the data, writing, and publishing the report. We also want to thank the anonymous reviewers of \emph{Medical Decision Making} for their valuable suggestions and the students who took our classes where we refined these materials.
 
 \hypertarget{references}{%
 \section*{References}\label{references}}

@@ -380,7 +380,7 @@ a_P_SoC <- array(0, dim = c(n_states, n_states, n_cycles),
               dimnames = list(v_names_states, v_names_states, 0:(n_cycles - 1)))
 ```
 
-Filling `a_P_SoC` with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling `m_P` for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For constant transitions  over time, we only need to provide one value for the transition probability. R replicates the value of such transitions as many times as the number of cycles ($n_T+1$ times in our example).
+Filling `a_P_SoC` with the corresponding transition probabilities of the cohort under the SoC strategy is comparable with filling `m_P` for a time-independent cSTM, accounting for the time dimension, which is represented by the third dimension of the array. However, this requires a slight modification of the code from the time-independent cSTM. The code below illustrates how to assign age-dependent transition probabilities in the third dimension of the array. For constant transitions  over time, we only need to provide one value for the transition probability. R replicates the value of such transitions as many times as the number of cycles ($n_T+1$ times in our example). We create the transition probability array for strategy A as a copy of SoC's because treatment A does not alter the cohort's transition probabilities.
 
 ```{r Sick-Sicker-TimeDep-P}
 ### Fill in array
@@ -398,6 +398,9 @@ a_P_SoC["S2", "S2", ] <- 1 - v_p_S2Dage
 a_P_SoC["S2", "D", ]  <- v_p_S2Dage
 ## From D
 a_P_SoC["D", "D", ]   <- 1
+
+## Initialize transition probability matrix for strategy A as a copy of SoC's
+a_P_strA <- a_P_SoC
 ```
 
 As mentioned above, each slice along the third dimension of `a_P_SoC` corresponds to a transition probability matrix. For example, the transition matrix for 25-year-olds in the Sick-Sicker model under the SoC strategy can be retrieved using:
@@ -406,14 +409,17 @@ As mentioned above, each slice along the third dimension of `a_P_SoC` correspond
 a_P_SoC[, , 1]
 ```
 
-Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, `a_P_trtB` as a copy of `a_P_SoC` and update only the probability of remaining in S1 and the transition probability from S1 to S2 (i.e., `p_S1S2` is replaced with `p_S1S2_trtB`).
+Similar to the time-independent cSTM, treatment A does not change the transition probabilities. For treatment B, we first initialize the three-dimensional array of transition probabilities, `a_P_strB` as a copy of `a_P_SoC` and update only the probability of remaining in S1 and the transition probability from S1 to S2 (i.e., `p_S1S2` is replaced with `p_S1S2_trtB`).
 
 ```{r Sick-Sicker-Time-Dependent-Age-New-Treatment2}
-## Initialize transition probability array for treatment B
-a_P_trtB <- a_P_SoC
+## Initialize transition probability array for strategy B
+a_P_strB <- a_P_SoC
 ## Update only transition probabilities from S1 involving p_S1S2
-a_P_trtB["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2_trtB))
-a_P_trtB["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2_trtB
+a_P_strB["S1", "S1", ] <- (1 - v_p_S1Dage) * (1 - (p_S1H + p_S1S2_trtB))
+a_P_strB["S1", "S2", ] <- (1 - v_p_S1Dage) * p_S1S2_trtB
+
+## Initialize transition probability matrix for strategy AB as a copy of B's
+a_P_strAB <- a_P_strB
 ```
 
 Once we create the transition probability arrays, we check they are valid (i.e., ensuring transition probabilities are between 0 and 1, and transition probabilities from each state sum to 1) using the functions `check_sum_of_transition_array` and `check_transition_probability`, provided in the `darthtools` package (https://github.com/DARTH-git/darthtools).
@@ -422,10 +428,14 @@ Once we create the transition probability arrays, we check they are valid (i.e.,
 ### Check if transition probability matrices are valid
 ## Check that transition probabilities are [0, 1]
 check_transition_probability(a_P_SoC)
-check_transition_probability(a_P_trtB)
+check_transition_probability(a_P_strA)
+check_transition_probability(a_P_strB)
+check_transition_probability(a_P_strAB)
 ## Check that all rows sum to 1
-check_sum_of_transition_array(a_P_SoC,      n_states = n_states, n_cycles = n_cycles)
-check_sum_of_transition_array(a_P_trtB, n_states = n_states, n_cycles = n_cycles)
+check_sum_of_transition_array(a_P_SoC, n_states = n_states, n_cycles = n_cycles)
+check_sum_of_transition_array(a_P_strA, n_states = n_states, n_cycles = n_cycles)
+check_sum_of_transition_array(a_P_strB, n_states = n_states, n_cycles = n_cycles)
+check_sum_of_transition_array(a_P_strAB, n_states = n_states, n_cycles = n_cycles)
 ```
 
 In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefore, we create the $1 \times n_S$ initial state vector `v_s_init` with all of the cohort assigned to the H state:
@@ -436,7 +446,7 @@ v_s_init
 #  1  0  0  0
 ```
 
-We use the variable `v_s_init` to initialize $M$ represented by `m_M` for the cohorts under SoC strategy and strategy A because the transition probabilities are the same under both strategies, and by `m_M_trtB` for the cohorts under strategies B and AB because both transition probabilities under both strategies are affected by treatment B. Note that the initial state vector, `v_s_init`, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the $n_T$ cycles for the simulation-time-dependent cSTM, we initialize two new cohort trace matrices `m_M_SoC` and `m_M_trtB`.
+We use the variable `v_s_init` to initialize $M$ represented by `m_M` for the cohort under SoC strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, `v_s_init`, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the $n_T$ cycles for the simulation-time-dependent cSTM, we initialize four cohort trace matrices.
 
 ```{r Init-Sick-Sicker-TimeDependent-Trace}
 ## Initialize cohort trace for age-dependent cSTM under SoC
@@ -445,23 +455,30 @@ m_M_SoC <- matrix(NA,
                  dimnames = list(0:n_cycles, v_names_states))
 # Store the initial state vector in the first row of the cohort trace
 m_M_SoC[1, ] <- v_s_init
-## Initialize cohort trace under treatment B
-m_M_trtB <- m_M_SoC # structure and initial states remain the same.
+## Initialize cohort trace for strategies A, B, and AB
+# Structure and initial states are the same as for SoC
+m_M_strA  <- m_M_SoC # Strategy A
+m_M_strB  <- m_M_SoC # Strategy B
+m_M_strAB <- m_M_SoC # Strategy AB
 ```
 
-We then use the matrix product to get the state vector at cycle $t$. This equation is similar to the one described for the time-independent model. The only modification required is to index the transition probability arrays `a_P_SoC` and `a_P_trtB` by $t$ to obtain the cycle-specific transition probability matrices.
+We then use the matrix product to get the state vector at cycle $t$. This equation is similar to the one described for the time-independent model. The only modification required is to index the transition probability arrays by $t$ to obtain each strategy's cycle-specific transition probability matrices.
 
 ```{r Sick-Sicker-TimeDependent-Solution}
 # Iterative solution of age-dependent cSTM
 for(t in 1:n_cycles){
   # For SoC
   m_M_SoC[t + 1, ] <- m_M_SoC[t, ] %*% a_P_SoC[, , t]
-  # For treatment B
-  m_M_trtB[t + 1, ] <- m_M_trtB[t, ] %*% a_P_trtB[, , t]
+  # For strategy A
+  m_M_strA[t + 1, ] <- m_M_strA[t, ] %*% a_P_strA[, , t]
+  # For strategy B
+  m_M_strB[t + 1, ] <- m_M_strB[t, ] %*% a_P_strB[, , t]
+  # For strategy AB
+  m_M_strAB[t + 1, ] <- m_M_strAB[t, ] %*% a_P_strAB[, , t]
 }
 ```
 
-A graphical representation of the cohort trace for all cycles of the age-dependent cSTM under strategies SoC and A is shown in Figure \@ref(fig:Sick-Sicker-Trace-AgeDep).
+A graphical representation of the cohort trace for all cycles of the age-dependent cSTM under SoC is shown in Figure \@ref(fig:Sick-Sicker-Trace-AgeDep).
 
 ```{r Sick-Sicker-Trace-AgeDep, echo=FALSE, fig.cap='Cohort trace of the age-dependent cSTM under strategies SoC and A.', message=FALSE, warning=FALSE, fig.pos="H"} 
 cols <- get_DARTH_cols()
@@ -492,14 +509,16 @@ where $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull f
 
 To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, from $H(\tau)$, we use the following equation[@Diaby2014]
 \begin{equation}
-p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}
+p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}.
 (\#eq:tp-from-H)
 \end{equation}
 
 Substituting the Weibull cumulative hazard in Equation \@ref(eq:tp-from-H), the transition probability is $p_{\left[S1_{\tau},S2, \tau\right]}$, is
-$$
+\begin{equation}
 p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}.
-$$
+(\#eq:tp-from-H-weibull)
+\end{equation}
+
 We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., $n_{\text{tunnels}}=n_T$) and create a new variable called `n_tunnel_size` with the length of the tunnel equal to `n_cycles`. Thus, there will be `r n_cycles` S1 tunnel states plus `r (n_states-1)` more states (H, S2, D) resulting in a total of $n_{S_{\text{tunnels}}}$ = `r (n_states-1) + n_cycles`.
 
 Figure \@ref(fig:STD-Sick-Sicker-tunnels) shows the Sick-Sicker model's state-transition diagram with state-residence dependency with $n_{\text{tunnels}}$ tunnel states for S1.
@@ -524,7 +543,7 @@ n_states_tunnels <- length(v_names_states_tunnels)         # number of states
 v_s_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
 ```
 
-Based on the updated parameters, the state-residence-dependent transition probability from Sick to Sicker based on a Weibull function, `v_p_S1S2_tunnels`, is: 
+Then, the transition probability dependent on state residence from Sick to Sicker, `v_p_S1S2_tunnels`, based on a Weibull function in Equation \@ref(eq:tp-from-H-weibull) is: 
 ```{r}
 # Weibull parameters
 p_S1S2_scale <- 0.08 # scale
@@ -580,7 +599,16 @@ a_P_tunnels["S2", "D", ]  <- v_p_S2Dage
 a_P_tunnels["D", "D", ] <- 1
 ```
 
-Accounting for the effectiveness of treatment B is done similarly to the simulation-time-dependent approach above. We first transform `v_p_S1S2_tunnels` to a vector of rates, `v_r_S1S2_tunnels`, assuming exponentially distributed transitions across the tunnel states, and multiply it by the hazard ratio of treatment B. Then, we transform back to probabilities to produce `v_p_S1S2_tunnels_trtB`, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
+<!-- To account for the effectiveness of treatment B on the progression from the S1 to the S2 state, we multiply the treatment's hazard ratio, `hr_S1S2_trtB`, by the difference of the cumulative hazards in Equation \@ref(eq:tp-from-H-weibull) -->
+
+<!-- ```{r} -->
+<!-- # Weibull function -->
+<!-- v_p_S1S2_tunnels_trtB <- 1-exp((((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape -  -->
+<!--                                  (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape) *  -->
+<!--                                  hr_S1S2_trtB) -->
+<!-- ``` -->
+
+Accounting for the effectiveness of treatment B is done similarly to the simulation-time-dependent approach above. We first transform `v_p_S1S2_tunnels` to a vector of rates, `v_r_S1S2_tunnels`, and multiply it by the hazard ratio of treatment B, `hr_S1S2_trtB`. Then, we transform back to probabilities to produce `v_p_S1S2_tunnels_trtB`, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
 
 ```{r}
 ## Transform risk of progression from Sick to Sicker to a rate
@@ -807,7 +835,7 @@ v_c_strAB <- c(H  = c_H,
                D  = c_D)
 ```
 
-<!-- To compute the expected QALYs and costs for the age-dependent Sick-Sicker model under SoC and strategy A, we multiply the cohort trace matrix, `m_M_SoC`, times the corresponding strategy-specific state vectors of rewards. Similarly, To compute the expected rewards for strategies B and AB, we multiply the cohort trace matrix accounting for the effectiveness of treatment B, `m_M_trtB`, times their corresponding state vectors of rewards. -->
+<!-- To compute the expected QALYs and costs for the age-dependent Sick-Sicker model under SoC and strategy A, we multiply the cohort trace matrix, `m_M_SoC`, times the corresponding strategy-specific state vectors of rewards. Similarly, To compute the expected rewards for strategies B and AB, we multiply the cohort trace matrix accounting for the effectiveness of treatment B, `m_M_strB`, times their corresponding state vectors of rewards. -->
 
 <!-- ```{r Expected-outcomes-each-cycle} -->
 <!-- # Vector of QALYs under SoC -->
@@ -819,13 +847,13 @@ v_c_strAB <- c(H  = c_H,
 <!-- # Vector of costs for strategy A -->
 <!-- v_cost_strA <- m_M_SoC %*% v_c_strA -->
 <!-- # Vector of QALYs for strategy B -->
-<!-- v_qaly_strB <- m_M_trtB %*% v_u_strB -->
+<!-- v_qaly_strB <- m_M_strB %*% v_u_strB -->
 <!-- # Vector of costs for strategy B -->
-<!-- v_cost_strB <- m_M_trtB %*% v_c_strB -->
+<!-- v_cost_strB <- m_M_strB %*% v_c_strB -->
 <!-- # Vector of QALYs for strategy AB -->
-<!-- v_qaly_strAB <- m_M_trtB %*% v_u_strAB -->
+<!-- v_qaly_strAB <- m_M_strB %*% v_u_strAB -->
 <!-- # Vector of costs for strategy AB -->
-<!-- v_cost_strAB <- m_M_trtB %*% v_c_strAB -->
+<!-- v_cost_strAB <- m_M_strB %*% v_c_strAB -->
 <!-- ``` -->
 
 ### Transition rewards
@@ -835,7 +863,7 @@ Incorporating transition rewards requires keeping track of the proportion of the
 
 To account for both state and transition rewards, we create a *matrix* of rewards $R_t$ of dimensions $n_S \times n_S$. The off-diagonal entries of $R_t$ store the transition rewards, and the diagonal of $R_t$ stores the state rewards for cycle $t$ and assumes that rewards occur at the beginning of the cycle.[@Krijkamp2019] Finally, we multiply this matrix by $A_t$, the $t$-th slice of $A$, apply discounting, within-cycle correction, and compute the overall reward for each strategy outcome. Below, we illustrate these concepts in R.
 
-To compute $\mathbf{A}$ for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array `a_A_SoC` of dimensions $n_S \times n_S \times [n_T+1]$ and set the diagonal of the first slice to the initial state vector `v_s_init`. Next, we create a three-dimensional array for the cohort under treatment B, `a_A_trtB`, as a copy of the array under SoC.
+To compute $\mathbf{A}$ for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array `a_A_SoC` of dimensions $n_S \times n_S \times [n_T+1]$ and set the diagonal of the first slice to the initial state vector `v_s_init`. Next, we create a three-dimensional array for each of the strategies as a copy of the array under SoC.
 
 ```{r Init-Transition-Array}
 # Initialize transition-dynamics array under SoC
@@ -844,19 +872,26 @@ a_A_SoC <- array(0,
              dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 # Set first slice to the initial state vector in its diagonal
 diag(a_A_SoC[, , 1]) <- v_s_init
-# Initialize transition-dynamics array under treatment B
-a_A_trtB <- a_A_SoC
+# Initialize transition-dynamics array for strategies A, B, and AB
+# Structure and initial states are the same as for SoC
+a_A_strA  <- a_A_SoC
+a_A_strB  <- a_A_SoC
+a_A_strAB <- a_A_SoC
 ```
 
-We then compute a matrix multiplication between a diagonal matrix of each of the $t$-th rows of the cohort trace matrix under SoC and treatment B, denoted as `diag(m_M_SoC[t, ])` and `diag(m_M_trtB[t, ])`, by the $t$-th matrix of the array of transition matrices, `a_P_SoC[, , t]` and `a_P_trtB[, , t]`, respectively,  over all $n_T$ cycles.
+We then compute a matrix multiplication between a diagonal matrix of each of the $t$-th rows of the cohort trace matrix under SoC and treatment B, denoted as `diag(m_M_SoC[t, ])` and `diag(m_M_strB[t, ])`, by the $t$-th matrix of the array of transition matrices, `a_P_SoC[, , t]` and `a_P_strB[, , t]`, respectively,  over all $n_T$ cycles.
 
 ```{r Compute-Transition-Array}
 # Iterative solution to produce the transition-dynamics array
 for (t in 1:n_cycles){
   # For SoC
   a_A_SoC[, , t + 1] <- diag(m_M_SoC[t, ]) %*% a_P_SoC[, , t]
-  # For treatment B
-  a_A_trtB[, , t + 1] <- m_M_trtB[t, ]  * a_P_trtB[, , t]
+  # For strategy A
+  a_A_strA[, , t + 1] <- diag(m_M_strA[t, ]) %*% a_P_strA[, , t]
+  # For strategy B
+  a_A_strB[, , t + 1] <- diag(m_M_strB[t, ]) %*% a_P_strB[, , t]
+  # For strategy AB
+  a_A_strAB[, , t + 1] <- diag(m_M_strAB[t, ]) %*% a_P_strAB[, , t]
 }
 ```
 
@@ -956,14 +991,14 @@ To obtain $\mathbf{Y}$ for QALYs and costs for all four strategies, we apply Equ
 a_Y_c_SoC <- a_A_SoC * a_R_c_SoC
 a_Y_u_SoC <- a_A_SoC * a_R_u_SoC
 # For Strategy A
-a_Y_c_strA <- a_A_SoC * a_R_c_strA
-a_Y_u_strA <- a_A_SoC * a_R_u_strA
+a_Y_c_strA <- a_A_strA * a_R_c_strA
+a_Y_u_strA <- a_A_strA * a_R_u_strA
 # For Strategy B
-a_Y_c_strB <- a_A_trtB * a_R_c_strB
-a_Y_u_strB <- a_A_trtB * a_R_u_strB
+a_Y_c_strB <- a_A_strB * a_R_c_strB
+a_Y_u_strB <- a_A_strB * a_R_u_strB
 # For Strategy AB
-a_Y_c_strAB <- a_A_trtB * a_R_c_strAB
-a_Y_u_strAB <- a_A_trtB * a_R_u_strAB
+a_Y_c_strAB <- a_A_strAB * a_R_c_strAB
+a_Y_u_strAB <- a_A_strAB * a_R_u_strAB
 ```
 
 The total rewards for each health state at cycle $t$, $\mathbf{y}_t$, is obtained by summing the rewards across all $j = 1,\ldots, n_S$ health states for all $n_T$ cycles.
@@ -1113,7 +1148,7 @@ plot(df_cea, label = "all", txtsize = 16) +
 ```
 
 # Probabilistic sensitivity analysis
-We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.[@Briggs2012] In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \@ref(tab:param-table) and more detail in the Supplementary Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. In a previously published manuscript, we describe the implementation of these steps in R.[@Alarid-Escudero2019e]
+We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.[@Briggs2012] In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \@ref(tab:param-table) and more detail in the Supplementary Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.[@Alarid-Escudero2019e]
 <!-- Briefly, to conduct the PSA, we create three R functions: -->
   
 ```{r PSA-setup, eval=TRUE, echo=FALSE}
@@ -1185,7 +1220,7 @@ plot(l_psa, txtsize = 16) +
   theme(legend.position = "bottom")
 ```
 
-In Figure \@ref(fig:CEAC-AgeDep), we present the cost-effectiveness acceptability curves (CEACs) showing the probability that each strategy is cost-effective, and the cost-effectiveness frontier (CEAF), which shows the strategy with the highest expected net monetary benefit (NMB), over a range of willingness-to-pay (WTP) thresholds. The NMB for each strategy is defined as the product of total discounted QALYs and the WTP threshold minus the total discounted costs,[@Stinnett1998b] calculated for each PSA parameter set sample. At WTP thresholds less than `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Standard of care", 2], accuracy = 1)` per QALY, SoC is the strategy with the highest probability of being cost-effective and the highest expected NMB. Strategy B has the highest probability of being cost-effective and the highest expected NMB for WTP thresholds greater than `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Standard of care", 2], accuracy = 1)` and smaller than `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Strategy B", 2][1], accuracy = 1)` per QALY. Strategy AB, has the highest expected NMB for WTP thresholds greater than or equal to `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Strategy B", 2][1], accuracy = 1)` and is the strategy with the highest probability of being cost-effective.
+In Figure \@ref(fig:CEAC-AgeDep), we present the cost-effectiveness acceptability curves (CEACs) showing the probability that each strategy is cost-effective, and the cost-effectiveness frontier (CEAF), which shows the strategy with the highest expected net monetary benefit (NMB), over a range of willingness-to-pay (WTP) thresholds. Each strategy's NMB is computed using $\text{NMB} = \text{QALY} \times \text{WTP} - \text{Cost}$[@Stinnett1998b] for each PSA sample. At WTP thresholds less than `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Standard of care", 2], accuracy = 1)` per QALY, SoC is the strategy with the highest probability of being cost-effective and the highest expected NMB. Strategy B has the highest probability of being cost-effective and the highest expected NMB for WTP thresholds greater than `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Standard of care", 2], accuracy = 1)` and smaller than `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Strategy B", 2][1], accuracy = 1)` per QALY. Strategy AB, has the highest expected NMB for WTP thresholds greater than or equal to `r dollar(summary(ceac_obj)[summary(ceac_obj)[, "cost_eff_strat"]=="Strategy B", 2][1], accuracy = 1)` and is the strategy with the highest probability of being cost-effective.
 
 ```{r CEAC-AgeDep, echo=FALSE, fig.cap='Cost-effectiveness acceptability curves (CEACs) and frontier (CEAF).', message=FALSE, warning=FALSE, fig.pos="H"} 
 # CEAC & CEAF plot
@@ -1193,7 +1228,7 @@ plot(ceac_obj, txtsize = 16, xlim = c(0, NA), n_x_ticks = 14) +
   theme(legend.position = c(0.8, 0.5))
 ```
 
-We quantify expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs). (Figure \@ref(fig:ELC-AgeDep)). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The expected loss of the optimal strategy represents the lowest envelope of the ELCs because, given current information, the loss cannot be minimized further. The lower envelope also represents the expected value of perfect information (EVPI), which quantifies the value of eliminating parameter uncertainty. The strategy SoC has the lowest expected loss for WTP thresholds less than `r dollar(max(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Standard of care"), "WTP"]), accuracy = 1)` per QALY, strategy B has the lowest expected loss for WTP threshold greater than or equal to `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy B"), "WTP"]), accuracy = 1)` and less than `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy AB"), "WTP"]), accuracy = 1)`. Strategy AB has the lowest expected loss for WTP threshold greater than or equal to `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy AB"), "WTP"]), accuracy = 1)` per QALY. At a WTP threshold of `r dollar(subset(elc_obj, On_Frontier == TRUE)[which.max(subset(elc_obj, On_Frontier == TRUE)$Expected_Loss), "WTP"], accuracy = 1)` per QALY, the EVPI is highest at `r dollar(subset(elc_obj, On_Frontier == TRUE)[which.max(subset(elc_obj, On_Frontier == TRUE)$Expected_Loss), "Expected_Loss"], accuracy = 1)`. For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.[@Alarid-Escudero2019]
+The CEAC and CEAF do not show the magnitude of the expected net benefit lost (i.e., expected loss) when the chosen strategy is not the cost-effective strategy in all the samples of the PSA. We quantify expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs) to complement these results (Figure \@ref(fig:ELC-AgeDep)). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The expected loss of the optimal strategy represents the lowest envelope of the ELCs because, given current information, the loss cannot be minimized further. The lower envelope also represents the expected value of perfect information (EVPI), which quantifies the value of eliminating parameter uncertainty. The strategy SoC has the lowest expected loss for WTP thresholds less than `r dollar(max(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Standard of care"), "WTP"]), accuracy = 1)` per QALY, strategy B has the lowest expected loss for WTP threshold greater than or equal to `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy B"), "WTP"]), accuracy = 1)` and less than `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy AB"), "WTP"]), accuracy = 1)`. Strategy AB has the lowest expected loss for WTP threshold greater than or equal to `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy AB"), "WTP"]), accuracy = 1)` per QALY. At a WTP threshold of `r dollar(subset(elc_obj, On_Frontier == TRUE)[which.max(subset(elc_obj, On_Frontier == TRUE)$Expected_Loss), "WTP"], accuracy = 1)` per QALY, the EVPI is highest at `r dollar(subset(elc_obj, On_Frontier == TRUE)[which.max(subset(elc_obj, On_Frontier == TRUE)$Expected_Loss), "Expected_Loss"], accuracy = 1)`. For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.[@Alarid-Escudero2019]
 
 ```{r ELC-AgeDep, echo=FALSE, fig.cap='Expected loss curves (ELCs) and expected value of perfect information (EVPI).', message=FALSE, warning=FALSE, fig.pos="H"} 
 # ELC plot
@@ -1218,7 +1253,7 @@ As described in the accompanying tutorial, cSTMs are recommended when the number
 In summary, this tutorial extends our conceptualization of time-independent cSTMs to allow for time dependency. It provides a step-by-step guide to implement them in R. We hope that health decision scientists and health economists find this tutorial useful for developing their cSTMs in a more flexible, efficient, and open-source manner. Ultimately, our goal is to increase model transparency and reproducibility.
 
 # Acknowledgements
-Dr Alarid-Escudero was supported by grants U01-CA199335 and U01-CA253913 from the National Cancer Institute (NCI) as part of the Cancer Intervention and Surveillance Modeling Network (CISNET), and a grant by the Gordon and Betty Moore Foundation. Miss Krijkamp was supported by the Society for Medical Decision Making (SMDM) fellowship through a grant by the Gordon and Betty Moore Foundation (GBMF7853). Dr Enns was supported by a grant from the National Institute of Allergy and Infectious Diseases of the National Institutes of Health under award no. K25AI118476. Dr Hunink receives Royalties from Cambridge University Press for a textbook on Medical Decision Making, reimbursement of expenses from the European Society of Radiology (ESR) for work on the ESR guidelines for imaging referrals, reimbursement of expenses from the European Institute for Biomedical Imaging Research (EIBIR) for membership of the Scientific Advisory Board, and research funding from the American Diabetes Association, the Netherlands Organization for Health Research and Development, the German Innovation Fund, Netherlands Educational Grant ("Studie Voorschot Middelen"), and the Gordon and Betty Moore Foundation. Dr Jalal was supported by a grant from the National Institute on Drug Abuse of the National Institute of Health under award no. K01DA048985. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health. The funding agencies had no role in the design of the study, interpretation of results, or writing of the manuscript. The funding agreement ensured the authors’ independence in designing the study, interpreting the data, writing, and publishing the report. We also want to thank the anonymous reviewers of *Medical Decision Making* for their valuable suggestions and the students who took our classes where we refined these materials.
+Dr Alarid-Escudero was supported by grants U01-CA199335 and U01-CA253913 from the National Cancer Institute (NCI) as part of the Cancer Intervention and Surveillance Modeling Network (CISNET), and a grant by the Gordon and Betty Moore Foundation. Miss Krijkamp was supported by the Society for Medical Decision Making (SMDM) fellowship through a grant by the Gordon and Betty Moore Foundation (GBMF7853). Dr Enns was supported by a grant from the National Institute of Allergy and Infectious Diseases of the National Institutes of Health under award no. K25AI118476. Dr. Hunink received research funding from the American Diabetes Association, the Netherlands Organization for Health Research and Development, the German Innovation Fund, Netherlands Educational Grant ("Studie Voorschot Middelen"), and the Gordon and Betty Moore Foundation. Dr Jalal was supported by a grant from the National Institute on Drug Abuse of the National Institute of Health under award no. K01DA048985. The content is solely the responsibility of the authors and does not necessarily represent the official views of the National Institutes of Health. The funding agencies had no role in the design of the study, interpretation of results, or writing of the manuscript. The funding agreement ensured the authors’ independence in designing the study, interpreting the data, writing, and publishing the report. We also want to thank the anonymous reviewers of *Medical Decision Making* for their valuable suggestions and the students who took our classes where we refined these materials.
 
 # References
 
