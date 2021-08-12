@@ -156,24 +156,23 @@ v_p_HDage  <- rate_to_prob(v_r_HDage)  # Age-specific mortality risk in the Heal
 v_p_S1Dage <- rate_to_prob(v_r_S1Dage) # Age-specific mortality risk in the Sick state
 v_p_S2Dage <- rate_to_prob(v_r_S2Dage) # Age-specific mortality risk in the Sicker state
 
-## History-dependent transition probability of becoming Sicker when Sick
-# conditional on surviving
-# Weibull hazard
-v_p_S1S2_tunnels <- 1-exp(((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape - 
-                            (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape)
-# Alternatively:
-# v_p_S1S2_tunnels <- 1-exp(p_S1S2_scale^p_S1S2_shape* 
-#                             ((v_cycles_tunnel-1)^p_S1S2_shape - 
-#                                (v_cycles_tunnel)^p_S1S2_shape))
+## State-residence-dependent transition rate of becoming Sicker when Sick
+# Weibull transition rate
+v_r_S1S2_tunnels <- (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape - 
+                    ((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape
+                            
+# Weibull transition probability conditional on surviving
+v_p_S1S2_tunnels <- 1 - exp(-v_r_S1S2_tunnels)
 
-## History-dependent transition probability of becoming Sicker when Sick for treatment B
-# transform probability to rate
-v_r_S1S2_tunnels <- prob_to_rate(p = v_p_S1S2_tunnels)
-# apply hazard ratio to rate to obtain transition rate of becoming Sicker when Sick for treatment B
-r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
-# transform rate to probability
-v_p_S1S2_tunnels_trtB <- rate_to_prob(r = r_S1S2_tunnels_trtB) # probability to become Sicker when Sick 
-                                                               # under treatment B conditional on surviving
+
+## State-residence-dependent transition rate of becoming Sicker when Sick for 
+## treatment B
+# apply hazard ratio to rate to obtain transition rate of becoming Sicker when 
+# Sick for treatment B
+v_r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
+# transform rate to probability to become Sicker when Sick under treatment B 
+# conditional on surviving
+v_p_S1S2_tunnels_trtB <- rate_to_prob(r = r_S1S2_tunnels_trtB)
 
 ###################### Construct state-transition models #####################
 #### Create transition matrix ####
