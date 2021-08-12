@@ -154,7 +154,7 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Pittsburgh, Pittsburgh, PA, USA}}
-\date{2021-08-10}
+\date{2021-08-11}
 
 \begin{document}
 \maketitle
@@ -577,20 +577,32 @@ To add a state-residence dependency to the simulation-time-dependent Sick-Sicker
   h(\tau) = \gamma \lambda (\lambda \tau)^{\gamma-1},
 \]
 with a corresponding cumulative hazard, \(H(\tau)\),
-\[
-H(\tau) = (\lambda \tau)^{\gamma},
-\]
-where \(\lambda\) and \(\gamma\) are the scale and shape parameters of the Weibull function, respectively.
-
-To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, \(p_{\left[S1_{\tau},S2, \tau\right]}\), from \(H(\tau)\), we use the following equation\textsuperscript{\protect\hyperlink{ref-Diaby2014}{15}}
 \begin{equation}
-p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}.
-\label{eq:tp-from-H}
+  H(\tau) = (\lambda \tau)^{\gamma},
+\label{eq:H-weibull}
 \end{equation}
 
-Substituting the Weibull cumulative hazard in Equation \eqref{eq:tp-from-H}, the transition probability is \(p_{\left[S1_{\tau},S2, \tau\right]}\), is
+where \(\lambda\) and \(\gamma\) are the scale and shape parameters of the Weibull hazard function, respectively.
+
+To derive a transition probability from S1 to S2 as a function of the time the cohort spends in S1, \(p_{\left[S1_{\tau},S2, \tau\right]}\), we assume exponentially distributed transition times with constant rates in each cycle interval (i.e., piecewise exponential transition times), where the probability of a transition is
 \begin{equation}
-p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}.
+  p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{\left(-\mu_{\left[S1_{\tau},S2, \tau\right]}\right)},
+\label{eq:tp-from-rate}
+\end{equation}
+where \(\mu_{\left[S1_{\tau},S2, \tau\right]}\) is the rate of transition from S1 to S2 in cycle \(\tau\) defined as the difference in cumulative hazards between consecutive cycles\textsuperscript{\protect\hyperlink{ref-Diaby2014}{15}}
+\begin{equation}
+  \mu_{\left[S1_{\tau},S2, \tau\right]} = H(\tau) - H(\tau-1).
+\label{eq:tr-from-H}
+\end{equation}
+
+Substituting the Weibull cumulative hazard from Equation \eqref{eq:H-weibull} into Equation \eqref{eq:tr-from-H} gives
+\begin{equation}
+  \mu_{\left[S1_{\tau},S2, \tau\right]} = (\lambda \tau)^{\gamma} - (\lambda (\tau-1))^{\gamma},
+\label{eq:tr-from-H-weibull}
+\end{equation}
+and the transition probability
+\begin{equation}
+  p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{\left(- \left((\lambda \tau)^{\gamma} - (\lambda (\tau-1))^{\gamma}\right) \right)}.
 \label{eq:tp-from-H-weibull}
 \end{equation}
 
@@ -625,16 +637,18 @@ To implement state-residence dependency in the Sick-Sicker, we create the vector
 \end{Highlighting}
 \end{Shaded}
 
-Then, the transition probability dependent on state residence from Sick to Sicker, \texttt{v\_p\_S1S2\_tunnels}, based on a Weibull function in Equation \eqref{eq:tp-from-H-weibull} is:
+Then, the transition rate and probability dependent on state residence from Sick to Sicker, \texttt{v\_r\_S1S2\_tunnels} and \texttt{v\_p\_S1S2\_tunnels}, respectively, based on a Weibull hazard function are:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Weibull parameters}
 \NormalTok{p\_S1S2\_scale }\OtherTok{\textless{}{-}} \FloatTok{0.08} \CommentTok{\# scale}
-\NormalTok{p\_S1S2\_shape }\OtherTok{\textless{}{-}} \FloatTok{1.1}  \CommentTok{\# shape}
+\NormalTok{p\_S1S2\_shape }\OtherTok{\textless{}{-}} \FloatTok{1.10} \CommentTok{\# shape}
 \CommentTok{\# Weibull function}
-\NormalTok{v\_p\_S1S2\_tunnels }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{{-}}\FunctionTok{exp}\NormalTok{(((v\_cycles\_tunnel}\DecValTok{{-}1}\NormalTok{)}\SpecialCharTok{*}\NormalTok{p\_S1S2\_scale)}\SpecialCharTok{\^{}}\NormalTok{p\_S1S2\_shape }\SpecialCharTok{{-}} 
-\NormalTok{                            (v\_cycles\_tunnel}\SpecialCharTok{*}\NormalTok{p\_S1S2\_scale)}\SpecialCharTok{\^{}}\NormalTok{p\_S1S2\_shape)}
+\NormalTok{v\_r\_S1S2\_tunnels }\OtherTok{\textless{}{-}}\NormalTok{ (v\_cycles\_tunnel}\SpecialCharTok{*}\NormalTok{p\_S1S2\_scale)}\SpecialCharTok{\^{}}\NormalTok{p\_S1S2\_shape }\SpecialCharTok{{-}}
+\NormalTok{                    ((v\_cycles\_tunnel}\DecValTok{{-}1}\NormalTok{)}\SpecialCharTok{*}\NormalTok{p\_S1S2\_scale)}\SpecialCharTok{\^{}}\NormalTok{p\_S1S2\_shape}
+                    
+\NormalTok{v\_p\_S1S2\_tunnels }\OtherTok{\textless{}{-}} \DecValTok{1} \SpecialCharTok{{-}} \FunctionTok{exp}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{v\_r\_S1S2\_tunnels}\SpecialCharTok{*}\NormalTok{cycle\_length)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -693,19 +707,16 @@ Filling \texttt{a\_P\_tunnels\_SoC} with the corresponding transition probabilit
 \end{Highlighting}
 \end{Shaded}
 
-Accounting for the effectiveness of treatment B is done similarly to the simulation-time-dependent approach above. We first transform \texttt{v\_p\_S1S2\_tunnels} to a vector of rates, \texttt{v\_r\_S1S2\_tunnels}, and multiply it by the hazard ratio of treatment B, \texttt{hr\_S1S2\_trtB}. Then, we transform back to probabilities to produce \texttt{v\_p\_S1S2\_tunnels\_trtB}, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
+Accounting for the effectiveness of treatment B is done by multiplying the vector of transition rates, \texttt{v\_r\_S1S2\_tunnels}, by the hazard ratio of treatment B, \texttt{hr\_S1S2\_trtB}. Then, we transform to a vector of transition probabilities that account for the duration of S1 state-residence under treatment B, \texttt{v\_p\_S1S2\_tunnels\_trtB}, following Equation \eqref{eq:tp-from-rate}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\DocumentationTok{\#\# Transform risk of progression from Sick to Sicker to a rate}
-\CommentTok{\# vector of rates of becoming Sicker when Sick}
-\NormalTok{v\_r\_S1S2\_tunnels }\OtherTok{\textless{}{-}} \SpecialCharTok{{-}}\FunctionTok{log}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{v\_p\_S1S2\_tunnels)}\SpecialCharTok{/}\NormalTok{cycle\_length}
-\CommentTok{\# apply hazard ratio to rate to obtain transition rate of becoming Sicker when }
+\CommentTok{\# Apply hazard ratio to rate to obtain transition rate of becoming Sicker when }
 \CommentTok{\# Sick for treatment B}
-\NormalTok{r\_S1S2\_tunnels\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ v\_r\_S1S2\_tunnels }\SpecialCharTok{*}\NormalTok{ hr\_S1S2\_trtB}
+\NormalTok{v\_r\_S1S2\_tunnels\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ v\_r\_S1S2\_tunnels }\SpecialCharTok{*}\NormalTok{ hr\_S1S2\_trtB}
 \CommentTok{\# transform rate to probability to become Sicker when Sick under treatment B }
 \CommentTok{\# conditional on surviving}
-\NormalTok{v\_p\_S1S2\_tunnels\_trtB }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{{-}}\FunctionTok{exp}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{r\_S1S2\_tunnels\_trtB}\SpecialCharTok{*}\NormalTok{cycle\_length) }
+\NormalTok{v\_p\_S1S2\_tunnels\_trtB }\OtherTok{\textless{}{-}} \DecValTok{1} \SpecialCharTok{{-}} \FunctionTok{exp}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{v\_r\_S1S2\_tunnels\_trtB}\SpecialCharTok{*}\NormalTok{cycle\_length) }
 \end{Highlighting}
 \end{Shaded}
 

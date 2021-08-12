@@ -502,22 +502,47 @@ $$
   h(\tau) = \gamma \lambda (\lambda \tau)^{\gamma-1},
 $$
 with a corresponding cumulative hazard, $H(\tau)$,
-$$
-H(\tau) = (\lambda \tau)^{\gamma},
-$$
-where $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull function, respectively.
-
-To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, from $H(\tau)$, we use the following equation[@Diaby2014]
 \begin{equation}
-p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}.
-(\#eq:tp-from-H)
+  H(\tau) = (\lambda \tau)^{\gamma},
+(\#eq:H-weibull)
 \end{equation}
 
-Substituting the Weibull cumulative hazard in Equation \@ref(eq:tp-from-H), the transition probability is $p_{\left[S1_{\tau},S2, \tau\right]}$, is
+
+where $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull hazard function, respectively.
+
+To derive a transition probability from S1 to S2 as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, we assume exponentially distributed transition times with constant rates in each cycle interval (i.e., piecewise exponential transition times), where the probability of a transition is 
 \begin{equation}
-p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}.
+  p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{\left(-\mu_{\left[S1_{\tau},S2, \tau\right]}\right)},
+(\#eq:tp-from-rate)
+\end{equation}
+where $\mu_{\left[S1_{\tau},S2, \tau\right]}$ is the rate of transition from S1 to S2 in cycle $\tau$ defined as the difference in cumulative hazards between consecutive cycles[@Diaby2014]
+\begin{equation}
+  \mu_{\left[S1_{\tau},S2, \tau\right]} = H(\tau) - H(\tau-1).
+(\#eq:tr-from-H)
+\end{equation}
+
+Substituting the Weibull cumulative hazard from Equation \@ref(eq:H-weibull) into Equation \@ref(eq:tr-from-H) gives
+\begin{equation}
+  \mu_{\left[S1_{\tau},S2, \tau\right]} = (\lambda \tau)^{\gamma} - (\lambda (\tau-1))^{\gamma},
+(\#eq:tr-from-H-weibull)
+\end{equation}
+and the transition probability
+\begin{equation}
+  p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{\left(- \left((\lambda \tau)^{\gamma} - (\lambda (\tau-1))^{\gamma}\right) \right)}.
 (\#eq:tp-from-H-weibull)
 \end{equation}
+
+<!-- To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, from $H(\tau)$, we use the following equation[@Diaby2014] -->
+<!-- \begin{equation} -->
+<!-- p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}. -->
+<!-- (\#eq:tp-from-H) -->
+<!-- \end{equation} -->
+
+<!-- Substituting the Weibull cumulative hazard in Equation \@ref(eq:tp-from-H), the transition probability is $p_{\left[S1_{\tau},S2, \tau\right]}$, is -->
+<!-- \begin{equation} -->
+<!-- p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}. -->
+<!-- (\#eq:tp-from-H-weibull) -->
+<!-- \end{equation} -->
 
 We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., $n_{\text{tunnels}}=n_T$) and create a new variable called `n_tunnel_size` with the length of the tunnel equal to `n_cycles`. Thus, there will be `r n_cycles` S1 tunnel states plus `r (n_states-1)` more states (H, S2, D) resulting in a total of $n_{S_{\text{tunnels}}}$ = `r (n_states-1) + n_cycles`.
 
@@ -543,14 +568,16 @@ n_states_tunnels <- length(v_names_states_tunnels)         # number of states
 v_s_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
 ```
 
-Then, the transition probability dependent on state residence from Sick to Sicker, `v_p_S1S2_tunnels`, based on a Weibull function in Equation \@ref(eq:tp-from-H-weibull) is: 
+Then, the transition rate and probability dependent on state residence from Sick to Sicker, `v_r_S1S2_tunnels` and `v_p_S1S2_tunnels`, respectively, based on a Weibull hazard function are: 
 ```{r}
 # Weibull parameters
 p_S1S2_scale <- 0.08 # scale
-p_S1S2_shape <- 1.1  # shape
+p_S1S2_shape <- 1.10 # shape
 # Weibull function
-v_p_S1S2_tunnels <- 1-exp(((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape - 
-                            (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape)
+v_r_S1S2_tunnels <- (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape -
+                    ((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape
+                    
+v_p_S1S2_tunnels <- 1 - exp(-v_r_S1S2_tunnels*cycle_length)
 ```
 
 To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, `a_P_tunnels_SoC`. The dimensions of this array are $n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T$. A visual representation of `a_P_tunnels_SoC` of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \@ref(fig:Array-Time-Dependent-Tunnels).
@@ -608,18 +635,15 @@ a_P_tunnels_SoC["D", "D", ] <- 1
 <!--                                  hr_S1S2_trtB) -->
 <!-- ``` -->
 
-Accounting for the effectiveness of treatment B is done similarly to the simulation-time-dependent approach above. We first transform `v_p_S1S2_tunnels` to a vector of rates, `v_r_S1S2_tunnels`, and multiply it by the hazard ratio of treatment B, `hr_S1S2_trtB`. Then, we transform back to probabilities to produce `v_p_S1S2_tunnels_trtB`, a vector of transition probabilities that account for the duration of S1 state-residence under treatment B.
+Accounting for the effectiveness of treatment B is done by multiplying the vector of transition rates, `v_r_S1S2_tunnels`, by the hazard ratio of treatment B, `hr_S1S2_trtB`. Then, we transform to a vector of transition probabilities that account for the duration of S1 state-residence under treatment B, `v_p_S1S2_tunnels_trtB`, following Equation \@ref(eq:tp-from-rate).
 
 ```{r}
-## Transform risk of progression from Sick to Sicker to a rate
-# vector of rates of becoming Sicker when Sick
-v_r_S1S2_tunnels <- -log(1-v_p_S1S2_tunnels)/cycle_length
-# apply hazard ratio to rate to obtain transition rate of becoming Sicker when 
+# Apply hazard ratio to rate to obtain transition rate of becoming Sicker when 
 # Sick for treatment B
-r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
+v_r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
 # transform rate to probability to become Sicker when Sick under treatment B 
 # conditional on surviving
-v_p_S1S2_tunnels_trtB <- 1-exp(-r_S1S2_tunnels_trtB*cycle_length) 
+v_p_S1S2_tunnels_trtB <- 1 - exp(-v_r_S1S2_tunnels_trtB*cycle_length) 
 ```
 
 Then, we initialize the three-dimensional transition probability array for treatment B, `a_P_tunnels_trtB`, based on `a_P_tunnels_SoC`. The only difference is that we update the transition probabilities from S1 involving `v_p_S1S2_tunnels` to using `v_p_S1S2_tunnels_trtB` instead.
