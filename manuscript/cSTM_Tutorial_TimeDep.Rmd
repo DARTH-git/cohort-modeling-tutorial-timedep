@@ -186,6 +186,7 @@ $$
     p_{[n_S,1,t]} & p_{[n_S,2,t]} & \cdots & p_{[n_S,n_S,t]} \\
   \end{bmatrix}.
 $$
+
 Note that in each cycle $t$ all rows of the transition probability matrix  must sum to one, $\sum_{j=1}^{n_S}{p_{[i,j,t]}} = 1$ for all $i = 1,\ldots,n_S$ and $t = 0,\ldots, n_T$.
 
 Next, we specify the initial distribution of the cohort at \(t = 0\). We then define \(\mathbf{m}_{0}\) as the vector that captures the distribution of the cohort among the states at \(t = 0\) (i.e., the initial state vector). As illustrated in the introductory tutorial, we iteratively compute the cohort distribution among the health states in each cycle from the transition probability matrix and the cohort's distribution from the prior cycle. The state vector at the next cycle $t+1$ ($\mathbf{m}_{t+1}$) is then calculated as the matrix product of the state vector at cycle $t$, $\mathbf{m}_{t}$, and the transition probability matrix that the cohort faces in cycle $t$, $P_t$, 
@@ -212,9 +213,7 @@ $$
 $M$ stores the output of the cSTM, which we can use to compute various epidemiological measures, such as prevalence and survival probability over time, and economic measures, such as cumulative resource use and costs. 
 
 # Time dependency on state residence
-The implementation of state residence dependency is slightly more involved than simulation-time dependency. As described above, dependence on state residence time occurs when transition probabilities or rewards depend on the time spent in a given state. To account for state residence dependency, we expand the number of states with as many transient states as the number of cycles for which state residency is required. These transient states are often referred to as *tunnel* states where the cohort stays for only one cycle and either transition to the next tunnel state or completely exit the tunnel.
-
-In a scenario where  state-residence in one state lasts $n_{\text{tunnels}}$ cycles, this state needs to be expanded into $n_{\text{tunnels}}$ states, and the transition probability matrix also needs to be expanded to incorporate these additional transient states. This will result in a transition probability matrix of dimensions $n_{S_\text{tunnels}} \times n_{S_\text{tunnels}}$, where $n_{S_\text{tunnels}}$ is the total number of health states ($n_{S_\text{tunnels}} = n_S + n_{\text{tunnels}} - 1$). If the transition probabilities are also dependent on simulation time, we add a third dimension such that the dimensions will become \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}} \times n_T\). As state residence dependency extends in more health states, the total number of health states will increase, causing what has been referred to as "state explosion". Table \@ref(tab:Timedep-cSTM-components-table) describes the core components of time-dependent cSTMs and their suggested R code names. 
+The implementation of state residence time dependency is slightly more involved than simulation time dependency. As described above, dependence on state residence occurs in applications where transition probabilities or rewards depend on the time spent in a given state. To account for state residence dependency, we expand the number of states with as many transient states as the number of cycles required for state residency. These transient states are often called *tunnel* states, where the cohort stays for only one cycle in each tunnel state and either transitions to the next tunnel state or completely exits the tunnel. The total number of states for a cSTM with tunnels is $n_{S_\text{tunnels}}$ and equals $n_S + n_{\text{tunnels}} - 1$, where $n_{\text{tunnels}}$ is the total number of times a health state needs to be expanded for. We subtract one because one of the original states is expanded to a tunnel state. The transition probability matrix also needs to be expanded to incorporate these additional transient states, resulting in a transition probability matrix of dimensions $n_{S_\text{tunnels}} \times n_{S_\text{tunnels}}$. If the transition probabilities are also dependent on simulation time, as described in the previous section, we add a third dimension such that the dimensions will become \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}} \times n_T\). As state residence time dependency extends in more health states, the total number of health states will increase, causing what has been referred to as "state explosion". Table \@ref(tab:Timedep-cSTM-components-table) describes the core components of time-dependent cSTMs and their suggested R code names. 
 
 Table: (\#tab:Timedep-cSTM-components-table) Core components of time-dependent cSTMs with their R name.
 
@@ -230,7 +229,7 @@ Table: (\#tab:Timedep-cSTM-components-table) Core components of time-dependent c
 | $n_{S_{\text{tunnels}}}$| Number of states including tunnel states | `n_states_tunnels` |   |
 | $\mathbf{m}_{\text{tunnels}_0}$| Initial state vector for the model with tunnel states | `v_s_init_tunnels` |   |
 
-For a more detailed description of these components with their variable types, data structure, and R name, please see the Supplementary Material.
+For a more detailed description of these components with their variable types, data structure, and R name, please see the Supplementary Materials.
 
 # Case study: Time-dependent Sick-Sicker model
 
