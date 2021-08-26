@@ -3,18 +3,18 @@
 \contentsline {section}{\numberline {3}Time dependency on state residence}{4}{section.3}%
 \contentsline {section}{\numberline {4}Case study: A Cost-effectiveness analysis using a time-dependent Sick-Sicker model}{5}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Incorporating simulation-time dependency}{10}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Time dependency on state residence}{14}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.2}Incorporating time dependency on state residence}{14}{subsection.4.2}%
 \contentsline {section}{\numberline {5}Epidemiological and economic measures}{20}{section.5}%
 \contentsline {subsection}{\numberline {5.1}Epidemiological measures}{20}{subsection.5.1}%
-\contentsline {subsubsection}{\numberline {5.1.1}Survival probability}{21}{subsubsection.5.1.1}%
+\contentsline {subsubsection}{\numberline {5.1.1}Survival probability}{20}{subsubsection.5.1.1}%
 \contentsline {subsubsection}{\numberline {5.1.2}Life expectancy}{21}{subsubsection.5.1.2}%
 \contentsline {subsubsection}{\numberline {5.1.3}Prevalence}{22}{subsubsection.5.1.3}%
 \contentsline {subsection}{\numberline {5.2}Economic measures}{23}{subsection.5.2}%
 \contentsline {subsubsection}{\numberline {5.2.1}State rewards}{23}{subsubsection.5.2.1}%
 \contentsline {subsubsection}{\numberline {5.2.2}Transition rewards}{24}{subsubsection.5.2.2}%
-\contentsline {subsubsection}{\numberline {5.2.3}Within-cycle correction and discounting future rewards}{29}{subsubsection.5.2.3}%
-\contentsline {section}{\numberline {6}Incremental cost-effectiveness ratios (ICERs)}{30}{section.6}%
-\contentsline {section}{\numberline {7}Probabilistic sensitivity analysis}{32}{section.7}%
-\contentsline {section}{\numberline {8}Discussion}{35}{section.8}%
-\contentsline {section}{\numberline {9}Acknowledgements}{36}{section.9}%
-\contentsline {section}{References}{37}{section*.2}%
+\contentsline {subsubsection}{\numberline {5.2.3}Within-cycle correction and discounting future rewards}{28}{subsubsection.5.2.3}%
+\contentsline {section}{\numberline {6}Incremental cost-effectiveness ratios (ICERs)}{29}{section.6}%
+\contentsline {section}{\numberline {7}Probabilistic sensitivity analysis}{31}{section.7}%
+\contentsline {section}{\numberline {8}Discussion}{34}{section.8}%
+\contentsline {section}{\numberline {9}Acknowledgements}{35}{section.9}%
+\contentsline {section}{References}{36}{section*.2}%

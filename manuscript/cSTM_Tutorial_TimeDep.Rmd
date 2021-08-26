@@ -503,8 +503,8 @@ ggplot(melt(m_M_SoC), aes(x = Var1, y = value,
         legend.background = element_rect(fill = NA))
 ```
 
-## Time dependency on state residence
-To add a state-residence dependency to the simulation-time-dependent Sick-Sicker model defined above, we assume the risk of progression from S1 to S2 increases as a function of the time $\tau = 1, \ldots, n_{\text{tunnels}}$ the cohort remains in the S1 state. This increase follows a Weibull hazard function, $h(\tau)$, defined as
+## Incorporating time dependency on state residence
+Here we add the dependency on state-residence to the simulation-time-dependent Sick-Sicker model defined above. We assume the risk of progression from S1 to S2 increases as a function of the time $\tau = 1, \ldots, n_{\text{tunnels}}$ the cohort remains in the S1 state. This increase follows a Weibull hazard function, $h(\tau)$, defined as
 $$
   h(\tau) = \gamma \lambda (\lambda \tau)^{\gamma-1},
 $$
@@ -513,11 +513,9 @@ with a corresponding cumulative hazard, $H(\tau)$,
   H(\tau) = (\lambda \tau)^{\gamma},
 (\#eq:H-weibull)
 \end{equation}
-
-
 where $\lambda$ and $\gamma$ are the scale and shape parameters of the Weibull hazard function, respectively.
 
-To derive a transition probability from S1 to S2 as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, we assume exponentially distributed transition times with constant rates in each cycle interval (i.e., piecewise exponential transition times), where the probability of a transition is 
+To derive a transition probability from S1 to S2 as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, we assume constant rates within each cycle interval (i.e., piecewise exponential transition times), where the cycle-specific probability of a transition is 
 \begin{equation}
   p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{\left(-\mu_{\left[S1_{\tau},S2, \tau\right]}\right)},
 (\#eq:tp-from-rate)
@@ -539,34 +537,22 @@ and the transition probability
 (\#eq:tp-from-H-weibull)
 \end{equation}
 
-<!-- To derive a transition probability from S1 to S2 as a function as a function of the time the cohort spends in S1, $p_{\left[S1_{\tau},S2, \tau\right]}$, from $H(\tau)$, we use the following equation[@Diaby2014] -->
-<!-- \begin{equation} -->
-<!-- p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{(H(\tau-1) - H(\tau))}. -->
-<!-- (\#eq:tp-from-H) -->
-<!-- \end{equation} -->
-
-<!-- Substituting the Weibull cumulative hazard in Equation \@ref(eq:tp-from-H), the transition probability is $p_{\left[S1_{\tau},S2, \tau\right]}$, is -->
-<!-- \begin{equation} -->
-<!-- p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{((\lambda (\tau-1))^{\gamma} -  (\lambda \tau)^{\gamma})}. -->
-<!-- (\#eq:tp-from-H-weibull) -->
-<!-- \end{equation} -->
-
 We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., $n_{\text{tunnels}}=n_T$) and create a new variable called `n_tunnel_size` with the length of the tunnel equal to `n_cycles`. Thus, there will be `r n_cycles` S1 tunnel states plus `r (n_states-1)` more states (H, S2, D) resulting in a total of $n_{S_{\text{tunnels}}}$ = `r (n_states-1) + n_cycles`.
 
 Figure \@ref(fig:STD-Sick-Sicker-tunnels) shows the Sick-Sicker model's state-transition diagram with state-residence dependency with $n_{\text{tunnels}}$ tunnel states for S1.
  
-```{r STD-Sick-Sicker-tunnels, echo=FALSE, out.width='100%', fig.cap="State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{\text{tunnels}}}$).", fig.pos="H"}
+```{r STD-Sick-Sicker-tunnels, echo=FALSE, out.width='100%', fig.cap="State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{\\text{tunnels}}}$).", fig.pos="H"}
 knitr::include_graphics("figs/Sick-Sicker-with-tunnels.png")
 ```
 
-To implement state-residence dependency in the Sick-Sicker, we create the vector variables `v_Sick_tunnel` and `v_names_states_tunnels` with the names of the  Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \@ref(tab:Timedep-cSTM-components-table).
+To implement state-residence dependency in the Sick-Sicker cSTM, we create the vector variables `v_Sick_tunnel` and `v_names_states_tunnels` with the names of the  Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \@ref(tab:Timedep-cSTM-components-table).
 
 ```{r}
 ## Number of tunnels
 n_tunnel_size <- n_cycles 
 ## Vector with cycles for tunnels
 v_cycles_tunnel <- 1:n_tunnel_size
-## Vector with names for tunnel states of Sick state
+## Vector with the names of the Sick tunnel state
 v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
 ## Create variables for model with tunnels
 v_names_states_tunnels <- c("H", v_Sick_tunnel, "S2", "D") # state names
@@ -597,11 +583,11 @@ a_P_tunnels_SoC <- array(0, dim = c(n_states_tunnels, n_states_tunnels, n_cycles
                                          0:(n_cycles - 1)))
 ```
 
-```{r Array-Time-Dependent-Tunnels, echo=FALSE, out.width='100%', fig.cap="The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for age-dependence and S1 state-residence using tunnel states.", fig.pos="H"}
+```{r Array-Time-Dependent-Tunnels, echo=FALSE, out.width='100%', fig.cap="The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for simulation-time and state-residence dependency using $\\tau$ tunnel states for S1.", fig.pos="H"}
 knitr::include_graphics("figs/3D-state-transition-array-sick-sicker-tunnels.png")
 ```
 
-Filling `a_P_tunnels_SoC` with the corresponding transition probabilities is similar to how it's done with `a_P_SoC` above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities.
+Filling `a_P_tunnels_SoC` with the corresponding transition probabilities is similar to how it's done with `a_P_SoC` above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities for each tunnel state.
 
 ```{r Sick-Sicker-TimeDep-P-tunnels}
 ### Fill in array
@@ -642,7 +628,7 @@ a_P_tunnels_SoC["D", "D", ] <- 1
 <!--                                  hr_S1S2_trtB) -->
 <!-- ``` -->
 
-Accounting for the effectiveness of treatment B is done by multiplying the vector of transition rates, `v_r_S1S2_tunnels`, by the hazard ratio of treatment B, `hr_S1S2_trtB`. Then, we transform to a vector of transition probabilities that account for the duration of S1 state-residence under treatment B, `v_p_S1S2_tunnels_trtB`, following Equation \@ref(eq:tp-from-rate).
+Next, we create the transition probability array for Strategy B. To implement the effectiveness of treatment B, we multiply the vector of transition rates, `v_r_S1S2_tunnels`, by the hazard ratio of treatment B, `hr_S1S2_trtB`. Then, we transform to a vector of transition probabilities that account for the duration of S1 state-residence under treatment B, `v_p_S1S2_tunnels_trtB`, following Equation \@ref(eq:tp-from-rate).
 
 ```{r}
 # Apply hazard ratio to rate to obtain transition rate of becoming Sicker when 
@@ -653,7 +639,7 @@ v_r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
 v_p_S1S2_tunnels_trtB <- 1 - exp(-v_r_S1S2_tunnels_trtB*cycle_length) 
 ```
 
-Then, we initialize the three-dimensional transition probability array for treatment B, `a_P_tunnels_trtB`, based on `a_P_tunnels_SoC`. The only difference is that we update the transition probabilities from S1 involving `v_p_S1S2_tunnels` to using `v_p_S1S2_tunnels_trtB` instead.
+Then, we initialize the three-dimensional transition probability array for treatment B, `a_P_tunnels_trtB`, based on `a_P_tunnels_SoC`. The only difference here is that we update the transition probabilities from S1 involving `v_p_S1S2_tunnels` to `v_p_S1S2_tunnels_trtB` instead.
 
 ```{r Sick-Sicker-Time-Dependent-State-Residence-New-Treatment2}
 ## Initialize transition probability array for treatment B
@@ -677,7 +663,7 @@ a_P_tunnels_trtB[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) *
 a_P_tunnels_trtB[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 ```
 
-Once we have created both three-dimensional transition probability arrays with tunnels, we check they are valid (i.e., between 0 and 1 and transition probabilities from each state sum to 1).
+Once we create both three-dimensional transition probability arrays with tunnels, we check they are valid (i.e., between 0 and 1 and transition probabilities from each state sum to 1).
 
 ```{r}
 ### Check if transition probability matrices are valid
@@ -691,7 +677,7 @@ check_sum_of_transition_array(a_P_tunnels_trtB, n_states = n_states_tunnels,
                               n_cycles = n_cycles)
 ```
 
-To simulate the cohort over the $n_T$ cycles for the cSTM accounting for state-residence dependency, we initialize two new cohort trace matrices for the SoC and treatment B, `m_M_tunnels_SoC` and `m_M_tunnels_trtB`, respectively.  The dimensions of both matrices are $(n_T+1) \times n_{S_{\text{tunnels}}}$.
+To simulate the cohort and store its state occupation over the $n_T$ cycles for the cSTM accounting for state-residence dependency, we initialize two new cohort trace matrices for the SoC and treatment B, `m_M_tunnels_SoC` and `m_M_tunnels_trtB`, respectively. The dimensions of both matrices are $(n_T+1) \times n_{S_{\text{tunnels}}}$.
 
 ```{r Init-Sick-Sicker-TimeDependent-Tunnels-Trace}
 # Initialize cohort for state-residence cSTM under SoC
@@ -727,7 +713,7 @@ m_M_tunnels_SoC_sum <- cbind(H = m_M_tunnels_SoC[, "H"],
                              D = m_M_tunnels_SoC[, "D"])
 ```
 
-```{r Sick-Sicker-Trace-HistDep, echo=FALSE, fig.cap='Cohort trace of the age-dependent cSTM accounting for state-residence dependency under strategies SoC and A.', message=FALSE, warning=FALSE, fig.pos="H"} 
+```{r Sick-Sicker-Trace-HistDep, echo=FALSE, fig.cap='Cohort trace of the age-dependent cSTM accounting for state-residence dependency under SoC.', message=FALSE, warning=FALSE, fig.pos="H"} 
 cols <- get_DARTH_cols()
 lty <-  c("H" = 1, "S1" = 2, "S2" = 4, "D" = 3)
 ggplot(melt(m_M_tunnels_SoC_sum), aes(x = Var1, y = value, 
@@ -743,10 +729,10 @@ ggplot(melt(m_M_tunnels_SoC_sum), aes(x = Var1, y = value,
         legend.background = element_rect(fill = NA))
 ```
 # Epidemiological and economic measures
-cSTMs can be used to generate different epidemiological and economic outputs. In a CEA, the main outcomes are typically the total discounted expected QALYs and total costs accrued by the cohort over the predefined time horizon. However, epidemiological outcomes can be helpful for complementary analyses, such as calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.[@Siebert2012c] We show how to obtain some of these outcomes from the trace and transition probability objects.
+cSTMs can be used to generate different epidemiological and economic outputs. In a CEA, the main outcomes are typically the total discounted expected QALYs and total costs accrued by the cohort over the predefined time horizon. However, epidemiological outcomes can be helpful for calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.[@Siebert2012c] We show how to obtain some of these outcomes from the trace and transition probability objects.
 
 ## Epidemiological measures
-Here we provide the epidemiological definition of some of these outcomes and how they can be generated from a cSTM using the simulation-time-dependent Sick-Sicker cSTM under SoC. In the GitHub repository, we provide the code to generate these outcomes from the state-residence-dependent cSTM.
+We provide the epidemiological definition of some of these outcomes and how they can be generated from a cSTM using the simulation time-dependent Sick-Sicker cSTM under SoC. In the GitHub repository, we provide the code to generate these outcomes from the state-residence-dependent cSTM.
 
 ### Survival probability
 The survival probability, $S(t)$, captures the proportion of the cohort remaining alive by cycle $t$. To estimate $S(t)$ from the simulated cohort of the simulation-time-dependent Sick-Sicker model, shown in Figure \@ref(fig:Sick-Sicker-Surv-AgeDep), we sum the proportions of the non-death states for all $n_T$ cycles in `m_M_SoC`.
@@ -800,7 +786,7 @@ v_prev_S2_SoC   <- m_M_SoC[, "S2"] / v_S_SoC          # vector with prevalence o
 v_prev_S1S2_SoC <- rowSums(m_M_SoC[, c("S1", "S2")])/v_S_SoC # prevalence of Sick and Sicker
 ```
 
-```{r Sick-Sicker-Prev-AgeDep, echo=FALSE, fig.cap='Prevalence of sick states in simulation-time-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
+```{r Sick-Sicker-Prev-AgeDep, echo=FALSE, fig.cap='Prevalence of sick states in age-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"} 
 df_prev_states <- data.frame(Cycle = 0:n_cycles, 
                   States  = ordered(rep(c("S1", "S2", "S1 + S2"),
                                 each = (n_cycles + 1)), 
@@ -823,7 +809,7 @@ ggplot(df_prev_states,
 ```
 
 ## Economic measures
-In CEA, we can calculate economic outcomes by using either state or transition rewards. A "state reward" refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A "transition reward" refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. In the accompanying tutorial, we describe how to incorporate state rewards in CEA in detail.[@Alarid-Escudero2021a] Here, we describe and illustrate how to implement both state and transition rewards together using a transition array.
+In CEA, we can calculate economic outcomes from state and transition rewards. A "state reward" refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A "transition reward" refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. In the accompanying tutorial, we describe how to incorporate state rewards in CEA in detail.[@Alarid-Escudero2021a] Here, we describe and illustrate how to implement both state and transition rewards together using a transition array.
 
 ### State rewards
 As shown in the introductory tutorial, to add state rewards to the Sick-Sicker model, we first create a vector of utilities and costs for each of the four strategies considered. The vectors of utilities and costs, `v_u_SoC` and `v_c_SoC`, respectively, contain the utilities and costs corresponding to being in each of the four health states under SoC, shown in Table \@ref(tab:param-table).
