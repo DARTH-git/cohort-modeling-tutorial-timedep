@@ -1027,7 +1027,7 @@ v_cost_strAB <- rowSums(t(colSums(a_Y_c_strAB)))
 Following the steps in the introductory cSTM tutorial,[@Alarid-Escudero2021a] here we use Simpson's 1/3rd rule for within-cycle correction (WCC),[@Elbasha2016, @Elbasha2016a] and use exponential discounting for costs and QALYs. In our example, the WCC vector, $\mathbf{wcc}$, is the same for both costs and QALYs; thus, only one vector, `v_wcc`, is required.
 ```{r within-cycle-vector}
 ## Vector with cycles
-v_cycles <- seq(1, n_cycles+1)
+v_cycles <- seq(1, n_cycles + 1)
 ## Generate 2/3 and 4/3 multipliers for even and odd entries, respectively
 v_wcc <- ((v_cycles %% 2)==0)*(2/3) + ((v_cycles %% 2)!=0)*(4/3)
 ## Substitute 1/3 in first and last entries
@@ -1096,7 +1096,7 @@ kable(m_outcomes,
 ```
 
 # Incremental cost-effectiveness ratios (ICERs)
-To conduct the cost-effectiveness analysis, we follow the coding approach described in the accompanying introductory cSTM tutorial.[@Alarid-Escudero2021a] We combine the total expected discounted costs and QALYs for all four strategies into outcome-specific vectors, `v_cost_str` for costs and `v_qaly_str` for QALYs. We use the R package `dampack` (https://cran.r-project.org/web/packages/dampack/)[@Alarid-Escudero2021] to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. The results are returned as the R the data frame `df_cea`.
+To conduct the cost-effectiveness analysis, we follow the coding approach described in the introductory cSTM tutorial.[@Alarid-Escudero2021a] We combine the total expected discounted costs and QALYs for all four strategies into outcome-specific vectors, `v_cost_str` for costs and `v_qaly_str` for QALYs. We use the R package `dampack` (https://cran.r-project.org/web/packages/dampack/)[@Alarid-Escudero2021] to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. `dampack` organizes and formats the results as a data frame,`df_cea`, that can be printed as a formatted table.
 
 ```{r CEA-analysis}
 ### Vector of costs
@@ -1143,8 +1143,7 @@ plot(df_cea, label = "all", txtsize = 16) +
 
 # Probabilistic sensitivity analysis
 We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.[@Briggs2012] In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \@ref(tab:param-table) and more detail in the Supplementary Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.[@Alarid-Escudero2019e]
-<!-- Briefly, to conduct the PSA, we create three R functions: -->
-  
+
 ```{r PSA-setup, eval=TRUE, echo=FALSE}
 # Number of PSA samples
 n_sim <- 1000
@@ -1163,11 +1162,6 @@ df_e <- as.data.frame(matrix(0,
                              ncol = n_str))
 colnames(df_e) <- v_names_str
 ```
-
-<!-- 1. A function called `generate_psa_params(n_sim, seed)` with arguments `n_sim` and `seed`. The function generates a sample of size `n_sim` for the model parameters from their distributions defined in Table \@ref(tab:param-table). The function also takes a seed number as input, `seed`, which ensures reproducibility of the PSA results. By calling this function, we generate the sample of parameter sets for the PSA, `df_psa_input`, via: `df_psa_input <- generate_psa_params(n_sim = n_sim)`. -->
-<!-- 2. A function called `decision_model(l_params_all)` that wraps the R code of the time-independent cSTM described in section [Conceptualizing and implementing time-independent cSTM dynamics](#conceptualizing-and-implementing-time-independent-cSTM-dynamics). This function requires inputting a list of all model parameter values, `l_params_all` and whether the user wants print messages via the `verbose` parameter. -->
-<!-- 3. A function called `calculate_ce_out(l_params_all, n_wtp = 100000)` that calculates total discounted costs and QALYs based on the `decision_model` function output. This function also computes the net monetary benefit (NMB) for a given willingness-to-pay threshold, specified by the argument `n_wtp`. -->
-<!-- These functions are provided in the Supplementary Material and the accompanying GitHub repository of this manuscript. -->
 
 ```{r PSA-run, eval=TRUE, echo=FALSE, cache=TRUE, message=FALSE, warning=FALSE}
 ## Conduct probabilistic sensitivity analysis
@@ -1204,7 +1198,7 @@ ceac_obj$Strategy <- ordered(ceac_obj$Strategy, v_names_str)
 elc_obj <- calc_exp_loss(wtp = v_wtp, psa = l_psa)
 ```
 
-To conduct the PSA of the CEA using the simulation-time-dependent Sick-Sicker cSTM, we sampled `r comma(n_sim)` parameter sets. For each set, we computed the total discounted costs and QALYs of each simulated strategy. Results from a PSA can be represented in various ways. For example, the joint distribution, 95% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy can be plotted in a cost-effectiveness (CE) scatter plot (Figure \@ref(fig:CE-scatter-TimeDep)),[@Briggs2002] where each of the `r comma(4*n_sim)` simulations (i.e., `r comma(n_sim)` combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph. The CE scatter plot for the CEA using the simulation-time-dependent model shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
+To conduct the PSA of the CEA using the simulation time-dependent Sick-Sicker cSTM, we sampled `r comma(n_sim)` parameter sets. For each set, we computed the total discounted costs and QALYs of each simulated strategy. Results from a PSA can be represented in various ways. For example, the joint distribution, 95% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy can be plotted in a cost-effectiveness (CE) scatter plot (Figure \@ref(fig:CE-scatter-TimeDep)),[@Briggs2002] where each of the `r comma(4*n_sim)` simulations (i.e., `r comma(n_sim)` combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph. The CE scatter plot for the CEA using the simulation-time-dependent model shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
 
 ```{r CE-scatter-TimeDep, echo=FALSE, fig.cap='Cost-effectiveness scatter plot.', message=FALSE, warning=FALSE, fig.pos="H"} 
 # CEAC & CEAF plot
@@ -1224,7 +1218,7 @@ plot(ceac_obj, txtsize = 16, xlim = c(0, NA), n_x_ticks = 14) +
 
 The CEAC and CEAF do not show the magnitude of the expected net benefit lost (i.e., expected loss) when the chosen strategy is not the cost-effective strategy in all the samples of the PSA. We quantify expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs) to complement these results (Figure \@ref(fig:ELC-AgeDep)). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The expected loss of the optimal strategy represents the lowest envelope of the ELCs because, given current information, the loss cannot be minimized further. The lower envelope also represents the expected value of perfect information (EVPI), which quantifies the value of eliminating parameter uncertainty. The strategy SoC has the lowest expected loss for WTP thresholds less than `r dollar(max(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Standard of care"), "WTP"]), accuracy = 1)` per QALY, strategy B has the lowest expected loss for WTP threshold greater than or equal to `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy B"), "WTP"]), accuracy = 1)` and less than `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy AB"), "WTP"]), accuracy = 1)`. Strategy AB has the lowest expected loss for WTP threshold greater than or equal to `r dollar(min(subset(elc_obj, On_Frontier == TRUE)[which(subset(elc_obj, On_Frontier == TRUE)$Strategy=="Strategy AB"), "WTP"]), accuracy = 1)` per QALY. At a WTP threshold of `r dollar(subset(elc_obj, On_Frontier == TRUE)[which.max(subset(elc_obj, On_Frontier == TRUE)$Expected_Loss), "WTP"], accuracy = 1)` per QALY, the EVPI is highest at `r dollar(subset(elc_obj, On_Frontier == TRUE)[which.max(subset(elc_obj, On_Frontier == TRUE)$Expected_Loss), "Expected_Loss"], accuracy = 1)`. For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.[@Alarid-Escudero2019]
 
-```{r ELC-AgeDep, echo=FALSE, fig.cap='Expected loss curves (ELCs) and expected value of perfect information (EVPI).', message=FALSE, warning=FALSE, fig.pos="H"} 
+```{r ELC-AgeDep, echo=FALSE, fig.cap='Expected loss curves (ELCs) and expected value of perfect information (EVPI) generated from the probabilistic sensitivity analysis (PSA) output.', message=FALSE, warning=FALSE, fig.pos="H"} 
 # ELC plot
 plot(elc_obj, log_y = FALSE, txtsize = 16, xlim = c(0, NA), n_x_ticks = 14,
      col = "full") +

@@ -1152,7 +1152,7 @@ Following the steps in the introductory cSTM tutorial,\textsuperscript{\protect\
 \begin{Shaded}
 \begin{Highlighting}[]
 \DocumentationTok{\#\# Vector with cycles}
-\NormalTok{v\_cycles }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, n\_cycles}\SpecialCharTok{+}\DecValTok{1}\NormalTok{)}
+\NormalTok{v\_cycles }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, n\_cycles }\SpecialCharTok{+} \DecValTok{1}\NormalTok{)}
 \DocumentationTok{\#\# Generate 2/3 and 4/3 multipliers for even and odd entries, respectively}
 \NormalTok{v\_wcc }\OtherTok{\textless{}{-}}\NormalTok{ ((v\_cycles }\SpecialCharTok{\%\%} \DecValTok{2}\NormalTok{)}\SpecialCharTok{==}\DecValTok{0}\NormalTok{)}\SpecialCharTok{*}\NormalTok{(}\DecValTok{2}\SpecialCharTok{/}\DecValTok{3}\NormalTok{) }\SpecialCharTok{+}\NormalTok{ ((v\_cycles }\SpecialCharTok{\%\%} \DecValTok{2}\NormalTok{)}\SpecialCharTok{!=}\DecValTok{0}\NormalTok{)}\SpecialCharTok{*}\NormalTok{(}\DecValTok{4}\SpecialCharTok{/}\DecValTok{3}\NormalTok{)}
 \DocumentationTok{\#\# Substitute 1/3 in first and last entries}
@@ -1225,7 +1225,7 @@ Strategy AB & \$282,370 & 21.302\\
 \hypertarget{incremental-cost-effectiveness-ratios-icers}{%
 \section{Incremental cost-effectiveness ratios (ICERs)}\label{incremental-cost-effectiveness-ratios-icers}}
 
-To conduct the cost-effectiveness analysis, we follow the coding approach described in the accompanying introductory cSTM tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} We combine the total expected discounted costs and QALYs for all four strategies into outcome-specific vectors, \texttt{v\_cost\_str} for costs and \texttt{v\_qaly\_str} for QALYs. We use the R package \texttt{dampack} (\url{https://cran.r-project.org/web/packages/dampack/})\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021}{22}} to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. The results are returned as the R the data frame \texttt{df\_cea}.
+To conduct the cost-effectiveness analysis, we follow the coding approach described in the introductory cSTM tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} We combine the total expected discounted costs and QALYs for all four strategies into outcome-specific vectors, \texttt{v\_cost\_str} for costs and \texttt{v\_qaly\_str} for QALYs. We use the R package \texttt{dampack} (\url{https://cran.r-project.org/web/packages/dampack/})\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021}{22}} to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. \texttt{dampack} organizes and formats the results as a data frame,\texttt{df\_cea}, that can be printed as a formatted table.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1273,7 +1273,7 @@ Strategy A & 211,911 & 19.840 & NA & NA & NA & D\\
 
 We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{23}} In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \ref{tab:param-table} and more detail in the Supplementary Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{12}}
 
-To conduct the PSA of the CEA using the simulation-time-dependent Sick-Sicker cSTM, we sampled 1,000 parameter sets. For each set, we computed the total discounted costs and QALYs of each simulated strategy. Results from a PSA can be represented in various ways. For example, the joint distribution, 95\% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy can be plotted in a cost-effectiveness (CE) scatter plot (Figure \ref{fig:CE-scatter-TimeDep}),\textsuperscript{\protect\hyperlink{ref-Briggs2002}{24}} where each of the 4,000 simulations (i.e., 1,000 combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph. The CE scatter plot for the CEA using the simulation-time-dependent model shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
+To conduct the PSA of the CEA using the simulation time-dependent Sick-Sicker cSTM, we sampled 1,000 parameter sets. For each set, we computed the total discounted costs and QALYs of each simulated strategy. Results from a PSA can be represented in various ways. For example, the joint distribution, 95\% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy can be plotted in a cost-effectiveness (CE) scatter plot (Figure \ref{fig:CE-scatter-TimeDep}),\textsuperscript{\protect\hyperlink{ref-Briggs2002}{24}} where each of the 4,000 simulations (i.e., 1,000 combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph. The CE scatter plot for the CEA using the simulation-time-dependent model shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
 
 \begin{figure}[H]
 
@@ -1303,7 +1303,7 @@ The CEAC and CEAF do not show the magnitude of the expected net benefit lost (i.
 
 }
 
-\caption{Expected loss curves (ELCs) and expected value of perfect information (EVPI).}\label{fig:ELC-AgeDep}
+\caption{Expected loss curves (ELCs) and expected value of perfect information (EVPI) generated from the probabilistic sensitivity analysis (PSA) output.}\label{fig:ELC-AgeDep}
 \end{figure}
 
 \hypertarget{discussion}{%

@@ -16,5 +16,5 @@
 \contentsline {section}{\numberline {6}Incremental cost-effectiveness ratios (ICERs)}{29}{section.6}%
 \contentsline {section}{\numberline {7}Probabilistic sensitivity analysis}{31}{section.7}%
 \contentsline {section}{\numberline {8}Discussion}{34}{section.8}%
-\contentsline {section}{\numberline {9}Acknowledgements}{35}{section.9}%
+\contentsline {section}{\numberline {9}Acknowledgements}{36}{section.9}%
 \contentsline {section}{References}{36}{section*.2}%
