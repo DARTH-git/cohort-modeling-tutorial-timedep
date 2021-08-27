@@ -1,5 +1,5 @@
 ---
-title: 'A Tutorial on Time-Dependent Cohort State-Transition Models in R'
+title: 'A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example'
 author: 
   - Fernando Alarid-Escudero, PhD^[Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico]
   - Eline Krijkamp, MSc^[Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands]
@@ -35,7 +35,7 @@ tags:
 - Tutorial
 - R
 abstract: |
-  This tutorial shows how to implement time-dependent cohort state-transition models (cSTMs) to conduct cost-effectiveness analyses (CEA) in R, where transition probabilities and rewards vary by time. We account for two types of time dependency: time since the start of the simulation (simulation-time dependency) and time spent in a health state (state residence dependency). This tutorial is based on an accompanying tutorial that introduces how to implement time-independent cSTMs.We illustrate how to conduct a CEA of multiple strategies based on a time-dependent cSTM using a previously published cSTM, including probabilistic sensitivity analyses. We also demonstrate how to compute various epidemiological outcomes of interest, such as survival probability and prevalence. To illustrate the concepts, we provide both the mathematical notation and the R code to execute the calculations. Finally, similar to the introductory tutorial, we provide a public repository with the R code for broader implementation.
+  This tutorial shows how to implement time-dependent cohort state-transition models (cSTMs) to conduct cost-effectiveness analyses (CEA) in R, where transition probabilities and rewards vary by time. We account for two types of time dependency: time since the start of the simulation (simulation-time dependency) and time spent in a health state (state residence dependency). We illustrate how to conduct a CEA of multiple strategies based on a time-dependent cSTM using a previously published cSTM, including probabilistic sensitivity analyses. We also demonstrate how to compute various epidemiological outcomes of interest from the outputs generated from the cSTM, such as survival probability and disease prevalence. We demonstrate both the mathematical notation and the R code to execute the calculations. This tutorial builds upon an introductory tutorial that introduces time-independent cSTMs using a CEA example in R. We provide an up-to-date public code repository for broader implementation.
 ---
 ```{r, echo = FALSE}
 ## Journal Abbreviations
@@ -68,7 +68,6 @@ knitr::opts_chunk$set(echo = TRUE)
 doc_type <- knitr::opts_knit$get('rmarkdown.pandoc.to')
 
 # Load cSTM and CEA functions
-source("../R/Functions_cSTM_time_dep_simulation.R")
 source("../R/Functions_cSTM_time_dep_simulation.R")
 source("../R/Functions.R")
 
