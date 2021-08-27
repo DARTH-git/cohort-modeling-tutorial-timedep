@@ -67,11 +67,16 @@ source("R/Functions.R")
 
 ################################ Model input ################################# 
 ## General setup
+cycle_length <- 1                       # cycle length equal one year
 n_age_init  <- 25                       # age at baseline
 n_age_max   <- 100                      # maximum age of follow up
-n_cycles    <- n_age_max - n_age_init   # time horizon, number of cycles
-v_names_states <- c("H", "S1", "S2", "D")  # the 4 health states of the model:
-                                           # Healthy (H), Sick (S1), Sicker (S2), Dead (D)
+n_cycles    <- n_age_max - n_age_init   # number of cycles
+# the 4 health states of the model:
+v_names_states <- c("H",  # Healthy (H)
+                    "S1", # Sick (S1)
+                    "S2", # Sicker (S2)
+                    "D")  # Dead (D)
+                                           
 n_states    <- length(v_names_states)   # number of health states 
 
 # Discounting factors
@@ -138,24 +143,27 @@ v_r_HDage  <- v_r_mort_by_age[(n_age_init + 1) + 0:(n_cycles - 1)]
 v_r_S1Dage <- v_r_HDage * hr_S1 # Age-specific mortality rate in the Sick state 
 v_r_S2Dage <- v_r_HDage * hr_S2 # Age-specific mortality rate in the Sicker state 
 # transform rates to probabilities
-v_p_HDage  <- rate_to_prob(v_r_HDage)  # Age-specific mortality risk in the Healthy state 
-v_p_S1Dage <- rate_to_prob(v_r_S1Dage) # Age-specific mortality risk in the Sick state
-v_p_S2Dage <- rate_to_prob(v_r_S2Dage) # Age-specific mortality risk in the Sicker state
+v_p_HDage  <- rate_to_prob(v_r_HDage, t = cycle_length)  # Age-specific mortality risk in the Healthy state 
+v_p_S1Dage <- rate_to_prob(v_r_S1Dage, t = cycle_length) # Age-specific mortality risk in the Sick state
+v_p_S2Dage <- rate_to_prob(v_r_S2Dage, t = cycle_length) # Age-specific mortality risk in the Sicker state
 
 ## Transition probability of becoming Sicker when Sick for treatment B
 # transform probability to rate
-r_S1S2 <- prob_to_rate(p = p_S1S2)
+r_S1S2 <- prob_to_rate(p = p_S1S2, t = cycle_length)
 # apply hazard ratio to rate to obtain transition rate of becoming Sicker when Sick for treatment B
 r_S1S2_trtB <- r_S1S2 * hr_S1S2_trtB
 # transform rate to probability
-p_S1S2_trtB <- rate_to_prob(r = r_S1S2_trtB) # probability to become Sicker when Sick 
-                                             # under treatment B conditional on surviving
+p_S1S2_trtB <- rate_to_prob(r = r_S1S2_trtB, t = cycle_length) # probability to become Sicker when Sick 
+                                                               # under treatment B conditional on surviving
 
 ###################### Construct state-transition models #####################
 #### Create transition arrays ####
 # Initialize 3-D array
-a_P_SoC <- array(0, dim      = c(n_states, n_states, n_cycles),
-                dimnames = list(v_names_states, v_names_states, 0:(n_cycles - 1)))
+a_P_SoC <- array(0, 
+                 dim  = c(n_states, n_states, n_cycles),
+                 dimnames = list(v_names_states, 
+                                 v_names_states, 
+                                 0:(n_cycles - 1)))
 ### Fill in array
 ## From H
 a_P_SoC["H", "H", ]   <- (1 - v_p_HDage) * (1 - p_HS1)
