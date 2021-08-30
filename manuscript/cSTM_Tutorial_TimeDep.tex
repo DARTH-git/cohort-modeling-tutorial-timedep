@@ -225,7 +225,7 @@ The cohort trace matrix, \(M\), is a matrix of dimensions \((n_T+1) \times n_S\)
 \hypertarget{time-dependency-on-state-residence}{%
 \section{Time dependency on state residence}\label{time-dependency-on-state-residence}}
 
-The implementation of state residence time dependency is slightly more involved than simulation time dependency. As described above, dependence on state residence occurs in applications where transition probabilities or rewards depend on the time spent in a given state. To account for state residence dependency, we expand the number of states with as many transient states as the number of cycles required for state residency. These transient states are often called \emph{tunnel} states, where the cohort stays for only one cycle in each tunnel state and either transitions to the next tunnel state or completely exits the tunnel. The total number of states for a cSTM with tunnels is \(n_{S_\text{tunnels}}\) and equals \(n_S + n_{\text{tunnels}} - 1\), where \(n_{\text{tunnels}}\) is the total number of times a health state needs to be expanded for. We subtract one because one of the original states is expanded to a tunnel state. The transition probability matrix also needs to be expanded to incorporate these additional transient states, resulting in a transition probability matrix of dimensions \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}}\). If the transition probabilities are also dependent on simulation time, as described in the previous section, we add a third dimension such that the dimensions will become \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}} \times n_T\). As state residence time dependency extends in more health states, the total number of health states will increase, causing what has been referred to as ``state explosion''. Table \ref{tab:Timedep-cSTM-components-table} describes the core components of time-dependent cSTMs and their suggested R code names.
+The implementation of state residence time dependency is slightly more involved than simulation time dependency. As described above, dependence on state residence occurs in applications where transition probabilities or rewards depend on the time spent in a given state. To account for state residence dependency, we expand the number of states with as many transient states as the number of cycles required for state residency. These transient states are often called \emph{tunnel} states, where the cohort stays for only one cycle in each tunnel state and either transitions to the next tunnel state or completely exits the tunnel. The total number of states for a cSTM with tunnels is \(n_{S_\text{tunnels}}\) and equals \(n_S + n_{\text{tunnels}} - 1\), where \(n_{\text{tunnels}}\) is the total number of times a health state needs to be expanded for. We subtract one because one of the original states is expanded to a tunnel state. The transition probability matrix also needs to be expanded to incorporate these additional transient states, resulting in a transition probability matrix of dimensions \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}}\). If the transition probabilities are also dependent on simulation time, as described in the previous section, we add a third dimension such that the dimensions will become \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}} \times n_T\). As state residence time dependency extends in more health states, the total number of health states will increase, causing what has been referred to as ``state explosion.'' Table \ref{tab:Timedep-cSTM-components-table} describes the core components of time-dependent cSTMs and their suggested R code names.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.19}}
@@ -269,7 +269,7 @@ We demonstrate simulation-time and state-residence time-dependency in R by expan
 \caption{State-transition diagram of the Sick-Sicker cohort state-transition model. The circles represent the health states, and the arrows represent the possible transition probabilities. The labels next to the arrows represent the variable names for these transitions.}\label{fig:STD-Sick-Sicker}
 \end{figure}
 
-As described in the introductory tutorial, this model simulates the health care costs and quality-adjusted life-years (QALYs) of a cohort of 25-year-old individuals at risk of developing a hypothetical disease with two stages: ``Sick'' and ``Sicker''.\textsuperscript{\protect\hyperlink{ref-Enns2015e}{11}} We simulate the cohort of individuals who all start in the ``Healthy'' state (denoted by ``H'') over their lifetime, which means that we will simulate the cohort for 75 cycles. The total number of cycles is denoted as \(n_T\) and defined in R as \texttt{n\_cycles}.
+As described in the introductory tutorial, this model simulates the health care costs and quality-adjusted life-years (QALYs) of a cohort of 25-year-old individuals at risk of developing a hypothetical disease with two stages: ``Sick'' and ``Sicker.''\textsuperscript{\protect\hyperlink{ref-Enns2015e}{11}} We simulate the cohort of individuals who all start in the ``Healthy'' state (denoted by ``H'') over their lifetime, which means that we will simulate the cohort for 75 cycles. The total number of cycles is denoted as \(n_T\) and defined in R as \texttt{n\_cycles}.
 
 In the introductory tutorial, healthy individuals face a constant risk of death. To illustrate simulation time dependency, here we assume that healthy individuals face age-specific background mortality. Healthy individuals who survive might become ill over time and transition to the ``Sick'' state (denoted by ``S1''). In this tutorial, we consider that once healthy individuals get sick, they incur a one-time utility decrement of 0.01 (\texttt{du\_HS1}, a disutility of transitioning from H to S1) and a transition cost of \$1,000 (\texttt{ic\_HS1}) that reflects the immediate costs of developing the illness. We demonstrate how to include these in the section transition rewards.
 
@@ -1317,7 +1317,7 @@ We incorporated state-residence time dependency using tunnel states by expanding
 
 It is the case that any time-varying feature in a discrete-time model can most generally be implemented as tunnel states with, at the extreme, every state having a different tunnel state for each time step. The cohort would then progressively move through these tunnel states to capture their progression through time, and the model features (e.g., transition probabilities, costs or utilities) that change over time. Using time-varying transition probabilities is a shortcut that is possible when the cohort experiences these time-varying processes simultaneously as a function of the time from the simulation start. Even if the time-varying process has a different periodicity than the cycle length, either tunnel states or time-varying transition probabilities can be used to capture these effects. However, this time-varying process needs to be represented or approximated over an integer number of cycle lengths.
 
-As described in the introductory tutorial, cSTMs are recommended when the number of states is considered ``not too large''.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{15}} Incorporating time-dependency in cSTMs using the provided approaches requires expanding the number of states by creating a multidimensional array for simulation-time dependency and/or creating tunnel states for state-residence time dependency, increasing the amount of computer memory (RAM) required. It is possible to build reasonably complex time-dependent cSTMs in R as long as there is sufficient RAM to store the transition probability array and outputs of interest. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1,000 states and 600 time-cycle slices. However, if a high degree of granularity is desired, the dimensions of these data objects can grow quickly; if the required number of states gets too large and difficult to code, it may be preferable to use a stochastic (Monte Carlo) version of the state-transition model -- often called individual-based state-transition models (iSTM) or microsimulation models -- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{15}} In an iSTM, the risks and rewards of simulated individuals need not depend only on a current health state; they may also depend on an individual's characteristics and attributes. In addition, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. Thus, we recommend carefully considering the required model structure before implementing it. An iSTM will also require additional functions to describe the dependency of transition probabilities and rewards on individuals' history. In a previous tutorial, we showed how to construct these functions for an iSTM using the Sick-Sicker example.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{28}}
+As described in the introductory tutorial, cSTMs are recommended when the number of states is considered ``not too large.''\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{15}} Incorporating time-dependency in cSTMs using the provided approaches requires expanding the number of states by creating a multidimensional array for simulation-time dependency and/or creating tunnel states for state-residence time dependency, increasing the amount of computer memory (RAM) required. It is possible to build reasonably complex time-dependent cSTMs in R as long as there is sufficient RAM to store the transition probability array and outputs of interest. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1,000 states and 600 time-cycle slices. However, if a high degree of granularity is desired, the dimensions of these data objects can grow quickly; if the required number of states gets too large and difficult to code, it may be preferable to use a stochastic (Monte Carlo) version of the state-transition model -- often called individual-based state-transition models (iSTM) or microsimulation models -- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{15}} In an iSTM, the risks and rewards of simulated individuals need not depend only on a current health state; they may also depend on an individual's characteristics and attributes. In addition, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. Thus, we recommend carefully considering the required model structure before implementing it. An iSTM will also require additional functions to describe the dependency of transition probabilities and rewards on individuals' history. In a previous tutorial, we showed how to construct these functions for an iSTM using the Sick-Sicker example.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{28}}
 
 We also described the concept and implementation of transition rewards. While these event-driven impacts could instead be captured by expanding the model state-space to include an initial disease state or a pre-death, end-of-life state, we can avoid state-space expansion by calculating incurred rewards based on the proportion of the cohort making the relevant transition. For implementation, this requires storing not just the cohort trace, which reflects how many individuals are in each state at a given cycle, but also a cohort state-transition array, which records how many individuals are making each possible transition at a given cycle.\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}}
 
@@ -1336,115 +1336,115 @@ Dr.~Alarid-Escudero was supported by grants U01-CA199335 and U01-CA253913 from t
 \begin{CSLReferences}{0}{0}
 \leavevmode\hypertarget{ref-Suijkerbuijk2018}{}%
 \CSLLeftMargin{1. }
-\CSLRightInline{Suijkerbuijk AWM, Van Hoek AJ, Koopsen J, et al. {Cost-effectiveness of screening for chronic hepatitis B and C among migrant populations in a low endemic country}. \emph{PLoS ONE} 2018; 13: 1--16.}
+\CSLRightInline{Suijkerbuijk AWM, Van Hoek AJ, Koopsen J, De Man RA, Mangen MJJ, De Melker HE, et al. {Cost-effectiveness of screening for chronic hepatitis B and C among migrant populations in a low endemic country}. PLoS ONE. 2018;13(11):1--6. }
 
 \leavevmode\hypertarget{ref-Sathianathen2018a}{}%
 \CSLLeftMargin{2. }
-\CSLRightInline{Sathianathen NJ, Konety BR, Alarid-Escudero F, et al. {Cost-effectiveness Analysis of Active Surveillance Strategies for Men with Low-risk Prostate Cancer}. \emph{European Urology}; 75: 910--917, \url{https://linkinghub.elsevier.com/retrieve/pii/S0302283818308534} (2019).}
+\CSLRightInline{Sathianathen NJ, Konety BR, Alarid-Escudero F, Lawrentschuk N, Bolton DM, Kuntz KM. {Cost-effectiveness Analysis of Active Surveillance Strategies for Men with Low-risk Prostate Cancer}. European Urology {[}Internet{]}. 2019;75(6):910--7. Available from: \url{https://linkinghub.elsevier.com/retrieve/pii/S0302283818308534}}
 
 \leavevmode\hypertarget{ref-Lu2018b}{}%
 \CSLLeftMargin{3. }
-\CSLRightInline{Lu S, Yu Y, Fu S, et al. {Cost-effectiveness of ALK testing and first-line crizotinib therapy for non-small-cell lung cancer in China}. \emph{PLoS ONE} 2018; 13: 1--12.}
+\CSLRightInline{Lu S, Yu Y, Fu S, Ren H. {Cost-effectiveness of ALK testing and first-line crizotinib therapy for non-small-cell lung cancer in China}. PLoS ONE. 2018;13(10):1--2. }
 
 \leavevmode\hypertarget{ref-Djatche2018}{}%
 \CSLLeftMargin{4. }
-\CSLRightInline{Djatche LM, Varga S, Lieberthal RD. {Cost-Effectiveness of Aspirin Adherence for Secondary Prevention of Cardiovascular Events}. \emph{PharmacoEconomics - Open}; 2: 371--380, \url{https://doi.org/10.1007/s41669-018-0075-2} (2018).}
+\CSLRightInline{Djatche LM, Varga S, Lieberthal RD. {Cost-Effectiveness of Aspirin Adherence for Secondary Prevention of Cardiovascular Events}. PharmacoEconomics - Open {[}Internet{]}. 2018;2(4):371--80. Available from: \url{https://doi.org/10.1007/s41669-018-0075-2}}
 
 \leavevmode\hypertarget{ref-Pershing2014}{}%
 \CSLLeftMargin{5. }
-\CSLRightInline{Pershing S, Enns EA, Matesic B, et al. {Cost-Effectiveness of Treatment of Diabetic Macular Edema}. \emph{Annals of Internal Medicine} 2014; 160: 18--29.}
+\CSLRightInline{Pershing S, Enns EA, Matesic B, Owens DK, Goldhaber-Fiebert JD. {Cost-Effectiveness of Treatment of Diabetic Macular Edema}. Annals of Internal Medicine. 2014;160(1):18--29. }
 
 \leavevmode\hypertarget{ref-Smith-Spangler2010}{}%
 \CSLLeftMargin{6. }
-\CSLRightInline{Smith-Spangler CM, Juusola JL, Enns EA, et al. {Population Strategies to Decrease Sodium Intake and the Burden of Cardiovascular Disease: A Cost-Effectiveness Analysis}. \emph{Annals of Internal Medicine}; 152: 481--487, \url{http://annals.org/article.aspx?articleid=745729} (2010).}
+\CSLRightInline{Smith-Spangler CM, Juusola JL, Enns EA, Owens DK, Garber AM. {Population Strategies to Decrease Sodium Intake and the Burden of Cardiovascular Disease: A Cost-Effectiveness Analysis}. Annals of Internal Medicine {[}Internet{]}. 2010;152(8):481--7. Available from: \url{http://annals.org/article.aspx?articleid=745729}}
 
 \leavevmode\hypertarget{ref-Alarid-Escudero2021a}{}%
 \CSLLeftMargin{7. }
-\CSLRightInline{Alarid-Escudero F, Krijkamp E, Enns EA, et al. {An Introductory Tutorial on Cohort State-Transition Models in R Using a Cost-Effectiveness Analysis Example}. \emph{arXiv:200107824v3}; 1--26, \url{https://arxiv.org/abs/2001.07824} (2021).}
+\CSLRightInline{Alarid-Escudero F, Krijkamp E, Enns EA, Yang A, Hunink MGGM, Pechlivanoglou P, et al. {An Introductory Tutorial on Cohort State-Transition Models in R Using a Cost-Effectiveness Analysis Example}. arXiv:200107824v3 {[}Internet{]}. 2021;1--26. Available from: \url{https://arxiv.org/abs/2001.07824}}
 
 \leavevmode\hypertarget{ref-Snowsill2019}{}%
 \CSLLeftMargin{8. }
-\CSLRightInline{Snowsill T. {A New Method for Model-Based Health Economic Evaluation Utilizing and Extending Moment-Generating Functions}. \emph{Medical Decision Making}; 39: 523--539, \url{http://journals.sagepub.com/doi/10.1177/0272989X19860119} (2019).}
+\CSLRightInline{Snowsill T. {A New Method for Model-Based Health Economic Evaluation Utilizing and Extending Moment-Generating Functions}. Medical Decision Making {[}Internet{]}. 2019;39(5):523--39. Available from: \url{http://journals.sagepub.com/doi/10.1177/0272989X19860119}}
 
 \leavevmode\hypertarget{ref-Krijkamp2019}{}%
 \CSLLeftMargin{9. }
-\CSLRightInline{Krijkamp EM, Alarid-Escudero F, Enns E, et al. {A Multidimensional Array Representation of State-Transition Model Dynamics}. \emph{Medical Decision Making} 2019; In Press.}
+\CSLRightInline{Krijkamp EM, Alarid-Escudero F, Enns E, Pechlivanoglou P, Hunink MM, Jalal H. {A Multidimensional Array Representation of State-Transition Model Dynamics}. Medical Decision Making. 2019;In Press. }
 
 \leavevmode\hypertarget{ref-Jalal2017b}{}%
 \CSLLeftMargin{10. }
-\CSLRightInline{Jalal H, Pechlivanoglou P, Krijkamp E, et al. {An Overview of R in Health Decision Sciences}. \emph{Medical Decision Making}; 37: 735--746, \url{http://journals.sagepub.com/doi/10.1177/0272989X16686559} (2017).}
+\CSLRightInline{Jalal H, Pechlivanoglou P, Krijkamp E, Alarid-Escudero F, Enns EA, Hunink MGM. {An Overview of R in Health Decision Sciences}. Medical Decision Making {[}Internet{]}. 2017;37(7):735--46. Available from: \url{http://journals.sagepub.com/doi/10.1177/0272989X16686559}}
 
 \leavevmode\hypertarget{ref-Enns2015e}{}%
 \CSLLeftMargin{11. }
-\CSLRightInline{Enns EA, Cipriano LE, Simons CT, et al. {Identifying Best-Fitting Inputs in Health-Economic Model Calibration: A Pareto Frontier Approach}. \emph{Medical Decision Making}; 35: 170--182, \url{http://www.ncbi.nlm.nih.gov/pubmed/24799456} (2015).}
+\CSLRightInline{Enns EA, Cipriano LE, Simons CT, Kong CY. {Identifying Best-Fitting Inputs in Health-Economic Model Calibration: A Pareto Frontier Approach}. Medical Decision Making {[}Internet{]}. 2015;35(2):170--82. Available from: \url{http://www.ncbi.nlm.nih.gov/pubmed/24799456}}
 
 \leavevmode\hypertarget{ref-Alarid-Escudero2019e}{}%
 \CSLLeftMargin{12. }
-\CSLRightInline{Alarid-Escudero F, Krijkamp E, Pechlivanoglou P, et al. {A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling}. \emph{PharmacoEconomics}; 37: 1329--1339, \url{https://doi.org/10.1007/s40273-019-00837-x} (2019).}
+\CSLRightInline{Alarid-Escudero F, Krijkamp E, Pechlivanoglou P, Jalal H, Kao S-YZ, Yang A, et al. {A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling}. PharmacoEconomics {[}Internet{]}. 2019;37(11):1329--39. Available from: \url{https://doi.org/10.1007/s40273-019-00837-x}}
 
 \leavevmode\hypertarget{ref-Arias2017}{}%
 \CSLLeftMargin{13. }
-\CSLRightInline{Arias E, Heron M, Xu J. {United States Life Tables, 2014}. \emph{National Vital Statistics Reports}; 66: 63, \url{https://www.cdc.gov/nchs/data/nvsr/nvsr66/nvsr66\%7B/_\%7D04.pdf} (2017).}
+\CSLRightInline{Arias E, Heron M, Xu J. {United States Life Tables, 2014}. National Vital Statistics Reports {[}Internet{]}. 2017;66(4):63. Available from: \url{https://www.cdc.gov/nchs/data/nvsr/nvsr66/nvsr66\%7B/_\%7D04.pdf}}
 
 \leavevmode\hypertarget{ref-Diaby2014}{}%
 \CSLLeftMargin{14. }
-\CSLRightInline{Diaby V, Adunlin G, Montero AJ. {Survival modeling for the estimation of transition probabilities in model-based economic evaluations in the absence of individual patient data: A tutorial}. \emph{PharmacoEconomics} 2014; 32: 101--108.}
+\CSLRightInline{Diaby V, Adunlin G, Montero AJ. {Survival modeling for the estimation of transition probabilities in model-based economic evaluations in the absence of individual patient data: A tutorial}. PharmacoEconomics. 2014 Feb;32(2):101--8. }
 
 \leavevmode\hypertarget{ref-Siebert2012c}{}%
 \CSLLeftMargin{15. }
-\CSLRightInline{Siebert U, Alagoz O, Bayoumi AM, et al. {State-Transition Modeling: A Report of the ISPOR-SMDM Modeling Good Research Practices Task Force-3}. \emph{Medical Decision Making}; 32: 690--700, \url{http://mdm.sagepub.com/cgi/doi/10.1177/0272989X12455463} (2012).}
+\CSLRightInline{Siebert U, Alagoz O, Bayoumi AM, Jahn B, Owens DK, Cohen DJ, et al. {State-Transition Modeling: A Report of the ISPOR-SMDM Modeling Good Research Practices Task Force-3}. Medical Decision Making {[}Internet{]}. 2012;32(5):690--700. Available from: \url{http://mdm.sagepub.com/cgi/doi/10.1177/0272989X12455463}}
 
 \leavevmode\hypertarget{ref-Lee2003a}{}%
 \CSLLeftMargin{16. }
-\CSLRightInline{Lee ET, Wang JW. \emph{{Statistical methods for Survival Data Analysis}}. 3rd ed. Hoboken, NJ: Wiley, 2003.}
+\CSLRightInline{Lee ET, Wang JW. {Statistical methods for Survival Data Analysis}. 3rd ed. Hoboken, NJ: Wiley; 2003. }
 
 \leavevmode\hypertarget{ref-Klein2003}{}%
 \CSLLeftMargin{17. }
-\CSLRightInline{Klein JP, Moeschberger ML. \emph{{Survival Analysis: Techniques for Censored and Truncated Data}}. 2nd ed. Springer-Verlag, \url{http://www.springer.com/statistics/life+sciences,+medicine+\%7B/\&\%7D+health/book/978-0-387-95399-1} (2003).}
+\CSLRightInline{Klein JP, Moeschberger ML. {Survival Analysis: Techniques for Censored and Truncated Data} {[}Internet{]}. 2nd ed. Springer-Verlag; 2003. Available from: \url{http://www.springer.com/statistics/life+sciences,+medicine+\%7B/\&\%7D+health/book/978-0-387-95399-1}}
 
 \leavevmode\hypertarget{ref-Rothman2008h}{}%
 \CSLLeftMargin{18. }
-\CSLRightInline{Rothman KJ, Greenland S, Lash TL. \emph{{Modern Epidemiology}}. 3rd ed. Lippincott Williams {\&} Wilkins, 2008.}
+\CSLRightInline{Rothman KJ, Greenland S, Lash TL. {Modern Epidemiology}. 3rd ed. Rothman KJ, Greenland S, Lash TL, editors. Lippincott Williams {\&} Wilkins; 2008. }
 
 \leavevmode\hypertarget{ref-Keiding1991}{}%
 \CSLLeftMargin{19. }
-\CSLRightInline{Keiding N. {Age-Specific Incidence and Prevalence: A Statistical Perspective}. \emph{Journal of the Royal Statistical Society Series A (Statistics in Society)} 1991; 154: 371--412.}
+\CSLRightInline{Keiding N. {Age-Specific Incidence and Prevalence: A Statistical Perspective}. Journal of the Royal Statistical Society Series A (Statistics in Society). 1991;154(3):371--412. }
 
 \leavevmode\hypertarget{ref-Elbasha2016}{}%
 \CSLLeftMargin{20. }
-\CSLRightInline{Elbasha EH, Chhatwal J. {Theoretical foundations and practical applications of within-cycle correction methods}. \emph{Medical Decision Making} 2016; 36: 115--131.}
+\CSLRightInline{Elbasha EH, Chhatwal J. {Theoretical foundations and practical applications of within-cycle correction methods}. Medical Decision Making. 2016;36(1):115--31. }
 
 \leavevmode\hypertarget{ref-Elbasha2016a}{}%
 \CSLLeftMargin{21. }
-\CSLRightInline{Elbasha EH, Chhatwal J. {Myths and misconceptions of within-cycle correction: a guide for modelers and decision makers}. \emph{PharmacoEconomics} 2016; 34: 13--22.}
+\CSLRightInline{Elbasha EH, Chhatwal J. {Myths and misconceptions of within-cycle correction: a guide for modelers and decision makers}. PharmacoEconomics. 2016;34(1):13--22. }
 
 \leavevmode\hypertarget{ref-Alarid-Escudero2021}{}%
 \CSLLeftMargin{22. }
-\CSLRightInline{Alarid-Escudero F, Knowlton G, Easterly CA, et al. Decision analytic modeling package (dampack), \url{https://cran.r-project.org/web/packages/dampack/\%20https://github.com/DARTH-git/dampack} (2021).}
+\CSLRightInline{Alarid-Escudero F, Knowlton G, Easterly CA, Enns EA. Decision analytic modeling package (dampack) {[}Internet{]}. 2021. Available from: \url{https://cran.r-project.org/web/packages/dampack/\%20https://github.com/DARTH-git/dampack}}
 
 \leavevmode\hypertarget{ref-Briggs2012}{}%
 \CSLLeftMargin{23. }
-\CSLRightInline{Briggs AH, Weinstein MC, Fenwick EAL, et al. {Model Parameter Estimation and Uncertainty Analysis: A Report of the ISPOR-SMDM Modeling Good Research Practices Task Force Working Group-6.} \emph{Medical Decision Making} 2012; 32: 722--732.}
+\CSLRightInline{Briggs AH, Weinstein MC, Fenwick EAL, Karnon J, Sculpher MJ, Paltiel AD. {Model Parameter Estimation and Uncertainty Analysis: A Report of the ISPOR-SMDM Modeling Good Research Practices Task Force Working Group-6.} Medical Decision Making. 2012 Sep;32(5):722--32. }
 
 \leavevmode\hypertarget{ref-Briggs2002}{}%
 \CSLLeftMargin{24. }
-\CSLRightInline{Briggs AH, Goeree R, Blackhouse G, et al. {Probabilistic Analysis of Cost-Effectiveness Models: Choosing between Treatment Strategies for Gastroesophageal Reflux Disease}. \emph{Medical Decision Making}; 22: 290--308, \url{http://mdm.sagepub.com/cgi/doi/10.1177/027298902400448867} (2002).}
+\CSLRightInline{Briggs AH, Goeree R, Blackhouse G, O'Brien BJ. {Probabilistic Analysis of Cost-Effectiveness Models: Choosing between Treatment Strategies for Gastroesophageal Reflux Disease}. Medical Decision Making {[}Internet{]}. 2002 Jul;22(4):290--308. Available from: \url{http://mdm.sagepub.com/cgi/doi/10.1177/027298902400448867}}
 
 \leavevmode\hypertarget{ref-Stinnett1998b}{}%
 \CSLLeftMargin{25. }
-\CSLRightInline{Stinnett AA, Mullahy J. {Net Health Benefits: A New Framework for the Analysis of Uncertainty in Cost-Effectiveness Analysis}. \emph{Medical Decision Making}; 18: S68--S80, \url{http://mdm.sagepub.com/cgi/doi/10.1177/0272989X9801800209} (1998).}
+\CSLRightInline{Stinnett AA, Mullahy J. {Net Health Benefits: A New Framework for the Analysis of Uncertainty in Cost-Effectiveness Analysis}. Medical Decision Making {[}Internet{]}. 1998 Apr;18(2):S68--80. Available from: \url{http://mdm.sagepub.com/cgi/doi/10.1177/0272989X9801800209}}
 
 \leavevmode\hypertarget{ref-Alarid-Escudero2019}{}%
 \CSLLeftMargin{26. }
-\CSLRightInline{Alarid-Escudero F, Enns EA, Kuntz KM, et al. {"Time Traveling Is Just Too Dangerous" But Some Methods Are Worth Revisiting: The Advantages of Expected Loss Curves Over Cost-Effectiveness Acceptability Curves and Frontier}. \emph{Value in Health} 2019; 22: 611--618.}
+\CSLRightInline{Alarid-Escudero F, Enns EA, Kuntz KM, Michaud TL, Jalal H. {"Time Traveling Is Just Too Dangerous" But Some Methods Are Worth Revisiting: The Advantages of Expected Loss Curves Over Cost-Effectiveness Acceptability Curves and Frontier}. Value in Health. 2019;22(5):611--8. }
 
 \leavevmode\hypertarget{ref-Hawkins2005}{}%
 \CSLLeftMargin{27. }
-\CSLRightInline{Hawkins N, Sculpher M, Epstein D. {Cost-effectiveness analysis of treatments for chronic disease: Using R to incorporate time dependency of treatment response.} \emph{Medical Decision Making}; 25: 511--9, \url{http://www.ncbi.nlm.nih.gov/pubmed/16160207} (2005).}
+\CSLRightInline{Hawkins N, Sculpher M, Epstein D. {Cost-effectiveness analysis of treatments for chronic disease: Using R to incorporate time dependency of treatment response.} Medical Decision Making {[}Internet{]}. 2005;25(5):511--9. Available from: \url{http://www.ncbi.nlm.nih.gov/pubmed/16160207}}
 
 \leavevmode\hypertarget{ref-Krijkamp2018}{}%
 \CSLLeftMargin{28. }
-\CSLRightInline{Krijkamp EM, Alarid-Escudero F, Enns EA, et al. {Microsimulation Modeling for Health Decision Sciences Using R: A Tutorial}. \emph{Medical Decision Making}; 38: 400--422, \url{http://journals.sagepub.com/doi/10.1177/0272989X18754513} (2018).}
+\CSLRightInline{Krijkamp EM, Alarid-Escudero F, Enns EA, Jalal HJ, Hunink MGM, Pechlivanoglou P. {Microsimulation Modeling for Health Decision Sciences Using R: A Tutorial}. Medical Decision Making {[}Internet{]}. 2018 Apr;38(3):400--22. Available from: \url{http://journals.sagepub.com/doi/10.1177/0272989X18754513}}
 
 \end{CSLReferences}
 
