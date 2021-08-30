@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-[![DOI](https://zenodo.org/badge/357362984.svg)](https://zenodo.org/badge/latestdoi/357362984)
+[![DOI](https://zenodo.org/badge/357371663.svg)](https://zenodo.org/badge/latestdoi/357371663)
 
 # A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example
 
@@ -16,7 +16,8 @@ following manuscript:
     Example](#a-tutorial-on-time-dependent-cohort-state-transition-models-in-r-using-a-cost-effectiveness-analysis-example)
     <!-- (http://arxiv.org/abs/2001.07824). arXiv:200107824v1. 2021:1-37. -->
 
-<!-- The release that accompanies the published article has been archived in zenodo: https://zenodo.org/badge/latestdoi/357362984 -->
+The release that accompanies the published article has been archived in
+zenodo: <https://zenodo.org/badge/latestdoi/357371663>
 
 The
 [`R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/R)
@@ -46,15 +47,15 @@ accessed’ date):
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort
 > State-Transition Models in R using a Cost-Effectiveness Analysis
-> Example (<http://arxiv.org/abs/2001.07824>). arXiv:200107824v3.
-> 2021:1-26.
+> Example
+> <!-- (http://arxiv.org/abs/2001.07824). arXiv:200107824v3. 2021:1-26.  -->
 
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H (2021). R Code for A Tutorial on
 > Time-Dependent Cohort State-Transition Models in R using a
-> Cost-Effectiveness Analysis Example (Version v0.1.1). Zenodo.
-> [10.5281/zenodo.5223093](https://www.doi.org/10.5281/zenodo.5223093).
-> Last accessed 19 August 2021.
+> Cost-Effectiveness Analysis Example (Version v0.1.0). Zenodo.
+> [10.5281/zenodo.5338819](https://www.doi.org/10.5281/zenodo.5338819).
+> Last accessed 30 August 2021.
 
 If you adapted the code, you should indicate “Adapted from:” or “Based
 on” so it is understood that you modified the code. For more information
@@ -104,7 +105,7 @@ in R:
 -   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
     Pechlivanoglou P, Jalal H. [An Introductory Tutorial on Cohort
     State-Transition Models in R Using a Cost-Effectiveness Analysis
-    Example](http://arxiv.org/abs/2001.07824). arXiv:200107824v1.
+    Example](http://arxiv.org/abs/2001.07824). arXiv:200107824v3.
     2021:1-26,
 
 and understanding the use of multidimensional arrays to represent cSTM
