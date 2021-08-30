@@ -1,5 +1,5 @@
 ---
-title: "A Tutorial on Time-Dependent Cohort State-Transition Models in R"
+title: "A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example"
 subtitle: "Appendix"
 author: 
   - Fernando Alarid-Escudero, PhD^[Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico]
@@ -10,7 +10,9 @@ author:
   - Petros Pechlivanoglou, PhD^[The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada]
   - Hawre Jalal, MD, PhD^[University of Pittsburgh, Pittsburgh, PA, USA]
 date: '`r Sys.Date()`'
-output: pdf_document
+output: 
+  pdf_document:
+    keep_tex: yes
 classoption: landscape
 ---
 

@@ -226,7 +226,7 @@ Table: (\#tab:Timedep-cSTM-components-table) Core components of time-dependent c
 | $n_{S_{\text{tunnels}}}$| Number of states including tunnel states | `n_states_tunnels` |   |
 | $\mathbf{m}_{\text{tunnels}_0}$| Initial state vector for the model with tunnel states | `v_s_init_tunnels` |   |
 
-For a more detailed description of these components with their variable types, data structure, and R name, please see the Supplementary Materials.
+For a more detailed description of these components with their variable types, data structure, and R name, please see the Supplementary Material.
 
 # Case study: A Cost-effectiveness analysis using a time-dependent Sick-Sicker model
 

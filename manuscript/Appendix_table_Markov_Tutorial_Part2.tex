@@ -1,0 +1,343 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  landscape]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example},
+  pdfauthor={Fernando Alarid-Escudero, PhD; Eline Krijkamp, MSc; Eva A. Enns, PhD; Alan Yang, MSc; Myriam G.M. Hunink, PhD\^{}\textbackslash dagger; Petros Pechlivanoglou, PhD; Hawre Jalal, MD, PhD},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{A Tutorial on Time-Dependent Cohort State-Transition Models in R
+using a Cost-Effectiveness Analysis Example}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Appendix}
+\author{Fernando Alarid-Escudero, PhD\footnote{Division of Public
+  Administration, Center for Research and Teaching in Economics (CIDE),
+  Aguascalientes, AGS, Mexico} \and Eline Krijkamp,
+MSc\footnote{Department of Epidemiology and Department of Radiology,
+  Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva
+A. Enns, PhD\footnote{Division of Health Policy and Management,
+  University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan
+Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam
+G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision
+  Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros
+Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and
+  University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD,
+PhD\footnote{University of Pittsburgh, Pittsburgh, PA, USA}}
+\date{2021-08-30}
+
+\begin{document}
+\maketitle
+
+\hypertarget{cohort-tutorial-model-components}{%
+\subsection{Cohort tutorial model
+components}\label{cohort-tutorial-model-components}}
+
+This table contains an overview of the key model components used in the
+code for the Sick-Sicker example from the
+\href{http://darthworkgroup.com/publications/}{DARTH} manuscript: ``A
+Tutorial on Time-Dependent Cohort State-Transition Models in R''. The
+first column gives the mathematical notation for some of the model
+components that are used in the equations in the manuscript. The second
+column gives a description of the model component with the R name in the
+third column. The forth gives the data structure, e.g.~scalar, list,
+vector, matrix etc, with the according dimensions of this data structure
+in the fifth column. The final column indicated the type of data that is
+stored in the data structure, e.g.~numeric (5.2,6.3,7.4), category
+(A,B,C), integer (5,6,7), logical (TRUE, FALSE).
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.07}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.35}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.14}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.14}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.17}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.12}}@{}}
+\toprule
+Element & Description & R name & Data structure & Dimensions & Data
+type \\
+\midrule
+\endhead
+\(n_t\) & Time horizon & \texttt{n\_t} & scalar & & numeric \\
+\(v_s\) & Names of the health states & \texttt{v\_n} & vector &
+\texttt{n\_states} x 1 & character \\
+\(n_s\) & Number of health states & \texttt{n\_states} & scalar & &
+numeric \\
+\(n_{S_{tunnels}}\) & Number of health states with tunnels &
+\texttt{n\_states\_tunnels} scalar & & numeric & \\
+\(v_{str}\) & Names of the strategies & \texttt{v\_names\_str} & scalar
+& & character \\
+\(n_{str}\) & Number of strategies & \texttt{n\_str} & scalar & &
+character \\
+\(\mathbf{d_c}\) & Discount rate for costs & \texttt{d\_c} & scalar & &
+numeric \\
+\(\mathbf{d_e}\) & Discount rate for effects & \texttt{d\_e} & scalar &
+& numeric \\
+& Discount weights for costs & \texttt{v\_dwc} & vector & (\texttt{n\_t}
+x 1 ) + 1 & numeric \\
+& Discount weights for effects & \texttt{v\_dwe} & vector &
+(\texttt{n\_t} x 1 ) + 1 & numeric \\
+\(\mathbf{wcc}\) & Within-cycle correction weights using Simpson's 1/3
+rule & \texttt{v\_wcc} & vector & (\texttt{n\_t} x 1 ) + 1 & numeric \\
+\(age_{_0}\) & Age at baseline & \texttt{n\_age\_init} & scalar & &
+numeric \\
+\(age\) & Maximum age of follow up & \texttt{n\_age\_max} & scalar & &
+numeric \\
+\(M_{ad}\) & Cohort trace for age-dependency & \texttt{m\_M\_ad} &
+matrix & (\texttt{n\_t} + 1) x \texttt{n\_states} & numeric \\
+\(M_{tunnels}\) & Aggregated Cohort trace for state-dependency &
+\texttt{m\_M\_tunnels} & matrix & (\texttt{n\_t} + 1) x
+\texttt{n\_states} & numeric \\
+\(m_0\) & Initial state vector & \texttt{v\_s\_init} & vector & 1 x
+\texttt{n\_states} & numeric \\
+\(m_t\) & State vector in cycle t & \texttt{v\_mt} & vector & 1 x
+\texttt{n\_states} & numeric \\
+& & & & & \\
+& \textbf{Transition probabilities} & & & & \\
+\(p_{[H,S1]}\) & From Healthy to Sick conditional on surviving &
+\texttt{p\_HS1} & scalar & & numeric \\
+\(p_{[S1,H]}\) & From Sick to Healthy conditional on surviving &
+\texttt{p\_S1H} & scalar & & numeric \\
+\(p_{[S1,S2]}\) & From Sick to Sicker conditional on surviving &
+\texttt{p\_S1S2} & scalar & & numeric \\
+\(r_{[H,D]}\) & Constant rate of dying when Healthy (all-cause mortality
+rate) & \texttt{r\_HD} & scalar & & numeric \\
+\(hr_{[S1,H]}\) & Hazard ratio of death in Sick vs Healthy &
+\texttt{hr\_S1} & scalar & & numeric \\
+\(hr_{[S2,H]}\) & Hazard ratio of death in Sicker vs Healthy &
+\texttt{hr\_S2} & scalar & & numeric \\
+\(hr_{[S1,S2]_{trtB}}\) & Hazard ratio of becoming Sicker when Sick
+under treatment B & \texttt{hr\_S1S2\_trtB} & scalar & & numeric \\
+\(p_{[S1,S2]_{trtB}}\) & probability to become Sicker when Sick under
+treatment B conditional on surviving & \texttt{p\_S1S2\_trtB} & scalar &
+& numeric \\
+& & & & & \\
+& \textbf{Age-specific mortality} & & & & \\
+\(r_{[H,D,t]}\) & Age-specific background mortality rates &
+\texttt{v\_r\_HDage} & vector & \texttt{n\_t} x 1 & numeric \\
+\(r_{[S1,D,t]}\) & Age-specific mortality rates in the Sick state &
+\texttt{v\_r\_S1Dage} & vector & \texttt{n\_t} x 1 & numeric \\
+\(r_{[S2,D,t]}\) & Age-specific mortality rates in the Sicker state &
+\texttt{v\_r\_S2Dage} & vector & \texttt{n\_t} x 1 & numeric \\
+\(p_{[H,D,t]}\) & Age-specific mortality risk in the Healthy state &
+\texttt{v\_p\_HDage} & vector & \texttt{n\_t} x 1 & numeric \\
+\(p_{[S1,D,t]}\) & Age-specific mortality rates in the Sick state &
+\texttt{v\_p\_S1Dage} & vector & \texttt{n\_t} x 1 & numeric \\
+\(p_{[S2,D,t]}\) & Age-specific mortality rates in the Sicker state &
+\texttt{v\_p\_S2Dage} & vector & \texttt{n\_t} x 1 & numeric \\
+\(p_{[S1,S2, t]}\) & Time-dependent transition probabilities from sick
+to sicker & \texttt{v\_p\_S1S2\_tunnels} & vector & \texttt{n\_t} x 1 &
+numeric \\
+& & & & & \\
+& \textbf{Annual costs} & & & & \\
+& Healthy individuals & \texttt{c\_H} & scalar & & numeric \\
+& Sick individuals in Sick & \texttt{c\_S1} & scalar & & numeric \\
+& Sick individuals in Sicker & \texttt{c\_S2} & scalar & & numeric \\
+& Dead individuals & \texttt{c\_D} & scalar & & numeric \\
+& Additional costs treatment A & \texttt{c\_trtA} & scalar & &
+numeric \\
+& Additional costs treatment B & \texttt{c\_trtB} & scalar & &
+numeric \\
+& & & & & \\
+& \textbf{Utility weights} & & & & \\
+& Healthy individuals & \texttt{u\_H} & scalar & & numeric \\
+& Sick individuals in Sick & \texttt{u\_S1} & scalar & & numeric \\
+& Sick individuals in Sicker & \texttt{u\_S2} & scalar & & numeric \\
+& Dead individuals & \texttt{u\_D} & scalar & & numeric \\
+& Treated with treatment A & \texttt{u\_trtA} & scalar & & numeric \\
+& & & & & \\
+& \textbf{Transition weights} & & & & \\
+& Utility decrement of healthy individuals when transitioning to S1 &
+\texttt{du\_HS1} & scalar & & numeric \\
+& Cost of healthy individuals when transitioning to S1 & \texttt{ic\_S1}
+& scalar & & numeric \\
+& Cost of dying & \texttt{ic\_D} & scalar & & numeric \\
+& & & & & \\
+& \textbf{Lists} & & & & \\
+& Cohort traces for each strategy & \texttt{l\_m\_M} & list & &
+numeric \\
+& Transition arrays for each strategy & \texttt{l\_A\_A} & list & &
+numeric \\
+& number of tunnel states & \texttt{n\_tunnel\_size} & scalar & &
+numeric \\
+& tunnel names of the Sick state & \texttt{v\_Sick\_tunnel} & vector & 1
+x \texttt{n\_states} & numeric \\
+& state names including tunnel states & \texttt{v\_n\_tunnel} & vector &
+1 x \texttt{n\_states} & character \\
+& number of states including tunnel states & \texttt{n\_states\_tunnels}
+& scalar & & numeric \\
+& initial state vector for the model with tunnels &
+\texttt{v\_s\_init\_tunnels} & & & numeric \\
+& & & & & \\
+\(\mathbf{P}\) & Time-dependent transition probability array &
+\texttt{a\_P} & array & \texttt{n\_states} x \texttt{n\_states} x
+\texttt{n\_t} & numeric \\
+\(\mathbf{P}_{tunnels}\) & Transition probability array for the model
+with tunnels & \texttt{a\_P\_tunnels} & array &
+\texttt{n\_states\_tunnels} x \texttt{n\_states\_tunnels} x
+\texttt{n\_t} & numeric \\
+\(\mathbf{A}\) & Transition dynamics array & \texttt{a\_A} & array &
+\texttt{n\_states} x \texttt{n\_states} x (\texttt{n\_t} + 1) &
+numeric \\
+\(\mathbf{R_u}\) & Transition rewards for effects & \texttt{a\_R\_u} &
+array & \texttt{n\_states} x \texttt{n\_states} x (\texttt{n\_t} + 1) &
+numeric \\
+\(\mathbf{R_c}\) & Transition rewards for costs & \texttt{a\_R\_c} &
+array & \texttt{n\_states} x \texttt{n\_states} x (\texttt{n\_t} + 1) &
+numeric \\
+\(\mathbf{Y_u}\) & Expected effects per states per cycle &
+\texttt{a\_Y\_u} & array & \texttt{n\_states} x \texttt{n\_states} x
+(\texttt{n\_t} + 1) & numeric \\
+\(\mathbf{Y_c}\) & Expected costs per state per cycle & \texttt{a\_Y\_c}
+& array & \texttt{n\_states} x \texttt{n\_states} x (\texttt{n\_t} + 1)
+& numeric \\
+& & & & & \\
+& \textbf{Data structures} & & & & \\
+& Expected QALYs per cycle under a strategy & \texttt{v\_qaly\_str} &
+vector & 1 x (\texttt{n\_t} + 1) & numeric \\
+& Expected costs per cycle under a strategy & \texttt{v\_cost\_str} &
+vector & 1 x (\texttt{n\_t} + 1) & numeric \\
+& Total expected discounted QALYs for a strategy &
+\texttt{n\_tot\_qaly\_str} & scalar & & numeric \\
+& Total expected discounted costs for a strategy &
+\texttt{n\_tot\_cost\_str} & scalar & & numeric \\
+& Summary of the model outcomes & \texttt{df\_cea} & data frame & & \\
+& Summary of the model outcomes & \texttt{table\_cea} & table & & \\
+& Input parameters values of the model for the cost-effectiveness
+analysis & \texttt{df\_psa} & data frame & & \\
+\bottomrule
+\end{longtable}
+
+\hypertarget{table-ii-input-parameters-for-probabilistic-analysis-of-the-time-dependent-3-state-model}{%
+\subsubsection{Table II: Input parameters for probabilistic analysis of
+the time-dependent 3-state
+model}\label{table-ii-input-parameters-for-probabilistic-analysis-of-the-time-dependent-3-state-model}}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.23}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.21}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.25}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.21}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 8\tabcolsep) * \real{0.09}}@{}}
+\toprule
+Parameter & Distribution & Distribution values & Parameter mean &
+Parameter standard error \\
+\midrule
+\endhead
+Number of simulation & \texttt{n\_sim} & 1000 & & \\
+Annual transition probabilities & & & & \\
+- Disease onset (Healthy to Sick) & \(Beta\) & \(\alpha\) = 30,
+\(\beta\) = 170 & 0.15 & 0.026 \\
+- Recovery (Sick to Healthy) & \(Beta\) & \(\alpha\) = 60, \(\beta\) =
+60 & 0.5 & 0.045 \\
+- Disease progression (Sick to Sicker) in the age-dependent model &
+\(Beta\) & \(\alpha\) = 84, \(\beta\) = 716 & 0.106 & 0.011 \\
+Risks of disease and treatment & & & & \\
+- Hazard ratio of death in Sick vs Healthy & \(Lognormal\) &
+\(log(\mu)\) = \(log(3)\) , \(log(\sigma)\) = 0.01 & 3 & 0.03 \\
+- Hazard ratio of death in Sicker vs Healthy & \(Lognormal\) &
+\(log(\mu)\) = \(log(10)\) , \(log(\sigma)\) = 0.2 & 10 & 0.2 \\
+- Hazard ratio of Sick to Sicker under treatment B & \(Lognormal\) &
+\(log(\mu)\) = \(log(0.6)\) , \(log(\sigma)\) = 0.2 & 0.60 & 0.013 \\
+Annual costs & & & & \\
+- Healthy individuals & \(Gamma\) & \(Shape\) = 100 , \(Scale\) = 20 &
+2000 & 200 \\
+- Sick individuals in Sick & \(Gamma\) & \(Shape\) = 177.8, \(Scale\) =
+22.5 & 4000 & 300 \\
+- Sick individuals in Sicker & \(Gamma\) & \(Shape\) = 225 , \(Scale\) =
+66.7 & 15000 & 1000 \\
+- Cost of treatment A for individuals in Sick or Sicker & \(Gamma\) &
+\(Shape\) = 73.5, \(Scale\) = 163.3 & 12000 & 1400 \\
+- Cost of treatment B for individuals in Sick or Sicker & \(Gamma\) &
+\(Shape\) = 86.2, \(Scale\) = 150.8 & 13050 & 1430 \\
+Utility weights & & & & \\
+- Healthy individuals & \(Beta\) & \(\alpha\) = 200, \(\beta\) = 3 &
+0.985 & 0.008 \\
+- Sick individuals in Sick & \(Beta\) & \(\alpha\) = 130, \(\beta\) = 45
+& 0.74 & 0.033 \\
+- Sick individuals in Sicker & \(Beta\) & \(\alpha\) = 230, \(\beta\) =
+230 & 0.5 & 0.023 \\
+- Individuals treated with treatment A & \(Beta\) & \(\alpha\) = 300,
+\(\beta\) = 15 & 0.95 & 0.012 \\
+Transition rewards & & & & \\
+- Disutility when transitioning from Healthy to Sick & \(Beta\) &
+\(\alpha\) = 11, \(\beta\) = 1088 & 0.01 & 0.003 \\
+- Increase in cost when transitioning from Healthy to Sick & \(Gamma\) &
+\(\alpha\) = 25, \(\beta\) = 40 & 1000 & 195 \\
+- Increase in cost when dying & \(Gamma\) & \(\alpha\) = 100, \(\beta\)
+= 20 & 2000 & 200 \\
+\bottomrule
+\end{longtable}
+
+\end{document}
