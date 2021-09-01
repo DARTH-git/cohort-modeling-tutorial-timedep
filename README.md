@@ -13,8 +13,8 @@ following manuscript:
 -   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
     Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
     State-Transition Models in R using a Cost-Effectiveness Analysis
-    Example](#a-tutorial-on-time-dependent-cohort-state-transition-models-in-r-using-a-cost-effectiveness-analysis-example)
-    <!-- (http://arxiv.org/abs/2001.07824). arXiv:200107824v1. 2021:1-37. -->
+    Example](https://arxiv.org/abs/2108.13552). arXiv:2108.13552v1.
+    2021:1-37.
 
 The release that accompanies the published article has been archived in
 zenodo: <https://zenodo.org/badge/latestdoi/357371663>
@@ -47,8 +47,8 @@ accessed’ date):
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort
 > State-Transition Models in R using a Cost-Effectiveness Analysis
-> Example
-> <!-- (http://arxiv.org/abs/2001.07824). arXiv:200107824v3. 2021:1-26.  -->
+> Example (<https://arxiv.org/abs/2108.13552>). arXiv:2108.13552v1.
+> 2021:1-37.
 
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H (2021). R Code for A Tutorial on

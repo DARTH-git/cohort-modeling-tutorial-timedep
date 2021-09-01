@@ -9,8 +9,7 @@ output: github_document
 
 This GitHub repository provides the code of the tutorial on how to implement time-dependent cohort state-transition models (cSTMs) in R using a cost-effectiveness analysis (CEA) example, explained in the following manuscript: 
 
-- Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example]
-<!-- (http://arxiv.org/abs/2001.07824). arXiv:200107824v1. 2021:1-37. -->
+- Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example](https://arxiv.org/abs/2108.13552). arXiv:2108.13552v1. 2021:1-37.
 
 The release that accompanies the published article has been archived in zenodo: https://zenodo.org/badge/latestdoi/357371663
 
@@ -24,8 +23,7 @@ The [`R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/mai
 
 You can cite the R code in this repository like this "we based our analysis using the R code from Alarid-Escudero F et al. (2021)". Here is the full bibliographic reference to include in your reference list for the manuscript and the R code (don't forget to update the 'last accessed' date):
 
-> Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example 
-<!-- (http://arxiv.org/abs/2001.07824). arXiv:200107824v3. 2021:1-26.  -->
+> Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example (https://arxiv.org/abs/2108.13552). arXiv:2108.13552v1. 2021:1-37.
 
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H (2021). R Code for A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example (Version v0.1.0). Zenodo. [10.5281/zenodo.5338819](https://www.doi.org/10.5281/zenodo.5338819). Last accessed 30 August 2021.
 
