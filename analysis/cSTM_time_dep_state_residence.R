@@ -77,7 +77,7 @@ v_names_states <- c("H",  # Healthy (H)
                     "D")  # Dead (D)
 
 ## Tunnel inputs
-# Number of tunnels
+# Number of tunnels, note: in our example the number of tunnels is identical to the number of cycles
 n_tunnel_size <- n_cycles
 # Vector with cycles for tunnels
 v_cycles_tunnel <- 1:n_tunnel_size
