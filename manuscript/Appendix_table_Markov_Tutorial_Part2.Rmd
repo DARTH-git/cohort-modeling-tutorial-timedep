@@ -41,8 +41,8 @@ This table contains an overview of the key model components used in the code for
 | $age_{_0}$   | Age at baseline                  | `n_age_init` | scalar          |                   | numeric     |
 | $age$        | Maximum age of follow up         | `n_age_max`  | scalar          |                   | numeric     |
 | \(M\)        | Cohort trace matrix  | `m_M`     | matrix          | (`n_t` + 1) x `n_states`    | numeric     |
-| \(M_{ad}\)   | Simulation time-dependent cohort trace matrix  | `m_M_ad`     | matrix          | (`n_t` + 1) x `n_states`    | numeric     |
 | \(M_{tunnels}\) | Aggregated Cohort trace for state-dependency  | `m_M_tunnels`  | matrix   | (`n_t` + 1) x `n_states`    | numeric     |
+|              | List of the cohort trace matrix for all strategies | `l_m_M`  | list   |                   | numeric     |
 | \(m_0\)      | Initial state vector             | `v_m_init`   | vector          | 1 x `n_states`         | numeric     |
 | \(m_t\)      | State vector in cycle t          | `v_mt`       | vector          | 1 x `n_states`         | numeric     |
 |              |                                  |              |                 |                        |             |
@@ -62,12 +62,11 @@ This table contains an overview of the key model components used in the code for
 | $hr_{[S1,S2]_{trtB}}$ | Hazard ratio of becoming Sicker when Sick under treatment B    | `hr_S1S2_trtB`| scalar   |  | numeric     |
 | $p_{[S1,S2]_{trtB}}$ | probability to become Sicker when Sick under treatment B conditional on surviving | `p_S1S2_trtB`| scalar   |  | numeric     |
 |              |                                  |              |                 |                        |             |
-|              |  **Weibull parameters**    |              |                 |                   |             |  
-| $\lambda$    | scale of the Weibull hazard function  | `p_S1S2_lambda`      | scalar          |                   | numeric     |
-| $\gamma$     | shape  of the Weibull hazard function | `p_S1S2_lambda`      | scalar          |                   | numeric     |
-|              | vector of transition probability to become Sicker when Sick when incorporating time dependency on state residence | `v_p_S1S2_tunnels`      | vector          |  1 x `n_states_tunnels`                | numeric     |
+|              |  **Weibull parameters for transition probability of becoming Sicker when Sick conditional on surviving** |              |                 |                   |             |  
+| $\lambda$    | scale of the Weibull hazard function  | `p_S1S2_scale`      | scalar          |                   | numeric     |
+| $\gamma$     | shape  of the Weibull hazard function | `p_S1S2_shape`      | scalar          |                   | numeric     |
 |              |                                  |              |                 |                        |             |
-|               |  **Simulation-time dependent mortality**                      |              |                 |                   |             | 
+|               |  **Simulation-time dependent mortality**                      |              |                 |                   |             |
 | $r_{[H,D,t]}$ | Age-specific background mortality rates          | `v_r_HDage`   | vector   | `n_t` x 1   | numeric     |
 | $r_{[S1,D,t]}$| Age-specific mortality rates in the Sick state   | `v_r_S1Dage`  | vector   | `n_t` x 1   | numeric     |
 | $r_{[S2,D,t]}$| Age-specific mortality rates in the Sicker state | `v_r_S2Dage`  | vector   | `n_t` x 1   | numeric     |
@@ -75,6 +74,7 @@ This table contains an overview of the key model components used in the code for
 | $p_{[S1,D,t]}$| Age-specific mortality rates in the Sick state   | `v_p_S1Dage`  | vector   | `n_t` x 1   | numeric     |
 | $p_{[S2,D,t]}$| Age-specific mortality rates in the Sicker state | `v_p_S2Dage`  | vector   | `n_t` x 1   | numeric     |
 | $p_{[S1,S2, t]}$ | Time-dependent transition probabilities from sick to sicker  |`v_p_S1S2_tunnels` | vector | `n_t` x 1 | numeric |
+| $r_{[S1,S2, t]}$ | State-residence-dependent transition rate of becoming Sicker when Sick |`v_r_S1S2_tunnels` | vector | `n_t` x 1 | numeric |
 |               |                                |               |                 |                   |           |
 |        | **Annual costs**                      |               |                 |                   |           |
 |              | Healthy individuals             | `c_H`         | scalar          |                   | numeric   |
@@ -83,6 +83,8 @@ This table contains an overview of the key model components used in the code for
 |              | Dead individuals                | `c_D`         | scalar          |                   | numeric   | 
 |              | Additional costs treatment A    | `c_trtA`      | scalar          |                   | numeric   | 
 |              | Additional costs treatment B    | `c_trtB`      | scalar          |                   | numeric   | 
+|              | Vector of state costs for a strategy       | `v_c_str`    |  vector        | 1 x `n_states`    | numeric   |
+|              | List that stores the vectors of state costs for each strategy     | `l_c`    |  List        |     | numeric   |
 |              |                                 |               |                 |                   |           |
 |              | **Utility weights**             |               |                 |                   |           |
 |              |  Healthy individuals            | `u_H`         | scalar          |                   | numeric   |
@@ -90,6 +92,9 @@ This table contains an overview of the key model components used in the code for
 |              |  Sick individuals in Sicker     | `u_S2`        | scalar          |                   | numeric   |
 |              |  Dead individuals               | `u_D`         | scalar          |                   | numeric   | 
 |              |  Treated with treatment A       | `u_trtA`      | scalar          |                   | numeric   | 
+|              |  Vector of state utilities for a strategy        | `v_u_str`    |  vector        | 1 x `n_states`    | numeric   |
+|              |  Vector of S1 utilities when including state-residency for a strategy SoC for         | `v_u_S1_SoC`    |  vector        | 1 x `n_tunnel_size`    | numeric   |
+|              |  List that stores the vectors of state utilities for each strategy     | `l_u`    |  List        |     | numeric   |
 |              |                                 |               |                 |                   |           |
 |              | **Transition weights**          |               |                 |                   |           |
 |              | Utility decrement of healthy individuals when transitioning to S1 | `du_HS1`| scalar  | | numeric |
@@ -98,60 +103,38 @@ This table contains an overview of the key model components used in the code for
 |              |                                 |               |                 |                   |           |
 |              | **Tunnel state structures**                       |               |                 |                   |           |
 |              | number of tunnel states         | `n_tunnel_size` | scalar        |                   |  numeric  |
+|              | vector with cycles for  tunnels states     | `v_cycles_tunnel` | vector        |     1 x `n_tunnel_size`       |  numeric  |
 |              | tunnel names of the Sick state  | `v_Sick_tunnel` | vector        | 1 x `n_states`    | numeric   |
 |              | state names including tunnel states | `v_names_states_tunnels` | vector       | 1 x `n_states_tunnels`    | character |
 |              | number of states including tunnel states | `n_states_tunnels`     | scalar   |        | numeric   |
-|              | Initial state vector for the model with tunnels       |  `v_m_init_tunnels` | vector     | 1 x `n_states_tunnels`   | numeric   |
+|              | Initial state vector for the model with tunnels  |  `v_m_init_tunnels` | vector  | 1 x `n_states_tunnels`   | numeric   |
 |              |                                  |              |                 |                        |             |
 | \(\mathbf{P}\)| Time-dependent transition probability array  | `a_P`  | array  | `n_states` x `n_states` x `n_t` | numeric |
 | \(\mathbf{P}_{tunnels}\)| Transition probability array for the model with tunnels  | `a_P_tunnels`  | array  |  `n_states_tunnels` x `n_states_tunnels` x `n_t` | numeric |
 | \(\mathbf{A}\)| Transition dynamics array                    |`a_A`   | array  |`n_states` x `n_states` x (`n_t` + 1)  | numeric |
+|              | List of the transition dynamics arrays for all strategies | `l_m_A`  | list   |                   | numeric     |
 | \(\mathbf{R_u}\) | Transition rewards for effects            |`a_R_u` | array  |`n_states` x `n_states` x (`n_t` + 1)   | numeric   |
 | \(\mathbf{R_c}\) | Transition rewards for costs              |`a_R_c` | array  |`n_states` x `n_states` x (`n_t` + 1)  | numeric   |
 | \(\mathbf{Y_u}\) | Expected effects per states per cycle     |`a_Y_u` | array  |`n_states` x `n_states` x (`n_t` + 1)   | numeric   |
 | \(\mathbf{Y_c}\) | Expected costs per state per cycle        |`a_Y_c` | array  |`n_states` x `n_states` x (`n_t` + 1)  | numeric   |
-|              |                                  |              |                 |                        |             |
-|              |  **Data structures**                           |                  |               |                    |           |  
+|              |                                             |           |        |                    |             |      |  
 |              | Expected QALYs per cycle under a strategy      | `v_qaly_str`     | vector        | 1 x (`n_t` + 1)    | numeric   |
 |              | Expected costs per cycle under a strategy      | `v_cost_str`     | vector        | 1 x (`n_t` + 1)    | numeric   |
-|              | Total expected discounted QALYs for a strategy | `n_tot_qaly_str` | scalar        |                    | numeric   |
-|              | Total expected discounted costs for a strategy | `n_tot_cost_str` | scalar        |                    | numeric   |
+|              | Vector of expected discounted QALYs for each strategy  | `v_tot_qaly`  |  vector  |    1 x `n_states`      | numeric   |
+|              | Vector of expected discounted costs for each strategy  | `v_tot_cost`|  vector    |  1 x `n_states`            | numeric   |
 |              | Summary matrix with costs and QALYS per strategy| `m_outcomes`    | table          |  `n_states`  x 2   |           |
 |              | Summary of the model outcomes                  | `df_cea`         | data frame    |                    |           |
 |              | Summary of the model outcomes                  | `table_cea`     | table         |                    |           |
 |              | Input parameters values of the model for the cost-effectiveness analysis   | `df_psa` | data frame  | |          |
+|              |  *NOTE: these structures can have `_strX` to indicate the strategy of interest          |            |          |            | 
+|              |                                             |           |        |                    |             |      |  
 |              |  **Probabilistic analysis  structures**         |               |                 |                   |             |
 |              | Number of PSA iterations         | `n_sim`      | scalar          |                   | numeric     |
-|              | Data frame with PSA input values for each iteration    | `df_psa_input`  | table          |                    |           |
-|              | Data frame to store the accumulated cost per strategy for each PSA iteration    | `df_c`  | table          |      `n_sim`  x `n_states `              |    numeric       |
-|              | Data frame to store the accumulated effects per strategy for each PSA iteration    | `df_e`  | table          |      `n_sim`  x `n_states `              |    numeric       |
+|              | List that stores all the values of the input parameters     | `l_params_all`    |  list        |     | numeric   |
+|              | Data frame with the parameter values for each PSA iteration    | `df_psa_input`    |  data frame        |     | numeric   |
+|              | Vector with the names of all the input parameters    | `v_names_params`    |  vector      |     | character   |
+|              | List with the model outcomes of the PSA for all strategies    | `l_psa`    |  list        |     | numeric   |
+|              | Vector with a sequence of relevant willingness-to-pay values    | `v_wtp`    |  vector      |     | numeric   |
+|              | Data frame to store expected costs and effects for each strategy from the PSA    | `df_out_ce_psa`  | data frame          |     |    numeric       |
+|              | Data frame to store incremental cost-effectiveness ratios (ICERs) from the PSA    | `df_cea_psa`  | data frame          |     |    numeric       |
 |              |     For more details about the PSA structures read the vignettes of `dampack`                            |               |                 |                   |           |
-
-
-### Table II: Input parameters for probabilistic analysis of the time-dependent 3-state model
-| Parameter              | Distribution         | Distribution values      | Parameter mean       | Parameter standard error|
-|------------------------|----------------------|--------------------------|----------------------|---------|
-| Number of simulation   | `n_sim`              | 1000                     |                      |         |
-| Annual transition probabilities |             |                          |                      |         |
-| - Disease onset (Healthy to Sick)                          |$Beta$ | \(\alpha\) = 30, \(\beta\) = 170     | 0.15 |   0.026 |
-| - Recovery (Sick to Healthy)                               |$Beta$ | \(\alpha\) = 60, \(\beta\) = 60     | 0.5   |   0.045 |
-| - Disease progression (Sick to Sicker) in the age-dependent model |$Beta$     | \(\alpha\) = 84, \(\beta\) = 716    | 0.106|   0.011  |
-| Risks of disease and treatment  |             |                          |                      |         |
-| - Hazard ratio of death in Sick vs Healthy               |$Lognormal$ | $log(\mu)$ = $log(3)$   ,  $log(\sigma)$ = 0.01      | 3    |   0.03  |
-| - Hazard ratio of death in Sicker vs Healthy             |$Lognormal$ | $log(\mu)$ = $log(10)$  ,  $log(\sigma)$ = 0.2       | 10   |   0.2     |
-| - Hazard ratio of Sick to Sicker under treatment B       |$Lognormal$ | $log(\mu)$ = $log(0.6)$  , $log(\sigma)$ = 0.2       | 0.60 |   0.013   |
-| Annual costs                                               |            |                                     |     |         |
-| - Healthy individuals                                      |$Gamma$     | $Shape$ = 100  , $Scale$ = 20      | 2000 |   200   |
-| - Sick individuals in Sick                                 |$Gamma$     | $Shape$ = 177.8, $Scale$ = 22.5    | 4000 |   300   |
-| - Sick individuals in Sicker                               |$Gamma$     | $Shape$ = 225  , $Scale$ = 66.7    | 15000|   1000  |
-| - Cost of treatment A for individuals in Sick or Sicker    |$Gamma$     | $Shape$ = 73.5,  $Scale$ = 163.3   | 12000|   1400  |
-| - Cost of treatment B for individuals in Sick or Sicker    |$Gamma$     | $Shape$ = 86.2,  $Scale$ = 150.8   | 13050|   1430  |
-| Utility weights                                            |            |                                    |      |         |
-| - Healthy individuals                                      |$Beta$      | \(\alpha\) = 200, \(\beta\) = 3    | 0.985|   0.008 |
-| - Sick individuals in Sick                                 |$Beta$      | \(\alpha\) = 130, \(\beta\) = 45   | 0.74 |   0.033 |
-| - Sick individuals in Sicker                               |$Beta$      | \(\alpha\) = 230, \(\beta\) = 230  | 0.5  |   0.023 |
-| - Individuals treated with treatment A                     |$Beta$      | \(\alpha\) = 300, \(\beta\) = 15   | 0.95 |   0.012 |
-| Transition rewards                                         |            |                                    |      |         |
-| - Disutility when transitioning from Healthy to Sick       |$Beta$      | \(\alpha\) = 11,  \(\beta\) = 1088 | 0.01 |   0.003 | 
-| - Increase in cost when transitioning from Healthy to Sick |$Gamma$     | \(\alpha\) = 25,  \(\beta\) = 40   | 1000 |   195   |
-| - Increase in cost when dying                              |$Gamma$     | \(\alpha\) = 100, \(\beta\) = 20   | 2000 |   200   |

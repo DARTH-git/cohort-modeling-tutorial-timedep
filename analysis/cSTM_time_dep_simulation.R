@@ -209,15 +209,15 @@ check_sum_of_transition_array(a_P_strAB, n_states = n_states, n_cycles = n_cycle
 #### Run Markov model ####
 ## Initial state vector
 # All starting healthy
-v_s_init <- c(H = 1, S1 = 0, S2 = 0, D = 0) # initial state vector
-v_s_init
+v_m_init <- c(H = 1, S1 = 0, S2 = 0, D = 0) # initial state vector
+v_m_init
 
 ## Initialize cohort trace for age-dependent cSTM for strategies SoC and A
 m_M_SoC <- matrix(0, 
                  nrow     = (n_cycles + 1), ncol = n_states, 
                  dimnames = list(0:n_cycles, v_names_states))
 # Store the initial state vector in the first row of the cohort trace
-m_M_SoC[1, ] <- v_s_init
+m_M_SoC[1, ] <- v_m_init
 ## Initialize cohort trace for strategies A, B, and AB
 # Structure and initial states are the same as for SoC
 m_M_strA  <- m_M_SoC # Strategy A
@@ -230,7 +230,7 @@ a_A_SoC <- array(0,
              dim      = c(n_states, n_states, n_cycles + 1),
              dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 # Set first slice of a_A_SoC with the initial state vector in its diagonal
-diag(a_A_SoC[, , 1]) <- v_s_init
+diag(a_A_SoC[, , 1]) <- v_m_init
 # Initialize transition-dynamics array for strategies A, B, and AB
 # Structure and initial states are the same as for SoC
 a_A_strA  <- a_A_SoC
@@ -261,16 +261,16 @@ for(t in 1:n_cycles){
 }
 
 ## Store the cohort traces in a list
-l_m_M <- list(SoC = m_M_SoC,
+l_m_M <- list(SoC =  m_M_SoC,
               A   =  m_M_SoC,
               B   =  m_M_strB,
-              AB  = m_M_strB)
+              AB  =  m_M_strB)
 names(l_m_M) <- v_names_str
 ## Store the transition array for each strategy in a list
-l_a_A <- list(SoC = a_A_SoC,
+l_a_A <- list(SoC =  a_A_SoC,
               A   =  a_A_SoC,
               B   =  a_A_strB,
-              AB  = a_A_strB)
+              AB  =  a_A_strB)
 names(l_a_A) <- v_names_str
 
 #### Plot Outputs ####
@@ -351,10 +351,10 @@ l_u   <- list(SoC = v_u_SoC,
               B   =  v_u_strB,
               AB  = v_u_strAB)
 ## Store the vectors of state cost for each strategy in a list 
-l_c   <- list(SoC = v_c_SoC,
+l_c   <- list(SoC =  v_c_SoC,
               A   =  v_c_strA,
               B   =  v_c_strB,
-              AB  = v_c_strAB)
+              AB  =  v_c_strAB)
 
 # assign strategy names to matching items in the lists
 names(l_u) <- names(l_c) <- v_names_str

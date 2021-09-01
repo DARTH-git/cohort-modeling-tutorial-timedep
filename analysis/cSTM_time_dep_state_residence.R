@@ -257,14 +257,14 @@ check_sum_of_transition_array(a_P_tunnels_strAB, n_states = n_states_tunnels, n_
 #### Run Markov model ####
 ## Initial state vector
 # All starting healthy
-v_s_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
+v_m_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
 
 ## Initialize cohort trace for history-dependent cSTM
 m_M_tunnels_SoC <- matrix(0, 
                       nrow     = (n_cycles + 1), ncol = n_states_tunnels, 
                       dimnames = list(0:n_cycles, v_names_states_tunnels))
 # Store the initial state vector in the first row of the cohort trace
-m_M_tunnels_SoC[1, ] <- v_s_init_tunnels
+m_M_tunnels_SoC[1, ] <- v_m_init_tunnels
 
 ## Initialize cohort trace for strategies A, B, and AB
 # Structure and initial states are the same as for SoC
@@ -277,7 +277,7 @@ a_A_tunnels_SoC <- array(0,
                      dim = c(n_states_tunnels, n_states_tunnels, n_cycles + 1),
                      dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:n_cycles))
 # Set first slice of A with the initial state vector in its diagonal
-diag(a_A_tunnels_SoC[, , 1]) <- v_s_init_tunnels
+diag(a_A_tunnels_SoC[, , 1]) <- v_m_init_tunnels
 # Initialize transition-dynamics array for strategies A, B, and AB
 # Structure and initial states are the same as for SoC
 a_A_tunnels_strA  <- a_A_tunnels_SoC

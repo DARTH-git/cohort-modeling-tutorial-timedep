@@ -525,14 +525,14 @@ for(t in 1:n_cycles){
 ## ----------------------------------------------------------------------------------------------------------------
 # Create aggregated trace
 m_M_tunnels_sum <- cbind(H = m_M_tunnels[, "H"], 
-                         S1 = rowSums(m_M_tunnels[, which(v_names_states=="S1"):
+                         S1 = rowSums(m_M_tunnels[, which(v_names_states == "S1"):
                                                     (n_tunnel_size +1)]), 
                          S2 = m_M_tunnels[, "S2"],
                          D = m_M_tunnels[, "D"])
 
 
 ## ----Sick-Sicker-TimeDependent-Surv------------------------------------------------------------------------------
-v_S_ad <- rowSums(m_M_ad[, -which(v_names_states=="D")]) # vector with survival curve
+v_S_ad <- rowSums(m_M_ad[, -which(v_names_states == "D")]) # vector with survival curve
 
 
 ## ----Sick-Sicker-Surv-TimeDep, echo=FALSE, fig.cap='Survival curve of time-dependent cSTM', message=FALSE, warning=FALSE, fig.pos="H"----
