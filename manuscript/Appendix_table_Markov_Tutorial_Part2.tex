@@ -106,16 +106,17 @@ components}\label{cohort-tutorial-model-components}}
 
 This table contains an overview of the key model components used in the
 code for the Sick-Sicker example from the
-\href{http://darthworkgroup.com/publications/}{DARTH} manuscript: ``A
-Tutorial on Time-Dependent Cohort State-Transition Models in R''. The
-first column gives the mathematical notation for some of the model
-components that are used in the equations in the manuscript. The second
-column gives a description of the model component with the R name in the
-third column. The forth gives the data structure, e.g.~scalar, list,
-vector, matrix etc, with the according dimensions of this data structure
-in the fifth column. The final column indicated the type of data that is
-stored in the data structure, e.g.~numeric (5.2,6.3,7.4), category
-(A,B,C), integer (5,6,7), logical (TRUE, FALSE).
+\href{http://darthworkgroup.com/}{DARTH} manuscript:
+\href{https://arxiv.org/abs/2108.13552}{``A Tutorial on Time-Dependent
+Cohort State-Transition Models in R''}. The first column gives the
+mathematical notation for some of the model components that are used in
+the equations in the manuscript. The second column gives a description
+of the model component with the R name in the third column. The forth
+gives the data structure, e.g.~scalar, list, vector, matrix etc, with
+the according dimensions of this data structure in the fifth column. The
+final column indicated the type of data that is stored in the data
+structure, e.g.~numeric (5.2,6.3,7.4), category (A,B,C), integer
+(5,6,7), logical (TRUE, FALSE).
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.07}}
@@ -141,18 +142,18 @@ numeric \\
 & & character \\
 \(n_{str}\) & Number of strategies & \texttt{n\_str} & scalar & &
 character \\
-\(\mathbf{d_c}\) & Discount rate for costs & \texttt{d\_c} & scalar & &
+\(d_c\) & Discount rate for costs & \texttt{d\_c} & scalar & &
 numeric \\
-\(\mathbf{d_e}\) & Discount rate for effects & \texttt{d\_e} & scalar &
-& numeric \\
-& Discount weights for costs & \texttt{v\_dwc} & vector & (\texttt{n\_t}
-x 1 ) + 1 & numeric \\
-& Discount weights for effects & \texttt{v\_dwe} & vector &
-(\texttt{n\_t} x 1 ) + 1 & numeric \\
+\(d_e\) & Discount rate for effects & \texttt{d\_e} & scalar & &
+numeric \\
+\(\mathbf{d_c}\) & Discount weights vector for costs & \texttt{v\_dwc} &
+vector & (\texttt{n\_t} x 1 ) + 1 & numeric \\
+\(\mathbf{d_e}\) & Discount weights vector for effects & \texttt{v\_dwe}
+& vector & (\texttt{n\_t} x 1 ) + 1 & numeric \\
 & Sequence of cycle numbers & \texttt{v\_cycles} & vector &
 (\texttt{n\_t} x 1 ) + 1 & numeric \\
-\(\mathbf{wcc}\) & Within-cycle correction weights using Simpson's 1/3
-rule & \texttt{v\_wcc} & vector & (\texttt{n\_t} x 1 ) + 1 & numeric \\
+\(\mathbf{wcc}\) & Within-cycle correction weights & \texttt{v\_wcc} &
+vector & (\texttt{n\_t} x 1 ) + 1 & numeric \\
 \(age_{_0}\) & Age at baseline & \texttt{n\_age\_init} & scalar & &
 numeric \\
 \(age\) & Maximum age of follow up & \texttt{n\_age\_max} & scalar & &
@@ -166,11 +167,12 @@ numeric \\
 & list & & numeric \\
 \(m_0\) & Initial state vector & \texttt{v\_m\_init} & vector & 1 x
 \texttt{n\_states} & numeric \\
-\(m_t\) & State vector in cycle t & \texttt{v\_mt} & vector & 1 x
+\(m_t\) & State vector in cycle \(t\) & \texttt{v\_mt} & vector & 1 x
 \texttt{n\_states} & numeric \\
 & & & & & \\
 & \textbf{Life table input} & & & & \\
-& State vector in cycle t & \texttt{lt\_usa\_2005} & list & & numeric \\
+& State vector in cycle \(t\) & \texttt{lt\_usa\_2005} & list & &
+numeric \\
 & Vector of age-specific mortality rates & \texttt{v\_r\_mort\_by\_age}
 & vector & & numeric \\
 & & & & & \\
@@ -299,8 +301,6 @@ numeric \\
 \(\mathbf{Y_c}\) & Expected costs per state per cycle & \texttt{a\_Y\_c}
 & array & \texttt{n\_states} x \texttt{n\_states} x (\texttt{n\_t} + 1)
 & numeric \\
-& *NOTE: these structures can have \texttt{\_strX} to indicate the
-strategy of interest & & & & \\
 & & & & & \\
 & Expected QALYs per cycle under a strategy & \texttt{v\_qaly\_str} &
 vector & 1 x (\texttt{n\_t} + 1) & numeric \\
@@ -316,6 +316,8 @@ vector & 1 x (\texttt{n\_t} + 1) & numeric \\
 & Summary of the model outcomes & \texttt{table\_cea} & table & & \\
 & Input parameters values of the model for the cost-effectiveness
 analysis & \texttt{df\_psa} & data frame & & \\
+& *NOTE: these structures can have \texttt{\_strX} to indicate the
+strategy of interest & & & & \\
 & & & & & \\
 & \textbf{Probabilistic analysis structures} & & & & \\
 & Number of PSA iterations & \texttt{n\_sim} & scalar & & numeric \\
@@ -333,8 +335,8 @@ analysis & \texttt{df\_psa} & data frame & & \\
 the PSA & \texttt{df\_out\_ce\_psa} & data frame & & numeric \\
 & Data frame to store incremental cost-effectiveness ratios (ICERs) from
 the PSA & \texttt{df\_cea\_psa} & data frame & & numeric \\
-& For more details about the PSA structures read the vignettes of
-\texttt{dampack} & & & & \\
+& For more details about the PSA structures read \texttt{dampack}'s
+vignettes & & & & \\
 \bottomrule
 \end{longtable}
 

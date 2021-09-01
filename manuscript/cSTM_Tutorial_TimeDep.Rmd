@@ -217,14 +217,14 @@ Table: (\#tab:Timedep-cSTM-components-table) Core components of time-dependent c
 | Element | Description               | R name |   |
 |---------|---------------------------|:------:|---|
 | $n_S$   | Number of states          | `n_states`|   |
-| $\mathbf{m}_0$   | Initial state vector      | `v_s_init` |   |
+| $\mathbf{m}_0$   | Initial state vector      | `v_m_init` |   |
 | $\mathbf{m}_t$   | State vector in cycle $t$ | `v_mt` |   |
 | $M$     | Cohort trace matrix       | `m_M` |   |
 | $\mathbf{P}$ | Time-dependent transition probability array | `a_P` |   |
 | $\mathbf{A}$ | Transition-dynamics array | `a_A` |   |
 | $n_{\text{tunnels}}$| Number of tunnel states | `n_tunnel size`|   |
 | $n_{S_{\text{tunnels}}}$| Number of states including tunnel states | `n_states_tunnels` |   |
-| $\mathbf{m}_{\text{tunnels}_0}$| Initial state vector for the model with tunnel states | `v_s_init_tunnels` |   |
+| $\mathbf{m}_{\text{tunnels}_0}$| Initial state vector for the model with tunnel states | `v_m_init_tunnels` |   |
 
 For a more detailed description of these components with their variable types, data structure, and R name, please see the Supplementary Material.
 
@@ -442,15 +442,15 @@ check_sum_of_transition_array(a_P_strB, n_states = n_states, n_cycles = n_cycles
 check_sum_of_transition_array(a_P_strAB, n_states = n_states, n_cycles = n_cycles)
 ```
 
-In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefore, we create the $1 \times n_S$ initial state vector `v_s_init` with all of the cohort assigned to the H state:
+In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefore, we create the $1 \times n_S$ initial state vector `v_m_init` with all of the cohort assigned to the H state:
 ```{r Sick-Sicker-s0, eval=TRUE, results='hide'}
-v_s_init <- c(H = 1, S1 = 0, S2 = 0, D = 0) # initial state vector
-v_s_init
+v_m_init <- c(H = 1, S1 = 0, S2 = 0, D = 0) # initial state vector
+v_m_init
 #  H S1 S2  D 
 #  1  0  0  0
 ```
 
-We use the variable `v_s_init` to initialize $M$ represented by `m_M` for the cohort under SoC strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, `v_s_init`, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the $n_T$ cycles for the simulation-time-dependent cSTM, we initialize four cohort trace matrices, one for each strategy.
+We use the variable `v_m_init` to initialize $M$ represented by `m_M` for the cohort under SoC strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, `v_m_init`, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the $n_T$ cycles for the simulation-time-dependent cSTM, we initialize four cohort trace matrices, one for each strategy.
 
 ```{r Init-Sick-Sicker-TimeDependent-Trace}
 ## Initialize cohort trace for age-dependent cSTM under SoC
@@ -458,7 +458,7 @@ m_M_SoC <- matrix(NA,
                  nrow = (n_cycles + 1), ncol = n_states, 
                  dimnames = list(0:n_cycles, v_names_states))
 # Store the initial state vector in the first row of the cohort trace
-m_M_SoC[1, ] <- v_s_init
+m_M_SoC[1, ] <- v_m_init
 ## Initialize cohort trace for strategies A, B, and AB
 # Structure and initial states are the same as for SoC
 m_M_strA  <- m_M_SoC # Strategy A
@@ -555,7 +555,7 @@ v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
 v_names_states_tunnels <- c("H", v_Sick_tunnel, "S2", "D") # state names
 n_states_tunnels <- length(v_names_states_tunnels)         # number of states
 ## Initialize first cycle of Markov trace accounting for the tunnels
-v_s_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
+v_m_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
 ```
 
 Then, the transition rate and probability dependent on state residence from Sick to Sicker, `v_r_S1S2_tunnels` and `v_p_S1S2_tunnels`, respectively, based on a Weibull hazard function are: 
@@ -682,7 +682,7 @@ m_M_tunnels_SoC <- matrix(0,
                       nrow = (n_cycles + 1), ncol = n_states_tunnels, 
                       dimnames = list(0:n_cycles, v_names_states_tunnels))
 # Store the initial state vector in the first row of the cohort trace
-m_M_tunnels_SoC[1, ] <- v_s_init_tunnels
+m_M_tunnels_SoC[1, ] <- v_m_init_tunnels
 ## Initialize cohort trace under treatment B
 m_M_tunnels_trtB <- m_M_tunnels_SoC
 ```
@@ -854,7 +854,7 @@ As previously mentioned, dying (i.e., transitioning to the Dead state) incurs a 
 
 To account for both state and transition rewards, we create a *matrix* of rewards $R_t$ of dimensions $n_S \times n_S$. The off-diagonal entries of $R_t$ store the transition rewards, and the diagonal of $R_t$ stores the state rewards for cycle $t$ and assumes that rewards occur at the beginning of the cycle.[@Krijkamp2019] Finally, we multiply this matrix by $A_t$, the $t$-th slice of $A$, and apply discounting, within-cycle correction, and compute the overall reward for each strategy outcome. Below, we illustrate these computations in R.
 
-To compute $\mathbf{A}$ for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array `a_A_SoC` of dimensions $n_S \times n_S \times [n_T+1]$ and set the diagonal of the first slice to the initial state vector `v_s_init`. Next, we create a three-dimensional array for each of the strategies as a copy of the array under SoC.
+To compute $\mathbf{A}$ for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array `a_A_SoC` of dimensions $n_S \times n_S \times [n_T+1]$ and set the diagonal of the first slice to the initial state vector `v_m_init`. Next, we create a three-dimensional array for each of the strategies as a copy of the array under SoC.
 
 ```{r Init-Transition-Array}
 # Initialize transition-dynamics array under SoC
@@ -862,7 +862,7 @@ a_A_SoC <- array(0,
              dim = c(n_states, n_states, (n_cycles + 1)),
              dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 # Set first slice to the initial state vector in its diagonal
-diag(a_A_SoC[, , 1]) <- v_s_init
+diag(a_A_SoC[, , 1]) <- v_m_init
 # Initialize transition-dynamics array for strategies A, B, and AB
 # Structure and initial states are the same as for SoC
 a_A_strA  <- a_A_SoC

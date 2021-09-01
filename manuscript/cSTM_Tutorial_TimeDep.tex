@@ -154,7 +154,7 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Pittsburgh, Pittsburgh, PA, USA}}
-\date{2021-08-31}
+\date{2021-09-01}
 
 \begin{document}
 \maketitle
@@ -242,14 +242,14 @@ Element & Description & R name & \\
 \midrule
 \endhead
 \(n_S\) & Number of states & \texttt{n\_states} & \\
-\(\mathbf{m}_0\) & Initial state vector & \texttt{v\_s\_init} & \\
+\(\mathbf{m}_0\) & Initial state vector & \texttt{v\_m\_init} & \\
 \(\mathbf{m}_t\) & State vector in cycle \(t\) & \texttt{v\_mt} & \\
 \(M\) & Cohort trace matrix & \texttt{m\_M} & \\
 \(\mathbf{P}\) & Time-dependent transition probability array & \texttt{a\_P} & \\
 \(\mathbf{A}\) & Transition-dynamics array & \texttt{a\_A} & \\
 \(n_{\text{tunnels}}\) & Number of tunnel states & \texttt{n\_tunnel\ size} & \\
 \(n_{S_{\text{tunnels}}}\) & Number of states including tunnel states & \texttt{n\_states\_tunnels} & \\
-\(\mathbf{m}_{\text{tunnels}_0}\) & Initial state vector for the model with tunnel states & \texttt{v\_s\_init\_tunnels} & \\
+\(\mathbf{m}_{\text{tunnels}_0}\) & Initial state vector for the model with tunnel states & \texttt{v\_m\_init\_tunnels} & \\
 \bottomrule
 \end{longtable}
 
@@ -515,18 +515,18 @@ Once we create the transition probability arrays, we check they are valid (i.e.,
 \end{Highlighting}
 \end{Shaded}
 
-In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefore, we create the \(1 \times n_S\) initial state vector \texttt{v\_s\_init} with all of the cohort assigned to the H state:
+In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefore, we create the \(1 \times n_S\) initial state vector \texttt{v\_m\_init} with all of the cohort assigned to the H state:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{v\_s\_init }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =} \DecValTok{1}\NormalTok{, }\AttributeTok{S1 =} \DecValTok{0}\NormalTok{, }\AttributeTok{S2 =} \DecValTok{0}\NormalTok{, }\AttributeTok{D =} \DecValTok{0}\NormalTok{) }\CommentTok{\# initial state vector}
-\NormalTok{v\_s\_init}
+\NormalTok{v\_m\_init }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =} \DecValTok{1}\NormalTok{, }\AttributeTok{S1 =} \DecValTok{0}\NormalTok{, }\AttributeTok{S2 =} \DecValTok{0}\NormalTok{, }\AttributeTok{D =} \DecValTok{0}\NormalTok{) }\CommentTok{\# initial state vector}
+\NormalTok{v\_m\_init}
 \CommentTok{\#  H S1 S2  D }
 \CommentTok{\#  1  0  0  0}
 \end{Highlighting}
 \end{Shaded}
 
-We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \texttt{m\_M} for the cohort under SoC strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, \texttt{v\_s\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the simulation-time-dependent cSTM, we initialize four cohort trace matrices, one for each strategy.
+We use the variable \texttt{v\_m\_init} to initialize \(M\) represented by \texttt{m\_M} for the cohort under SoC strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, \texttt{v\_m\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the simulation-time-dependent cSTM, we initialize four cohort trace matrices, one for each strategy.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -535,7 +535,7 @@ We use the variable \texttt{v\_s\_init} to initialize \(M\) represented by \text
                  \AttributeTok{nrow =}\NormalTok{ (n\_cycles }\SpecialCharTok{+} \DecValTok{1}\NormalTok{), }\AttributeTok{ncol =}\NormalTok{ n\_states, }
                  \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(}\DecValTok{0}\SpecialCharTok{:}\NormalTok{n\_cycles, v\_names\_states))}
 \CommentTok{\# Store the initial state vector in the first row of the cohort trace}
-\NormalTok{m\_M\_SoC[}\DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ v\_s\_init}
+\NormalTok{m\_M\_SoC[}\DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ v\_m\_init}
 \DocumentationTok{\#\# Initialize cohort trace for strategies A, B, and AB}
 \CommentTok{\# Structure and initial states are the same as for SoC}
 \NormalTok{m\_M\_strA  }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_SoC }\CommentTok{\# Strategy A}
@@ -636,7 +636,7 @@ To implement state-residence dependency in the Sick-Sicker cSTM, we create the v
 \NormalTok{v\_names\_states\_tunnels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"H"}\NormalTok{, v\_Sick\_tunnel, }\StringTok{"S2"}\NormalTok{, }\StringTok{"D"}\NormalTok{) }\CommentTok{\# state names}
 \NormalTok{n\_states\_tunnels }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(v\_names\_states\_tunnels)         }\CommentTok{\# number of states}
 \DocumentationTok{\#\# Initialize first cycle of Markov trace accounting for the tunnels}
-\NormalTok{v\_s\_init\_tunnels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, n\_tunnel\_size), }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{) }
+\NormalTok{v\_m\_init\_tunnels }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{, }\FunctionTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, n\_tunnel\_size), }\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{) }
 \end{Highlighting}
 \end{Shaded}
 
@@ -774,7 +774,7 @@ To simulate the cohort and store its state occupation over the \(n_T\) cycles fo
                       \AttributeTok{nrow =}\NormalTok{ (n\_cycles }\SpecialCharTok{+} \DecValTok{1}\NormalTok{), }\AttributeTok{ncol =}\NormalTok{ n\_states\_tunnels, }
                       \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(}\DecValTok{0}\SpecialCharTok{:}\NormalTok{n\_cycles, v\_names\_states\_tunnels))}
 \CommentTok{\# Store the initial state vector in the first row of the cohort trace}
-\NormalTok{m\_M\_tunnels\_SoC[}\DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ v\_s\_init\_tunnels}
+\NormalTok{m\_M\_tunnels\_SoC[}\DecValTok{1}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ v\_m\_init\_tunnels}
 \DocumentationTok{\#\# Initialize cohort trace under treatment B}
 \NormalTok{m\_M\_tunnels\_trtB }\OtherTok{\textless{}{-}}\NormalTok{ m\_M\_tunnels\_SoC}
 \end{Highlighting}
@@ -954,7 +954,7 @@ As previously mentioned, dying (i.e., transitioning to the Dead state) incurs a 
 
 To account for both state and transition rewards, we create a \emph{matrix} of rewards \(R_t\) of dimensions \(n_S \times n_S\). The off-diagonal entries of \(R_t\) store the transition rewards, and the diagonal of \(R_t\) stores the state rewards for cycle \(t\) and assumes that rewards occur at the beginning of the cycle.\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}} Finally, we multiply this matrix by \(A_t\), the \(t\)-th slice of \(A\), and apply discounting, within-cycle correction, and compute the overall reward for each strategy outcome. Below, we illustrate these computations in R.
 
-To compute \(\mathbf{A}\) for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array \texttt{a\_A\_SoC} of dimensions \(n_S \times n_S \times [n_T+1]\) and set the diagonal of the first slice to the initial state vector \texttt{v\_s\_init}. Next, we create a three-dimensional array for each of the strategies as a copy of the array under SoC.
+To compute \(\mathbf{A}\) for the simulation-time-dependent Sick-Sicker model under SoC, we initialize a three-dimensional array \texttt{a\_A\_SoC} of dimensions \(n_S \times n_S \times [n_T+1]\) and set the diagonal of the first slice to the initial state vector \texttt{v\_m\_init}. Next, we create a three-dimensional array for each of the strategies as a copy of the array under SoC.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -963,7 +963,7 @@ To compute \(\mathbf{A}\) for the simulation-time-dependent Sick-Sicker model un
              \AttributeTok{dim =} \FunctionTok{c}\NormalTok{(n\_states, n\_states, (n\_cycles }\SpecialCharTok{+} \DecValTok{1}\NormalTok{)),}
              \AttributeTok{dimnames =} \FunctionTok{list}\NormalTok{(v\_names\_states, v\_names\_states, }\DecValTok{0}\SpecialCharTok{:}\NormalTok{n\_cycles))}
 \CommentTok{\# Set first slice to the initial state vector in its diagonal}
-\FunctionTok{diag}\NormalTok{(a\_A\_SoC[, , }\DecValTok{1}\NormalTok{]) }\OtherTok{\textless{}{-}}\NormalTok{ v\_s\_init}
+\FunctionTok{diag}\NormalTok{(a\_A\_SoC[, , }\DecValTok{1}\NormalTok{]) }\OtherTok{\textless{}{-}}\NormalTok{ v\_m\_init}
 \CommentTok{\# Initialize transition{-}dynamics array for strategies A, B, and AB}
 \CommentTok{\# Structure and initial states are the same as for SoC}
 \NormalTok{a\_A\_strA  }\OtherTok{\textless{}{-}}\NormalTok{ a\_A\_SoC}
