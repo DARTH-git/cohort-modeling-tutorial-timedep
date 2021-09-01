@@ -25,8 +25,9 @@ This table contains an overview of the key model components used in the code for
 
 | Element | Description                           | R name        | Data structure | Dimensions        | Data type   |
 |--------|---------------------------------------|----------------|----------------|-------------------|-------------|
-| $n_t$        | Time horizon                     | `n_t`        | scalar          |                   | numeric     |
-| $v_s$        | Names of the health states       | `v_n`        | vector          | `n_states` x 1    | character   |
+| $n_t$        | Time horizon                     | `n_cycles`   | scalar          |                   | numeric     |
+|              | Cycle length                     | `cycle_length`| scalar         |                   | numeric     |
+| $v_s$        | Names of the health states       | `v_names_states`| vector       | `n_states` x 1    | character   |
 | $n_s$        | Number of health states          | `n_states`   | scalar          |                   | numeric     |
 | $n_{S_{tunnels}}$   | Number of health states with tunnels    | `n_states_tunnels`    scalar  |      | numeric     |
 | $v_{str}$    | Names of the strategies          | `v_names_str`| scalar          |                   | character   |
@@ -35,25 +36,38 @@ This table contains an overview of the key model components used in the code for
 | \(\mathbf{d_e}\)  | Discount rate for effects   | `d_e`        | scalar          |                   | numeric     |
 |              | Discount weights for costs       | `v_dwc`      | vector          | (`n_t` x 1 ) + 1  | numeric     | 
 |              | Discount weights for effects     | `v_dwe`      | vector          | (`n_t` x 1 ) + 1  | numeric     |
+|              | Sequence of cycle numbers        | `v_cycles`   | vector          | (`n_t` x 1 ) + 1  | numeric     | 
 |\(\mathbf{wcc}\) | Within-cycle correction weights using Simpson's 1/3 rule   | `v_wcc`   | vector  | (`n_t` x 1 ) + 1  | numeric |
 | $age_{_0}$   | Age at baseline                  | `n_age_init` | scalar          |                   | numeric     |
 | $age$        | Maximum age of follow up         | `n_age_max`  | scalar          |                   | numeric     |
-| \(M_{ad}\)   | Cohort trace for age-dependency  | `m_M_ad`     | matrix          | (`n_t` + 1) x `n_states`    | numeric     |
+| \(M\)        | Cohort trace matrix  | `m_M`     | matrix          | (`n_t` + 1) x `n_states`    | numeric     |
+| \(M_{ad}\)   | Simulation time-dependent cohort trace matrix  | `m_M_ad`     | matrix          | (`n_t` + 1) x `n_states`    | numeric     |
 | \(M_{tunnels}\) | Aggregated Cohort trace for state-dependency  | `m_M_tunnels`  | matrix   | (`n_t` + 1) x `n_states`    | numeric     |
-| \(m_0\)      | Initial state vector             | `v_s_init`   | vector          | 1 x `n_states`         | numeric     |
+| \(m_0\)      | Initial state vector             | `v_m_init`   | vector          | 1 x `n_states`         | numeric     |
 | \(m_t\)      | State vector in cycle t          | `v_mt`       | vector          | 1 x `n_states`         | numeric     |
+|              |                                  |              |                 |                        |             |
+|              |  **Life table input**    |              |                 |                   |             |  
+|              | State vector in cycle t          | `lt_usa_2005`       | list          |          | numeric     |
+|              | Vector of age-specific mortality rates          | `v_r_mort_by_age`       | vector          |          | numeric     |
 |              |                                  |              |                 |                        |             |
 |              |  **Transition probabilities**    |              |                 |                   |             |  
 | $p_{[H,S1]}$  | From Healthy to Sick conditional on surviving  | `p_HS1`      | scalar          |                   | numeric     |
 | $p_{[S1,H]}$  | From Sick to Healthy conditional on surviving  | `p_S1H`      | scalar          |                   | numeric     |
 | $p_{[S1,S2]}$ | From Sick to Sicker conditional on surviving   | `p_S1S2`     | scalar          |                   | numeric     |
 | $r_{[H,D]}$   | Constant rate of dying when Healthy (all-cause mortality rate)| `r_HD`       | scalar          |     | numeric     |
+| $r_{[S1,S2]}$   | Constant rate of becoming Sicker when Sick   | `r_S1S2`       | scalar          |                   | numeric     |
+| $r_{[S1,S2]_{trtB}}$   | Constant rate of becoming Sicker when Sick for treatment B| `r_S1S2_trtB`       | scalar          |                   | numeric     |
 | $hr_{[S1,H]}$ | Hazard ratio of death in Sick vs Healthy       | `hr_S1`       | scalar          |                   | numeric     |
 | $hr_{[S2,H]}$ | Hazard ratio of death in Sicker vs Healthy     | `hr_S2`       | scalar          |                   | numeric     |
 | $hr_{[S1,S2]_{trtB}}$ | Hazard ratio of becoming Sicker when Sick under treatment B    | `hr_S1S2_trtB`| scalar   |  | numeric     |
 | $p_{[S1,S2]_{trtB}}$ | probability to become Sicker when Sick under treatment B conditional on surviving | `p_S1S2_trtB`| scalar   |  | numeric     |
 |              |                                  |              |                 |                        |             |
-|               |  **Age-specific mortality**                      |              |                 |                   |             | 
+|              |  **Weibull parameters**    |              |                 |                   |             |  
+| $\lambda$    | scale of the Weibull hazard function  | `p_S1S2_lambda`      | scalar          |                   | numeric     |
+| $\gamma$     | shape  of the Weibull hazard function | `p_S1S2_lambda`      | scalar          |                   | numeric     |
+|              | vector of transition probability to become Sicker when Sick when incorporating time dependency on state residence | `v_p_S1S2_tunnels`      | vector          |  1 x `n_states_tunnels`                | numeric     |
+|              |                                  |              |                 |                        |             |
+|               |  **Simulation-time dependent mortality**                      |              |                 |                   |             | 
 | $r_{[H,D,t]}$ | Age-specific background mortality rates          | `v_r_HDage`   | vector   | `n_t` x 1   | numeric     |
 | $r_{[S1,D,t]}$| Age-specific mortality rates in the Sick state   | `v_r_S1Dage`  | vector   | `n_t` x 1   | numeric     |
 | $r_{[S2,D,t]}$| Age-specific mortality rates in the Sicker state | `v_r_S2Dage`  | vector   | `n_t` x 1   | numeric     |
@@ -79,17 +93,15 @@ This table contains an overview of the key model components used in the code for
 |              |                                 |               |                 |                   |           |
 |              | **Transition weights**          |               |                 |                   |           |
 |              | Utility decrement of healthy individuals when transitioning to S1 | `du_HS1`| scalar  | | numeric |
-|              | Cost of healthy individuals when transitioning to S1  |    `ic_S1`          | scalar  | | numeric |
+|              | Cost of healthy individuals when transitioning to S1  |    `ic_HS1`          | scalar  | | numeric |
 |              | Cost of dying                   |                          `ic_D`           | scalar  | | numeric |
 |              |                                 |               |                 |                   |           |
-|              | **Lists**                       |               |                 |                   |           |
-|              | Cohort traces for each strategy     | `l_m_M`   | list            |                   |  numeric  |
-|              | Transition arrays for each strategy | `l_A_A`   | list            |                   |  numeric  |
+|              | **Tunnel state structures**                       |               |                 |                   |           |
 |              | number of tunnel states         | `n_tunnel_size` | scalar        |                   |  numeric  |
 |              | tunnel names of the Sick state  | `v_Sick_tunnel` | vector        | 1 x `n_states`    | numeric   |
-|              | state names including tunnel states | `v_n_tunnel` | vector       | 1 x `n_states`    | character |
+|              | state names including tunnel states | `v_names_states_tunnels` | vector       | 1 x `n_states_tunnels`    | character |
 |              | number of states including tunnel states | `n_states_tunnels`     | scalar   |        | numeric   |
-|              | initial state vector for the model with tunnels       |  `v_s_init_tunnels` |     |   | numeric   |
+|              | Initial state vector for the model with tunnels       |  `v_m_init_tunnels` | vector     | 1 x `n_states_tunnels`   | numeric   |
 |              |                                  |              |                 |                        |             |
 | \(\mathbf{P}\)| Time-dependent transition probability array  | `a_P`  | array  | `n_states` x `n_states` x `n_t` | numeric |
 | \(\mathbf{P}_{tunnels}\)| Transition probability array for the model with tunnels  | `a_P_tunnels`  | array  |  `n_states_tunnels` x `n_states_tunnels` x `n_t` | numeric |
@@ -104,9 +116,16 @@ This table contains an overview of the key model components used in the code for
 |              | Expected costs per cycle under a strategy      | `v_cost_str`     | vector        | 1 x (`n_t` + 1)    | numeric   |
 |              | Total expected discounted QALYs for a strategy | `n_tot_qaly_str` | scalar        |                    | numeric   |
 |              | Total expected discounted costs for a strategy | `n_tot_cost_str` | scalar        |                    | numeric   |
+|              | Summary matrix with costs and QALYS per strategy| `m_outcomes`    | table          |  `n_states`  x 2   |           |
 |              | Summary of the model outcomes                  | `df_cea`         | data frame    |                    |           |
 |              | Summary of the model outcomes                  | `table_cea`     | table         |                    |           |
 |              | Input parameters values of the model for the cost-effectiveness analysis   | `df_psa` | data frame  | |          |
+|              |  **Probabilistic analysis  structures**         |               |                 |                   |             |
+|              | Number of PSA iterations         | `n_sim`      | scalar          |                   | numeric     |
+|              | Data frame with PSA input values for each iteration    | `df_psa_input`  | table          |                    |           |
+|              | Data frame to store the accumulated cost per strategy for each PSA iteration    | `df_c`  | table          |      `n_sim`  x `n_states `              |    numeric       |
+|              | Data frame to store the accumulated effects per strategy for each PSA iteration    | `df_e`  | table          |      `n_sim`  x `n_states `              |    numeric       |
+|              |     For more details about the PSA structures read the vignettes of `dampack`                            |               |                 |                   |           |
 
 
 ### Table II: Input parameters for probabilistic analysis of the time-dependent 3-state model

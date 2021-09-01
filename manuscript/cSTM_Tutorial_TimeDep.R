@@ -194,8 +194,8 @@ p_S1S2_trtB <- 1-exp(-r_S1S2_trtB*cycle_length) # probability to become Sicker w
 
 
 ## ----Sick-Sicker-s0----------------------------------------------------------------------------------------------
-v_s_init <- c(H = 1, S1 = 0, S2 = 0, D = 0) # initial state vector
-v_s_init
+v_m_init <- c(H = 1, S1 = 0, S2 = 0, D = 0) # initial state vector
+v_m_init
 
 
 ## ----Sick-Sicker-M-----------------------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ m_M <- matrix(NA,
               nrow = (n_cycles + 1), ncol = n_states, 
               dimnames = list(0:n_cycles, v_names_states))
 # Store the initial state vector in the first row of the cohort trace
-m_M[1, ] <- v_s_init
+m_M[1, ] <- v_m_init
 ## Initialize cohort trace under treatment B
 m_M_trtB <- m_M # structure and initial states remain the same.
 
@@ -354,12 +354,12 @@ check_sum_of_transition_array(a_P_trtB, n_states = n_states, n_cycles = n_cycles
 
 
 ## ----Init-Sick-Sicker-TimeDependent-Trace------------------------------------------------------------------------
-## Initialize cohort trace for age-dependent (ad) cSTM under SoC
+## Initialize cohort trace for simulation-time dependency (ad) cSTM under SoC
 m_M_ad <- matrix(NA, 
                  nrow = (n_cycles + 1), ncol = n_states, 
                  dimnames = list(0:n_cycles, v_names_states))
 # Store the initial state vector in the first row of the cohort trace
-m_M_ad[1, ] <- v_s_init
+m_M_ad[1, ] <- v_m_init
 ## Initialize cohort trace under treatment B
 m_M_ad_trtB <- m_M_ad # structure and initial states remain the same.
 
@@ -401,7 +401,7 @@ v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
 v_names_states_tunnels <- c("H", v_Sick_tunnel, "S2", "D") # state names
 n_states_tunnels <- length(v_names_states_tunnels)         # number of states
 ## Initialize first cycle of Markov trace accounting for the tunnels
-v_s_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
+v_m_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
 
 
 ## ----------------------------------------------------------------------------------------------------------------
@@ -507,7 +507,7 @@ m_M_tunnels <- matrix(0,
                       nrow = (n_cycles + 1), ncol = n_states_tunnels, 
                       dimnames = list(0:n_cycles, v_names_states_tunnels))
 # Store the initial state vector in the first row of the cohort trace
-m_M_tunnels[1, ] <- v_s_init_tunnels
+m_M_tunnels[1, ] <- v_m_init_tunnels
 ## Initialize cohort trace under treatment B
 m_M_tunnels_trtB <- m_M_tunnels
 
@@ -709,7 +709,7 @@ a_A <- array(0,
              dim = c(n_states, n_states, (n_cycles + 1)),
              dimnames = list(v_names_states, v_names_states, 0:n_cycles))
 # Set first slice to the initial state vector in its diagonal
-diag(a_A[, , 1]) <- v_s_init
+diag(a_A[, , 1]) <- v_m_init
 # Initialize transition-dynamics array under treatment B
 a_A_trtB <- a_A
 
