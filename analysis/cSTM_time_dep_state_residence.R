@@ -1,82 +1,93 @@
-################################################################################
-### Time-dependent cSTMs in R: State-residence time dependency               ###
-################################################################################
-# This code forms the basis for the state-transition model of the tutorial: 
-# 'A Tutorial on Time-Dependent Cohort State-Transition Models in R' 
-# Authors: 
-# - Fernando Alarid-Escudero <fernando.alarid@cide.edu>
-# - Eline Krijkamp
-# - Eva A. Enns
-# - Alan Yang
-# - M.G. Myriam Hunink
-# - Petros Pechlivanoglou
-# - Hawre Jalal
-# Please cite the article when using this code
-#
-# To program this tutorial we used: 
-# R version 4.0.3 (2020-10-10)
-# Platform: 64-bit operating system, x64-based processor
-# Running under: Mac OS 11.2.2
-# RStudio: Version 1.4.1103 2009-2021 RStudio, Inc
+# Appendix code to Time-dependent cSTMs in R: State-residence time dependency ----
 
-################################################################################
-################################ Description ###################################
-################################################################################
-# This code implements a state-residence time-dependent Sick-Sicker cSTM model 
-# to conduct a CEA of four strategies:
-# - Standard of Care (SoC): best available care for the patients with the 
-#   disease. This scenario reflects the natural history of the disease 
-#   progression.
-# - Strategy A: treatment A is given to patients in the Sick and Sicker states, 
-#   but only improves the quality of life of those in the Sick state.
-# - Strategy B: treatment B is given to all sick patients and reduces disease 
-#   progression from the Sick to Sicker state.
-# - Strategy AB: This strategy combines treatment A and treatment B. The disease 
-#   progression is reduced, and individuals in the Sick state have an improved 
-#   quality of life.
+#* This code forms the basis for the state-transition model of the tutorial: 
+#* 'A Tutorial on Time-Dependent Cohort State-Transition Models in R using a 
+#* Cost-Effectiveness Analysis Example' 
+#* Authors: 
+#* - Fernando Alarid-Escudero <fernando.alarid@cide.edu>
+#* - Eline Krijkamp
+#* - Eva A. Enns
+#* - Alan Yang
+#* - M.G. Myriam Hunink
+#* - Petros Pechlivanoglou
+#* - Hawre Jalal
+#* Please cite the article when using this code
+#* 
+#* To program this tutorial we used:
+#* R version 4.0.5 (2021-03-31)
+#* Platform: 64-bit operating system, x64-based processor
+#* Running under: Mac OS 12.2.1
+#* RStudio: Version 1.4.1717 2009-2021 RStudio, Inc
 
-################################ Initial setup ############################### 
+#******************************************************************************#
+# Description ----
+
+#* This code implements a state-residence time-dependent Sick-Sicker cSTM model to 
+#* conduct a CEA of four strategies:
+#* - Standard of Care (SoC): best available care for the patients with the 
+#*   disease. This scenario reflects the natural history of the disease 
+#*   progression.
+#* - Strategy A: treatment A is given to patients in the Sick and Sicker states, 
+#*   but only improves the quality of life of those in the Sick state.
+#* - Strategy B: treatment B is given to all sick patients and reduces disease 
+#*   progression from the Sick to Sicker state.
+#* - Strategy AB: This strategy combines treatment A and treatment B. The disease 
+#*   progression is reduced, and individuals in the Sick state have an improved 
+#*   quality of life.
+
+#******************************************************************************#
+# Initial setup ---- 
 rm(list = ls())    # remove any variables in R's memory 
 
-### Install packages
-# install.packages("dplyr")     # to manipulate data
-# install.packages("tidyr")     # to manipulate data
-# install.packages("reshape2")  # to transform data
-# install.packages("ggplot2")   # to visualize data
-# install.packages("gridExtra") # to visualize data
-# install.packages("scales")    # for dollar signs and commas
-# install.packages("boot")      # to handle log odds and log odds ratios
-# install.packages("devtools")  # to ensure compatibility among packages
-# install.packages("dampack")   # for CEA, calculating ICERs and PSA visualization
-# devtools::install_github("DARTH-git/darthtools") # to install darthtools from GitHub
+## Install required packages ----
+# install.packages("dplyr")      # to manipulate data
+# install.packages("tidyr")      # to manipulate data
+# install.packages("reshape2")   # to manipulate data
+# install.packages("ggplot2")    # to visualize data
+# install.packages("ggrepel")    # to visualize data
+# install.packages("gridExtra")  # to visualize data
+# install.packages("ellipse")    # to visualize data
+# install.packages("scales")     # for dollar signs and commas
+# install.packages("dampack")    # for CEA and calculate ICERs
+# install.packages("devtools")   # to install packages from GitHub
+# devtools::install_github("DARTH-git/darthtools") # to install darthtools from GitHub using devtools
+# install.packages("doParallel") # to handle parallel processing
 
-### Load packages
-library(dplyr)    
-library(reshape2) 
-library(ggplot2)   
-library(scales)    
-library(boot)
-library(dampack)
-library(darthtools)
-library(doParallel)
+## Load packages ----
+library(dplyr)
+library(tidyr)
+library(reshape2)   # For melting data
+library(ggplot2)    # For plotting
+library(ggrepel)    # For plotting
+library(gridExtra)  # For plotting
+library(ellipse)    # For plotting
+library(scales)     # For dollar signs and commas
+# library(dampack)  # Uncomment to use CEA and PSA visualization functionality from dampack instead of the functions included in this repository
+# library(darthtools) # Uncomment to use WCC, parameter transformation, and matrix checks from darthtools instead of the functions included in this repository
+# library(doParallel) # For running PSA in parallel
 
-### Load functions
+## Load supplementary functions ----
 source("R/Functions.R")
 
-################################ Model input ################################# 
-## General setup
-cycle_length <- 1                       # cycle length equal one year
-n_age_init  <- 25                       # age at baseline
-n_age_max   <- 100                      # maximum age of follow up
-n_cycles    <- n_age_max - n_age_init   # time horizon, number of cycles
-v_names_states <- c("H", "S1", "S2", "D")  # the 4 health states of the model:
-# the 4 health states of the model:
+# Model input ----
+## General setup ----
+cycle_length <- 1 # cycle length equal to one year (use 1/12 for monthly)
+n_age_init <- 25  # age at baseline
+n_age_max  <- 100 # maximum age of follow up
+n_cycles <- (n_age_max - n_age_init)/cycle_length # time horizon, number of cycles
+#* Age labels 
+v_age_names <- paste(rep(n_age_init:(n_age_max-1), each = 1/cycle_length), 
+                     1:(1/cycle_length), 
+                     sep = ".")
+#* the 4 health states of the model:
 v_names_states <- c("H",  # Healthy (H)
                     "S1", # Sick (S1)
                     "S2", # Sicker (S2)
                     "D")  # Dead (D)
 
-## Tunnel inputs
+n_states <- length(v_names_states)   # number of health states 
+
+### Tunnel inputs ----
 # Number of tunnels, note: in our example the number of tunnels is identical to the number of cycles
 n_tunnel_size <- n_cycles
 # Vector with cycles for tunnels
@@ -87,100 +98,125 @@ v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
 v_names_states_tunnels <- c("H", v_Sick_tunnel, "S2", "D") # health state names
 n_states_tunnels <- length(v_names_states_tunnels)         # number of health states
 
+### Discounting factors ----
+d_c <- 0.03 # annual discount rate for costs 
+d_e <- 0.03 # annual discount rate for QALYs
 
-# Discounting factors
-d_c         <- 0.03                     # discount rate for costs 
-d_e         <- 0.03                     # discount rate for QALYs
-
-# Strategies
-v_names_str <- c("Standard of care", # store the strategy names
+### Strategies ----
+v_names_str <- c("Standard of care",      # store the strategy names
                  "Strategy A", 
                  "Strategy B",
                  "Strategy AB") 
-n_str       <- length(v_names_str)      # number of strategies
+n_str       <- length(v_names_str)        # number of strategies
 
-# Within-cycle correction (WCC) using Simpson's 1/3 rule
-v_wcc <- darthtools::gen_wcc(n_cycles = n_cycles, 
-                             method = "Simpson1/3") # vector of wcc
+## Within-cycle correction (WCC) using Simpson's 1/3 rule ----
+v_wcc <- gen_wcc(n_cycles = n_cycles,  # Function included in "R/Functions.R". The latest version can be found in `darthtools` package
+                 method = "Simpson1/3") # vector of wcc
 
-## Transition probabilities (per cycle) and hazard ratios
-p_HS1    <- 0.15 # probability to become Sick when Healthy conditional on surviving
-p_S1H    <- 0.50 # probability to become Healthy when Sick conditional on surviving
-hr_S1    <- 3    # hazard ratio of death in Sick vs Healthy
-hr_S2    <- 10   # hazard ratio of death in Sicker vs Healthy 
+### Transition rates (annual), and hazard ratios (HRs) ----
+r_HS1  <- 0.15  # constant annual rate of becoming Sick when Healthy
+r_S1H  <- 0.5   # constant annual rate of becoming Healthy when Sick
+hr_S1  <- 3     # hazard ratio of death in Sick vs Healthy 
+hr_S2  <- 10    # hazard ratio of death in Sicker vs Healthy 
 
-# Effectiveness of treatment B
-hr_S1S2_trtB <- 0.6 # hazard ratio of becoming Sicker when Sick under treatment B
+### Effectiveness of treatment B ----
+hr_S1S2_trtB <- 0.6  # hazard ratio of becoming Sicker when Sick under treatment B
 
-# Weibull parameters for state-residence-dependent transition probability of 
-# becoming Sicker when Sick conditional on surviving
+#* Weibull parameters for state-residence-dependent transition probability of 
+#* becoming Sicker when Sick conditional on surviving
 p_S1S2_scale <- 0.08 # scale
 p_S1S2_shape <- 1.1  # shape
 
-## Age-dependent mortality rates
+## Age-dependent mortality rates ----
 lt_usa_2015 <- read.csv("data/LifeTable_USA_Mx_2015.csv")
+#* Extract age-specific all-cause mortality for ages in model time horizon
 v_r_mort_by_age <- lt_usa_2015 %>% 
-                   select(Total) %>%
-                   as.matrix()
-names(v_r_mort_by_age) <- lt_usa_2015$Age
+  dplyr::filter(Age >= n_age_init & Age < n_age_max) %>%
+  dplyr::select(Total) %>%
+  as.matrix() # anyone above 100 have the same mortality
 
-## State rewards
-# Costs
-c_H    <- 2000  # cost of remaining one cycle Healthy 
-c_S1   <- 4000  # cost of remaining one cycle Sick 
-c_S2   <- 15000 # cost of remaining one cycle Sicker 
-c_D    <- 0     # cost of being dead (per cycle)
-c_trtA <- 12000 # cost of treatment A 
-c_trtB <- 13000 # cost of treatment B
-# Utilities
-u_H    <- 1     # utility when Healthy 
-u_S1   <- 0.75  # utility when Sick 
-u_S2   <- 0.5   # utility when Sicker
-u_D    <- 0     # utility when Healthy 
-u_trtA <- 0.95  # utility when being treated
+### State rewards ----
+#### Costs ----
+c_H    <- 2000  # annual cost of being Healthy
+c_S1   <- 4000  # annual cost of being Sick
+c_S2   <- 15000 # annual cost of being Sicker
+c_D    <- 0     # annual cost of being dead
+c_trtA <- 12000 # annual cost of receiving treatment A
+c_trtB <- 13000 # annual cost of receiving treatment B
+#### Utilities ----
+u_H    <- 1     # annual utility of being Healthy
+u_S1   <- 0.75  # annual utility of being Sick
+u_S2   <- 0.5   # annual utility of being Sicker
+u_D    <- 0     # annual utility of being dead
+u_trtA <- 0.95  # annual utility when receiving treatment A
 
-## Transition rewards
+### Transition rewards ----
 du_HS1 <- 0.01  # disutility when transitioning from Healthy to Sick
 ic_HS1 <- 1000  # increase in cost when transitioning from Healthy to Sick
 ic_D   <- 2000  # increase in cost when dying
 
-# Discount weight (equal discounting is assumed for costs and effects)
-v_dwc  <- 1 / ((1 + d_e) ^ (0:n_cycles))
-v_dwe  <- 1 / ((1 + d_c) ^ (0:n_cycles))
+### Discount weight for costs and effects ----
+v_dwc  <- 1 / ((1 + (d_e * cycle_length)) ^ (0:n_cycles))
+v_dwe  <- 1 / ((1 + (d_c * cycle_length)) ^ (0:n_cycles))
 
-### Process model inputs
-## Age-specific transition probabilities to the Dead state
-# extract age-specific all-cause mortality rates for ages in model time horizon
-v_r_HDage  <- v_r_mort_by_age[(n_age_init + 1) + 0:(n_cycles - 1)]
-# compute mortality rates
-v_r_S1Dage <- v_r_HDage * hr_S1        # Age-specific mortality rate in the Sick state 
-v_r_S2Dage <- v_r_HDage * hr_S2        # Age-specific mortality rate in the Sicker state 
-# transform rates to probabilities
+# Process model inputs ----
+## Age-specific transition probabilities to the Dead state for all cycles ----
+v_r_HDage  <- rep(v_r_mort_by_age, each = 1/cycle_length)
+#* Name age-specific mortality vector 
+names(v_r_HDage) <- v_age_names
+
+#* compute mortality rates
+v_r_S1Dage <- v_r_HDage * hr_S1 # Age-specific mortality rate in the Sick state 
+v_r_S2Dage <- v_r_HDage * hr_S2 # Age-specific mortality rate in the Sicker state 
+
+#* transform rates to probabilities adjusting by cycle length
+#* Function included in "R/Functions.R". The latest version can be found in `darthtools` package
+p_HS1  <- rate_to_prob(r = r_HS1, t = cycle_length) # constant annual probability of becoming Sick when Healthy conditional on surviving 
+p_S1H  <- rate_to_prob(r = r_S1H, t = cycle_length) # constant annual probability of becoming Healthy when Sick conditional on surviving
 v_p_HDage  <- rate_to_prob(v_r_HDage, t = cycle_length)  # Age-specific mortality risk in the Healthy state 
 v_p_S1Dage <- rate_to_prob(v_r_S1Dage, t = cycle_length) # Age-specific mortality risk in the Sick state
 v_p_S2Dage <- rate_to_prob(v_r_S2Dage, t = cycle_length) # Age-specific mortality risk in the Sicker state
 
-## State-residence-dependent transition rate of becoming Sicker when Sick
-# Weibull transition rate
+## State-residence-dependent transition rate of becoming Sicker when Sick ----
+#* Weibull transition rate
 v_r_S1S2_tunnels <- (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape - 
                     ((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape
                             
-# Weibull transition probability conditional on surviving
-v_p_S1S2_tunnels <- 1 - exp(-v_r_S1S2_tunnels)
+## Weibull transition probability conditional on surviving adjusting by cycle length ----
+v_p_S1S2_tunnels <- rate_to_prob(v_r_S1S2_tunnels, t = cycle_length)
 
-
-## State-residence-dependent transition rate of becoming Sicker when Sick for 
-## treatment B
-# apply hazard ratio to rate to obtain transition rate of becoming Sicker when 
-# Sick for treatment B
+## State-residence-dependent transition rate of becoming Sicker when Sick under treatment B ----
+#* Apply hazard ratio to rate to obtain transition rate of becoming Sicker when 
+#* Sick for treatment B
 v_r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
-# transform rate to probability to become Sicker when Sick under treatment B 
-# conditional on surviving
-v_p_S1S2_tunnels_trtB <- rate_to_prob(r = r_S1S2_tunnels_trtB, t = cycle_length)
+#* Transform rate to probability to become Sicker when Sick under treatment B 
+#* adjusting by cycle length conditional on surviving
+#* (Function included in "R/Functions.R". The latest version can be found in 
+#* `darthtools` package)
+v_p_S1S2_tunnels_trtB <- rate_to_prob(r = v_r_S1S2_tunnels_trtB, t = cycle_length)
 
-###################### Construct state-transition models #####################
-#### Create transition matrix ####
-# Initialize 3-D array
+# Construct state-transition models ----
+## Initial state vector ----
+#* All starting healthy
+v_m_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
+
+## Initialize cohort traces ----
+### Initialize cohort trace for state-residece dependent cSTM under SoC ----
+m_M_tunnels_SoC <- matrix(0, 
+                          nrow     = (n_cycles + 1), ncol = n_states_tunnels, 
+                          dimnames = list(0:n_cycles, v_names_states_tunnels))
+#* Store the initial state vector in the first row of the cohort trace
+m_M_tunnels_SoC[1, ] <- v_m_init_tunnels
+
+### Initialize cohort trace for strategies A, B, and AB ----
+#* Structure and initial states are the same as for SoC
+m_M_tunnels_strA  <- m_M_tunnels_SoC # Strategy A
+m_M_tunnels_strB  <- m_M_tunnels_SoC # Strategy B
+m_M_tunnels_strAB <- m_M_tunnels_SoC # Strategy AB
+
+## Create transition probability arrays for strategy SoC ----
+### Initialize transition probability array for strategy SoC ----
+#* All transitions to a non-death state are assumed to be conditional on survival
 a_P_tunnels_SoC <- array(0, 
                          dim = c(n_states_tunnels, n_states_tunnels, n_cycles),
                          dimnames = list(v_names_states_tunnels, 
@@ -214,14 +250,12 @@ a_P_tunnels_SoC["S2", "D", ]  <- v_p_S2Dage
 ## From D
 a_P_tunnels_SoC["D", "D", ] <- 1
 
-## Initialize transition probability matrix for strategy A as a copy of SoC's
+### Initialize transition probability array for strategy A as a copy of SoC's ----
 a_P_tunnels_strA <- a_P_tunnels_SoC
 
-### For strategies B and AB
-## Initialize transition probability array for strategies B and AB
+### Initialize transition probability array for strategy B ----
 a_P_tunnels_strB <- a_P_tunnels_SoC
-## Only need to update the probabilities involving the transition from Sick to Sicker, v_p_S1S2_tunnels
-# From S1
+#* Update only transition probabilities from S1 involving v_p_S1S2_tunnels
 for(i in 1:(n_tunnel_size - 1)){
   a_P_tunnels_strB[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
   a_P_tunnels_strB[v_Sick_tunnel[i], 
@@ -230,7 +264,7 @@ for(i in 1:(n_tunnel_size - 1)){
   a_P_tunnels_strB[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels_trtB[i]
   a_P_tunnels_strB[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
 }
-# repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
+#* repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
 a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "H", ] <- (1 - v_p_S1Dage) * p_S1H
 a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size],
             v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) * 
@@ -239,52 +273,38 @@ a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) *
                                                            v_p_S1S2_tunnels_trtB[n_tunnel_size]
 a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 
-## Initialize transition probability matrix for strategy AB as a copy of B's
+### Initialize transition probability array for strategy AB as a copy of B's ----
 a_P_tunnels_strAB <- a_P_tunnels_strB
 
-
-### Check if transition probability matrix is valid (i.e., elements cannot < 0 or > 1) 
+## Check if transition probability arrays are valid ----
+#* Functions included in "R/Functions.R". The latest version can be found in `darthtools` package
+### Check that transition probabilities are [0, 1] ----
 check_transition_probability(a_P_tunnels_SoC, verbose = TRUE)
 check_transition_probability(a_P_tunnels_strA, verbose = TRUE)
 check_transition_probability(a_P_tunnels_strB, verbose = TRUE)
 check_transition_probability(a_P_tunnels_strAB, verbose = TRUE)
-### Check if transition probability matrix sum to 1 (i.e., each row should sum to 1)
+### Check that all rows for each slice of the array sum to 1 ----
 check_sum_of_transition_array(a_P_tunnels_SoC, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
 check_sum_of_transition_array(a_P_tunnels_strA, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
 check_sum_of_transition_array(a_P_tunnels_strB, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
 check_sum_of_transition_array(a_P_tunnels_strAB, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
 
-#### Run Markov model ####
-## Initial state vector
-# All starting healthy
-v_m_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
-
-## Initialize cohort trace for history-dependent cSTM
-m_M_tunnels_SoC <- matrix(0, 
-                      nrow     = (n_cycles + 1), ncol = n_states_tunnels, 
-                      dimnames = list(0:n_cycles, v_names_states_tunnels))
-# Store the initial state vector in the first row of the cohort trace
-m_M_tunnels_SoC[1, ] <- v_m_init_tunnels
-
-## Initialize cohort trace for strategies A, B, and AB
-# Structure and initial states are the same as for SoC
-m_M_tunnels_strA  <- m_M_tunnels_SoC # Strategy A
-m_M_tunnels_strB  <- m_M_tunnels_SoC # Strategy B
-m_M_tunnels_strAB <- m_M_tunnels_SoC # Strategy AB
-
-## Initialize transition array
+## Create transition dynamics arrays ----
+#* These arrays will capture transitions from each state to another over time 
+### Initialize transition dynamics array for strategy SoC ----
 a_A_tunnels_SoC <- array(0,
                      dim = c(n_states_tunnels, n_states_tunnels, n_cycles + 1),
                      dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:n_cycles))
-# Set first slice of A with the initial state vector in its diagonal
+#* Set first slice of A with the initial state vector in its diagonal
 diag(a_A_tunnels_SoC[, , 1]) <- v_m_init_tunnels
-# Initialize transition-dynamics array for strategies A, B, and AB
-# Structure and initial states are the same as for SoC
+### Initialize transition-dynamics array for strategies A, B, and AB ----
+#* Structure and initial states are the same as for SoC
 a_A_tunnels_strA  <- a_A_tunnels_SoC
 a_A_tunnels_strB  <- a_A_tunnels_SoC
 a_A_tunnels_strAB <- a_A_tunnels_SoC
 
-## Iterative solution of age-dependent cSTM
+#  Run Markov model ----
+#* Iterative solution of state-residence dependent cSTM
 for(t in 1:n_cycles){
   ## Fill in cohort trace
   # For SoC
@@ -307,7 +327,7 @@ for(t in 1:n_cycles){
   a_A_tunnels_strAB[, , t + 1] <- diag(m_M_tunnels_strAB[t, ]) %*% a_P_tunnels_strAB[, , t]
 }
 
-# Create aggregated trace
+#* Create aggregated trace
 m_M_tunnels_SoC_sum <- cbind(H  = m_M_tunnels_SoC[, "H"], 
                              S1 = rowSums(m_M_tunnels_SoC[, 2:(n_tunnel_size +1)]), 
                              S2 = m_M_tunnels_SoC[, "S2"],
@@ -325,123 +345,164 @@ m_M_tunnels_strAB_sum <- cbind(H  = m_M_tunnels_strAB[, "H"],
                                S2 = m_M_tunnels_strAB[, "S2"],
                                D  = m_M_tunnels_strAB[, "D"])
 
-## Store the cohort traces in a list
+## Store the cohort traces in a list ----
 l_m_M <- list(m_M_tunnels_SoC_sum,      
               m_M_tunnels_strA_sum,      
               m_M_tunnels_strB_sum, 
               m_M_tunnels_strAB_sum)
 names(l_m_M) <- v_names_str
 
-## Store the transition array for each strategy in a list
+## Store the transition dynamics array for each strategy in a list ----
 l_a_A <- list(a_A_tunnels_SoC,
               a_A_tunnels_strA,
               a_A_tunnels_strB,
               a_A_tunnels_strAB)
 names(l_a_A) <- v_names_str
 
-#### Plot Outputs ####
-## Plot the cohort trace for strategies SoC and A
+# Plot Outputs ----
+#* (Functions included in "R/Functions.R"; depends on the `ggplot2` package)
+
+## Plot the cohort trace for strategy SoC ----
 plot_trace(m_M_tunnels_SoC_sum)
+## Plot the cohort trace for all strategies ----
 plot_trace_strategy(l_m_M)
 
-#### State Rewards ####
-## Vector of utilities for S1 under strategy SoC
+## Plot the epidemiology outcomes ----
+### Survival ----
+survival_plot <- plot_surv(l_m_M, v_names_death_states = "D") +
+  theme(legend.position = "bottom")
+survival_plot
+### Prevalence ----
+prevalence_S1_plot   <- plot_prevalence(l_m_M, 
+                                        v_names_sick_states = c("S1"), 
+                                        v_names_dead_states = "D")  +
+  theme(legend.position = "")
+prevalence_S1_plot
+prevalence_S2_plot   <- plot_prevalence(l_m_M, 
+                                        v_names_sick_states = c("S2"), 
+                                        v_names_dead_states = "D")  +
+  theme(legend.position = "")
+prevalence_S2_plot
+prevalence_S1S2_plot <- plot_prevalence(l_m_M, 
+                                        v_names_sick_states = c("S1", "S2"), 
+                                        v_names_dead_states = "D") +
+  theme(legend.position = "")
+prevalence_S1S2_plot
+prop_sicker_plot     <- plot_proportion_sicker(l_m_M, 
+                                               v_names_sick_states = c("S1", "S2"), 
+                                               v_names_sicker_states = c("S2")) +
+  theme(legend.position = "bottom")
+prop_sicker_plot
+
+## Combine plots ----
+gridExtra::grid.arrange(survival_plot, 
+                        prevalence_S1_plot, 
+                        prevalence_S2_plot, 
+                        prevalence_S1S2_plot, 
+                        prop_sicker_plot, 
+                        ncol = 1, heights = c(0.75, 0.75, 0.75, 0.75, 1))
+
+# State Rewards ----
+## Scale by the cycle length ----
+#* Vector of utilities per cycle for S1 under strategy SoC
 v_u_S1_SoC <- rep(u_S1, n_tunnel_size)
 names(v_u_S1_SoC) <- v_Sick_tunnel
-## Vector of state utilities under strategy SoC
+#* Vector of utilities under strategy SoC
 v_u_SoC <- c(H  = u_H, 
              v_u_S1_SoC, 
              S2 = u_S2,
-             D  = u_D)
-## Vector of costs per cycle for S1 under strategy SoC
+             D  = u_D) * cycle_length
+#* Vector of costs per cycle for S1 under strategy SoC
 v_c_S1_SoC <- rep(c_S1, n_tunnel_size)
 names(v_c_S1_SoC) <- v_Sick_tunnel
-## Vector of state costs per cycle under strategy SoC
+#* Vector of costs per cycle under strategy SoC
 v_c_SoC <- c(H  = c_H,
              v_c_S1_SoC, 
              S2 = c_S2,
-             D  = c_D)
+             D  = c_D) * cycle_length
 
-## Vector of utilities for S1 under strategy A
+#* Vector of utilities per cycle for S1 under strategy A
 v_u_S1_strA <- rep(u_trtA, n_tunnel_size)
 names(v_u_S1_strA) <- v_Sick_tunnel
-## Vector of state utilities under strategy A
+#* Vector of utilities under strategy A
 v_u_strA <- c(H  = u_H, 
               v_u_S1_strA, 
               S2 = u_S2, 
-              D  = u_D)
-## Vector of costs per cycle for S1 under strategy A
+              D  = u_D) * cycle_length
+#* Vector of costs per cycle for S1 under strategy A
 v_c_S1_strA <- rep(c_S1 + c_trtA, n_tunnel_size)
 names(v_c_S1_strA) <- v_Sick_tunnel
-## Vector of state costs per cycle under strategy A
+#* Vector of state costs per cycle under strategy A
 v_c_strA <- c(H  = c_H, 
               v_c_S1_strA,
               S2 = c_S2 + c_trtA,
-              D  = c_D)
+              D  = c_D) * cycle_length
 
-## Vector of utilities for S1 under strategy B
+#* Vector of utilities per cycle for S1 under strategy B
 v_u_S1_strB <- rep(u_S1, n_tunnel_size)
 names(v_u_S1_strB) <- v_Sick_tunnel
-## Vector of state utilities under strategy B
+#* Vector of utilities under strategy B
 v_u_strB <- c(H  = u_H, 
               v_u_S1_strB, 
               S2 = u_S2,
-              D  = u_D)
-## Vector of costs per cycle for S1 under strategy B
+              D  = u_D) * cycle_length
+#* Vector of costs per cycle for S1 under strategy B
 v_c_S1_strB <- rep(c_S1 + c_trtB, n_tunnel_size)
 names(v_c_S1_strB) <- v_Sick_tunnel
-## Vector of state costs per cycle under strategy B
+#* Vector of state costs per cycle under strategy B
 v_c_strB <- c(H  = c_H, 
               v_c_S1_strB, 
               S2 = c_S2 + c_trtB,
-              D  = c_D)
+              D  = c_D) * cycle_length
 
-## Vector of utilities for S1 under strategy AB
+#* Vector of utilities per cycle for S1 under strategy AB
 v_u_S1_strAB <- rep(u_trtA, n_tunnel_size)
 names(v_u_S1_strAB) <- v_Sick_tunnel
-## Vector of state utilities under strategy AB
+#* Vector of  utilities under strategy AB
 v_u_strAB <- c(H  = u_H, 
                v_u_S1_strAB, 
                S2 = u_S2, 
-               D  = u_D)
-## Vector of costs per cycle for S1 under strategy AB
+               D  = u_D) * cycle_length
+#* Vector of costs per cycle for S1 under strategy AB
 v_c_S1_strAB <- rep(c_S1 + (c_trtA + c_trtB), n_tunnel_size)
 names(v_c_S1_strAB) <- v_Sick_tunnel
-## Vector of state costs per cycle under strategy AB
+#* Vector of costs per cycle under strategy AB
 v_c_strAB <- c(H  = c_H, 
                v_c_S1_strAB, 
                S2 = c_S2 + (c_trtA + c_trtB), 
-               D  = c_D)
+               D  = c_D) * cycle_length
 
-## Store the vectors of state utilities for each strategy in a list 
+## Store state rewards ----
+#* Store the vectors of state utilities for each strategy in a list 
 l_u   <- list(v_u_SoC,
               v_u_strA,
               v_u_strB,
               v_u_strAB)
-## Store the vectors of state cost for each strategy in a list 
+#* Store the vectors of state cost for each strategy in a list 
 l_c   <- list(v_c_SoC,
               v_c_strA,
               v_c_strB,
               v_c_strAB)
 
-# assign strategy names to matching items in the lists
+#* assign strategy names to matching items in the lists
 names(l_u) <- names(l_c) <- v_names_str
 
-## create empty vectors to store total utilities and costs 
+# Compute expected outcomes ----
+#* Create empty vectors to store total utilities and costs 
 v_tot_qaly <- v_tot_cost <- vector(mode = "numeric", length = n_str)
 names(v_tot_qaly) <- names(v_tot_cost) <- v_names_str
 
-#### Loop through each strategy and calculate total utilities and costs ####
-for (i in 1:n_str) {
-  v_u_str         <- l_u[[i]]   # select the vector of state utilities for the ith strategy
-  v_c_str         <- l_c[[i]]   # select the vector of state costs for the ith strategy
-  a_A_tunnels_str <- l_a_A[[i]] # select the transition array for the ith strategy
+## Loop through each strategy and calculate total utilities and costs ----
+for (i in 1:n_str) { # i <- 1
+  v_u_str         <- l_u[[i]]   # select the vector of state utilities for the i-th strategy
+  v_c_str         <- l_c[[i]]   # select the vector of state costs for the i-th strategy
+  a_A_tunnels_str <- l_a_A[[i]] # select the transition array for the i-th strategy
   
-  #### Array of state utilities and costs ####
-  # Create transition matrices of state utilities and state costs for the ith strategy 
+  ##* Array of state rewards 
+  #* Create transition matrices of state utilities and state costs for the i-th strategy
   m_u_str  <- matrix(v_u_str, nrow = n_states_tunnels, ncol = n_states_tunnels, byrow = T)
   m_c_str  <- matrix(v_c_str, nrow = n_states_tunnels, ncol = n_states_tunnels, byrow = T)
-  # Expand the transition matrix of state utilities across cycles to form a transition array of state utilities
+  #* Expand the transition matrix of state utilities across cycles to form a transition array of state utilities
   a_R_u_str <- array(m_u_str, 
                      dim      = c(n_states_tunnels, n_states_tunnels, n_cycles + 1),
                      dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:n_cycles))
@@ -450,65 +511,70 @@ for (i in 1:n_str) {
                      dim      = c(n_states_tunnels, n_states_tunnels, n_cycles + 1),
                      dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:n_cycles))
   
-  #### Apply transition rewards ####  
-  # Add disutility due to transition from H to S1
+  ##* Apply transition rewards
+  #* Apply disutility due to transition from H to S1
   a_R_u_str["H", "S1_1Yr", ]          <- a_R_u_str["H", "S1_1Yr", ]          - du_HS1
-  # Add transition cost per cycle due to transition from H to S1
+  #* Add transition cost per cycle due to transition from H to S1
   a_R_c_str["H", "S1_1Yr", ]          <- a_R_c_str["H", "S1_1Yr", ]          + ic_HS1
-  # Add transition cost per cycle of dying from all non-dead states
+  #* Add transition cost  per cycle of dying from all non-dead states
   a_R_c_str[-n_states_tunnels, "D", ] <- a_R_c_str[-n_states_tunnels, "D", ] + ic_D
   
-  #### Expected QALYs and Costs for all transitions per cycle ####
-  # QALYs = life years x QoL
-  # Note: all parameters are annual in our example. In case your own case example is different make sure you correctly apply .
+  ###* Expected QALYs and costs for all transitions per cycle
+  #* QALYs = life years x QoL
+  #* Note: all parameters are annual in our example. In case your own case example is different make sure you correctly apply.
   a_Y_c_str <- a_A_tunnels_str * a_R_c_str
   a_Y_u_str <- a_A_tunnels_str * a_R_u_str 
   
-  #### Expected QALYs and Costs per cycle ####
-  ## Vector of QALYs under 
+  ###* Expected QALYs and costs per cycle
+  ##* Vector of QALYs and costs
   v_qaly_str <- apply(a_Y_u_str, 3, sum) # sum the proportion of the cohort across transitions 
   v_cost_str <- apply(a_Y_c_str, 3, sum) # sum the proportion of the cohort across transitions
   
-  #### Discounted total expected QALYs and Costs per strategy and apply half-cycle correction if applicable ####
-  ## QALYs
+  ##* Discounted total expected QALYs and Costs per strategy and apply within-cycle correction if applicable
+  #* QALYs
   v_tot_qaly[i] <- t(v_qaly_str) %*% (v_dwe * v_wcc)
-  ## Costs
+  #* Costs
   v_tot_cost[i] <- t(v_cost_str) %*% (v_dwc * v_wcc)
 }
 
-########################## Cost-effectiveness analysis #######################
-### Calculate incremental cost-effectiveness ratios (ICERs)
+# Cost-effectiveness analysis (CEA) ----
+## Incremental cost-effectiveness ratios (ICERs) ----
+#* Function included in "R/Functions.R"; depends on the `dplyr` package
+#* The latest version can be found in `dampack` package
 df_cea <- calculate_icers(cost       = v_tot_cost, 
                           effect     = v_tot_qaly,
                           strategies = v_names_str)
 df_cea
 
-### Create CEA table in proper format
-table_cea <- format_table_cea(df_cea)
+## CEA table in proper format ----
+table_cea <- format_table_cea(df_cea) # Function included in "R/Functions.R"; depends on the `scales` package
 table_cea
 
-### CEA frontier
-plot(df_cea, label = "all") +
-     expand_limits(x = max(table_cea$QALYs) + 0.3, 
-                   y = 250000) 
+## CEA frontier -----
+#* Function included in "R/Functions.R"; depends on the `ggplot2`  and `ggrepel` packages.
+#* The latest version can be found in `dampack` package
+plot.icers(df_cea, label = "all", txtsize = 16) +
+  expand_limits(x = max(table_cea$QALYs) + 0.1) +
+  theme(legend.position = c(0.8, 0.2))
 
-###################### Probabilistic Sensitivity Analysis #####################
-### Load model, CEA and PSA functions
+#******************************************************************************#
+# Probabilistic Sensitivity Analysis (PSA) -----
+## Load model, CEA and PSA functions ----
 source('R/Functions_cSTM_time_dep_state_residence.R')
+source('R/Functions.R')
 
-# List of input parameters
+## List of input parameters -----
 l_params_all <- list(
   # Transition probabilities (per cycle), hazard ratios
   v_r_HDage    = v_r_HDage, # constant rate of dying when Healthy (all-cause mortality)
-  p_HS1        = 0.15,  # probability to become Sick when Healthy conditional on surviving
-  p_S1H        = 0.5,   # probability to become Healthy when Sick conditional on surviving
-  p_S1S2       = 0.105, # probability to become Sicker when Sick conditional on surviving
+  r_HS1        = 0.15,  # constant annual rate of becoming Sick when Healthy conditional on surviving
+  r_S1H        = 0.5,   # constant annual rate of becoming Healthy when Sick conditional on surviving
   hr_S1        = 3,     # hazard ratio of death in Sick vs Healthy 
   hr_S2        = 10,    # hazard ratio of death in Sicker vs Healthy 
   p_S1S2_scale = 0.08,  # transition from S1 to S2 - Weibull scale parameter
   p_S1S2_shape = 1.1,   # transition from S1 to S2 - Weibull shape parameter
   # Effectiveness of treatment B 
-  hr_S1S2_trtB = 0.6,  # hazard ratio of becoming Sicker when Sick under B under treatment B
+  hr_S1S2_trtB = 0.6,  # hazard ratio of becoming Sicker when Sick under treatment B
   ## State rewards
   # Costs
   c_H    = 2000,  # cost of remaining one cycle in Healthy 
@@ -526,27 +592,37 @@ l_params_all <- list(
   ## Transition rewards
   du_HS1 = 0.01,  # disutility when transitioning from Healthy to Sick
   ic_HS1 = 1000,  # increase in cost when transitioning from Healthy to Sick
-  ic_D   = 2000   # increase in cost when dying
+  ic_D   = 2000,  # increase in cost when dying
+  # Initial and maximum ages
+  n_age_init = 25,
+  n_age_max = 100,
+  # Discount rates
+  d_c = 0.03, # annual discount rate for costs 
+  d_e = 0.03, # annual discount rate for QALYs,
+  # Cycle length
+  cycle_length = 1
 )
 
-# store the parameter names into a vector
+#* Store the parameter names into a vector
 v_names_params <- names(l_params_all)
 
-# Test function to compute CE outcomes
-calculate_ce_out(l_params_all)
+## Test functions to generate CE outcomes and PSA dataset ----
+#* Test function to compute CE outcomes
+calculate_ce_out(l_params_all) # Function included in "R/Functions_cSTM_time_dep_state_residence.R"
 
-# Test function to generate PSA input dataset
-generate_psa_params(10) 
+#* Test function to generate PSA input dataset
+generate_psa_params(10) # Function included in "R/Functions_cSTM_time_dep_state_residence.R"
 
-# Number of PSA samples
+## Generate PSA dataset ----
+#* Number of simulations
 n_sim <- 1000
 
-# Generate PSA input dataset
+#* Generate PSA input dataset
 df_psa_input <- generate_psa_params(n_sim = n_sim)
-# First six observations
+#* First six observations
 head(df_psa_input)
 
-# Histogram of parameters
+### Histogram of parameters ----
 ggplot(melt(df_psa_input, variable.name = "Parameter"), aes(x = value)) +
   facet_wrap(~Parameter, scales = "free") +
   geom_histogram(aes(y = ..density..)) +
@@ -558,25 +634,25 @@ ggplot(melt(df_psa_input, variable.name = "Parameter"), aes(x = value)) +
         axis.text.y  = element_blank(),
         axis.ticks.y = element_blank()) 
 
-# Initialize matrices with PSA output 
-# Dataframe of costs
+## Run PSA ----
+#* Initialize data.frames with PSA output 
+#* data.frame of costs
 df_c <- as.data.frame(matrix(0, 
                              nrow = n_sim,
                              ncol = n_str))
 colnames(df_c) <- v_names_str
-# Dataframe of effectiveness
+#* data.frame of effectiveness
 df_e <- as.data.frame(matrix(0, 
                              nrow = n_sim,
                              ncol = n_str))
 colnames(df_e) <- v_names_str
 
-#### Conduct probabilistic sensitivity analysis ####
-## Run Markov model on each parameter set of PSA input dataset in series
-## (Running this model in series can be slow. We suggest running it in parallel 
-## with the code in the next section)
+#* Conduct probabilistic sensitivity analysis
+#* Run Markov model on each parameter set of PSA input dataset
 n_time_init_psa_series <- Sys.time()
 for(i in 1:n_sim){
-  l_out_temp <- calculate_ce_out(df_psa_input[i, ])
+  l_psa_input <- update_param_list(l_params_all, df_psa_input[i,])
+  l_out_temp <- calculate_ce_out(l_psa_input)
   df_c[i, ]  <- l_out_temp$Cost  
   df_e[i, ]  <- l_out_temp$Effect
   # Display simulation progress
@@ -586,12 +662,12 @@ for(i in 1:n_sim){
 }
 n_time_end_psa_series <- Sys.time()
 n_time_total_psa_series <- n_time_end_psa_series - n_time_init_psa_series
-print(paste0("PSA with ", comma(n_sim), " simulations run in series in ", 
+print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in ", 
              round(n_time_total_psa_series, 2), " ", 
              units(n_time_total_psa_series)))
 
-### Run Markov model on each parameter set of PSA input dataset in parallel
-## (Uncomment next section to run in parallel)
+# ## Run Markov model on each parameter set of PSA input dataset in parallel
+# # Uncomment next section to run in parallel
 # ## Get OS
 # os <- get_os()
 # 
@@ -602,7 +678,7 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
 # n_time_init_psa_parallel <- Sys.time()
 # 
 # ## Run parallelized PSA based on OS
-# if(os == "macosx"){
+# if(os == "osx"){
 #   # Initialize cluster object
 #   cl <- parallel::makeForkCluster(no_cores)
 #   # Register clusters
@@ -626,12 +702,12 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
 #   opts <- list(attachExportEnv = TRUE)
 #   # Run parallelized PSA
 #   df_ce <- foreach::foreach(i = 1:n_samp, .combine = rbind,
-#                            .export = ls(globalenv()),
-#                            .packages=c("dampack"),
-#                            .options.snow = opts) %dopar% {
-#                              l_out_temp <- calculate_ce_out(df_psa_input[i, ])
-#                              df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
-#                            }
+#                             .export = ls(globalenv()),
+#                             .packages=c("dampack"),
+#                             .options.snow = opts) %dopar% {
+#                               l_out_temp <- calculate_ce_out(df_psa_input[i, ])
+#                               df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
+#                             }
 #   # Extract costs and effects from the PSA dataset
 #   df_c <- df_ce[, 1:n_str]
 #   df_e <- df_ce[, (n_str+1):(2*n_str)]
@@ -657,11 +733,13 @@ print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
 # # Stop clusters
 # stopCluster(cl)
 # n_time_total_psa_parallel <- n_time_end_psa_parallel - n_time_init_psa_parallel
-# print(paste0("PSA with ", comma(n_sim), " simulations run in series in ",
+# print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in ",
 #              round(n_time_total_psa_parallel, 2), " ",
 #              units(n_time_total_psa_parallel)))
 
-# Create PSA object for dampack
+## Visualize PSA results and CEA ----
+### Create PSA object ----
+#* Function included in "R/Functions.R" The latest version can be found in `dampack` package
 l_psa <- make_psa_obj(cost          = df_c, 
                       effectiveness = df_e, 
                       parameters    = df_psa_input, 
@@ -670,46 +748,68 @@ l_psa$strategies <- v_names_str
 colnames(l_psa$effectiveness)<- v_names_str
 colnames(l_psa$cost)<- v_names_str
 
-# Vector with willingness-to-pay (WTP) thresholds.
-v_wtp <- seq(0, 200000, by = 10000)
+#* Vector with willingness-to-pay (WTP) thresholds.
+v_wtp <- seq(0, 200000, by = 5000)
 
-# Cost-Effectiveness Scatter plot
-plot(l_psa)
+### Cost-Effectiveness Scatter plot ----
+#* Function included in "R/Functions.R"; depends on `tidyr` and `ellipse` packages.
+#* The latest version can be found in `dampack` package
+plot.psa(l_psa) +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  xlab("Effectiveness (QALYs)") +
+  guides(col = guide_legend(nrow = 2)) +
+  theme(legend.position = "bottom")
 
-## Conduct CEA with probabilistic output
-# Compute expected costs and effects for each strategy from the PSA
+### Incremental cost-effectiveness ratios (ICERs) with probabilistic output ----
+#* Compute expected costs and effects for each strategy from the PSA
+#* Function included in "R/Functions.R". The latest version can be found in `dampack` package
 df_out_ce_psa <- summary(l_psa)
 
-# Calculate incremental cost-effectiveness ratios (ICERs)
+#* Function included in "R/Functions.R"; depends on the `dplyr` package
+#* The latest version can be found in `dampack` package
 df_cea_psa <- calculate_icers(cost       = df_out_ce_psa$meanCost, 
                               effect     = df_out_ce_psa$meanEffect,
                               strategies = df_out_ce_psa$Strategy)
 df_cea_psa
 
-## Plot cost-effectiveness frontier
-plot(df_cea_psa, label = "all") +
-     expand_limits(x = 20.8)
+### Plot cost-effectiveness frontier with probabilistic output ----
+#* Function included in "R/Functions.R"; depends on the `ggplot2`  and `ggrepel` packages.
+#* The latest version can be found in `dampack` package
+plot.icers(df_cea_psa, label = "all", txtsize = 16) +
+  expand_limits(x = max(table_cea$QALYs) + 0.1) +
+  theme(legend.position = c(0.8, 0.2))
 
-## Cost-effectiveness acceptability curves (CEACs) and frontier (CEAF)
+## Cost-effectiveness acceptability curves (CEACs) and frontier (CEAF) ---
+#* Functions included in "R/Functions.R". The latest versions can be found in `dampack` package
 ceac_obj <- ceac(wtp = v_wtp, psa = l_psa)
-# Regions of highest probability of cost-effectiveness for each strategy
+#* Regions of highest probability of cost-effectiveness for each strategy
 summary(ceac_obj)
-# ceac_obj$Strategy <- ordered(ceac_obj$Strategy, levels = v_names_str)
+#* CEAC & CEAF plot
+plot.ceac(ceac_obj, txtsize = 16, xlim = c(0, NA)) +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  theme(legend.position = c(0.82, 0.5))
 
-# CEAC & CEAF plot
-plot(ceac_obj, txtsize = 16, xlim = c(0, NA)) +
-     theme(legend.position = "bottom")
-
-##  Expected Loss Curves (ELCs)
+## Expected Loss Curves (ELCs) ----
+#* Function included in "R/Functions.R".The latest version can be found in `dampack` package
 elc_obj <- calc_exp_loss(wtp = v_wtp, psa = l_psa)
 elc_obj
 
-# ELC plot
-plot(elc_obj, log_y = FALSE, txtsize = 16, xlim = c(0, NA)) +
-     theme(legend.position = "bottom")
+#* ELC plot
+plot(elc_obj, log_y = FALSE, txtsize = 16, xlim = c(0, NA), n_x_ticks = 14, 
+     col = "full") +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  # geom_point(aes(shape = as.name("Strategy"))) +
+  scale_y_continuous("Expected Loss (Thousand $)", 
+                     breaks = number_ticks(10),
+                     labels = function(x) x/1000) +
+  theme(legend.position = c(0.4, 0.7))
 
-## Expected value of perfect information (EVPI)
+## Expected value of perfect information (EVPI) ----
+#* Function included in "R/Functions.R". The latest version can be found in `dampack` package
 evpi <- calc_evpi(wtp = v_wtp, psa = l_psa)
-# EVPI plot
-plot(evpi, effect_units = "QALY")
+#* EVPI plot
+plot.evpi(evpi, effect_units = "QALY")
 

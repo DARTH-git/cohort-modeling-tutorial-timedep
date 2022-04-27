@@ -1,6 +1,6 @@
-#-----------------------------------------#
-####          Decision Model           ####
-#-----------------------------------------#
+#------------------------------------------------------------------------------#
+####                         Decision Model                                 ####
+#------------------------------------------------------------------------------#
 #' Decision Model
 #'
 #' \code{decision_model} implements the decision model used.
@@ -8,16 +8,25 @@
 #' @param l_params_all List with all parameters of decision model
 #' @param verbose Logical variable to indicate print out of messages
 #' @return The transition probability array and the cohort trace matrix.
-#' 
+#' @export
 decision_model <- function(l_params_all, verbose = FALSE) {
   with(as.list(l_params_all), {
-    
-    ###################### Process model inputs ######################
+    ########################### Process model inputs ###########################
+    ##* Number of cycles
+    n_cycles <- (n_age_max - n_age_init)/cycle_length # time horizon, number of cycles
+    # Number of tunnels, note: in our example the number of tunnels is identical to the number of cycles
+    n_tunnel_size <- n_cycles
+    # Vector with cycles for tunnels
+    v_cycles_tunnel <- 1:n_tunnel_size
     ## Age-specific transition probabilities to the Dead state
     # compute mortality rates
     v_r_S1Dage <- v_r_HDage * hr_S1        # Age-specific mortality rate in the Sick state 
     v_r_S2Dage <- v_r_HDage * hr_S2        # Age-specific mortality rate in the Sicker state 
-    # transform rates to probabilities
+    #* transform rates to probabilities adjusting by cycle length
+    #* Function included in "R/Functions.R". The latest version can be found in `darthtools` package
+    p_HS1  <- rate_to_prob(r = r_HS1, t = cycle_length) # constant annual probability of becoming Sick when Healthy conditional on surviving 
+    p_S1H  <- rate_to_prob(r = r_S1H, t = cycle_length) # constant annual probability of becoming Healthy when Sick conditional on surviving
+    v_p_HDage  <- rate_to_prob(v_r_HDage, t = cycle_length)  # Age-specific mortality risk in the Healthy state 
     v_p_S1Dage <- rate_to_prob(v_r_S1Dage) # Age-specific mortality risk in the Sick state
     v_p_S2Dage <- rate_to_prob(v_r_S2Dage) # Age-specific mortality risk in the Sicker state
     
@@ -26,9 +35,8 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     v_r_S1S2_tunnels <- (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape - 
                         ((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape
     
-    # Weibull transition probability conditional on surviving
-    v_p_S1S2_tunnels <- 1 - exp(-v_r_S1S2_tunnels)
-    
+    # Weibull transition probability conditional on surviving adjusting by cycle length
+    v_p_S1S2_tunnels <- rate_to_prob(v_r_S1S2_tunnels, t = cycle_length)
     
     ## State-residence-dependent transition rate of becoming Sicker when Sick 
     ## for treatment B
@@ -37,11 +45,46 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     v_r_S1S2_tunnels_trtB <- v_r_S1S2_tunnels * hr_S1S2_trtB
     # transform rate to probability to become Sicker when Sick under treatment B 
     # conditional on surviving
-    v_p_S1S2_tunnels_trtB <- rate_to_prob(r = v_r_S1S2_tunnels_trtB) 
+    v_p_S1S2_tunnels_trtB <- rate_to_prob(r = v_r_S1S2_tunnels_trtB, t = cycle_length) 
     
     ###################### Construct state-transition models #####################
-    #### Create transition matrix ####
-    # Initialize 3-D array
+    ##* Initial state vector
+    #* All starting healthy
+    v_m_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
+    #* Number of health states 
+    n_states_tunnels    <- length(v_m_init_tunnels)
+    # Vector with names for tunnel states of Sick state
+    v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
+    #* Health state names
+    v_names_states_tunnels <- c("H", v_Sick_tunnel, "S2", "D") # health state names
+    
+    ##* Initialize cohort trace for state-residence dependent cSTM
+    m_M_tunnels_SoC <- matrix(0, 
+                              nrow     = (n_cycles + 1), ncol = n_states_tunnels, 
+                              dimnames = list(0:n_cycles, v_names_states_tunnels))
+    #* Store the initial state vector in the first row of the cohort trace
+    m_M_tunnels_SoC[1, ] <- v_m_init_tunnels
+    ##* Initialize cohort trace for strategies A, B, and AB
+    #* Structure and initial states are the same as for SoC
+    m_M_tunnels_strA  <- m_M_tunnels_SoC # Strategy A
+    m_M_tunnels_strB  <- m_M_tunnels_SoC # Strategy B
+    m_M_tunnels_strAB <- m_M_tunnels_SoC # Strategy AB
+    
+    ##* Initialize transition dynamics arrays which will capture transitions 
+    ##* from each state to another over time for strategy SoC
+    a_A_tunnels_SoC <- array(0,
+                             dim = c(n_states_tunnels, n_states_tunnels, n_cycles + 1),
+                             dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:n_cycles))
+    #* Set first slice of a_A_SoC with the initial state vector in its diagonal
+    diag(a_A_tunnels_SoC[, , 1]) <- v_m_init_tunnels
+    #* Initialize transition-dynamics array for strategies A, B, and AB
+    #* Structure and initial states are the same as for SoC
+    a_A_tunnels_strA  <- a_A_tunnels_SoC
+    a_A_tunnels_strB  <- a_A_tunnels_SoC
+    a_A_tunnels_strAB <- a_A_tunnels_SoC
+    
+    ##* Create transition arrays
+    #* Initialize 3-D array
     a_P_tunnels_SoC <- array(0, dim   = c(n_states_tunnels, n_states_tunnels, n_cycles),
                          dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:(n_cycles - 1)))
     ### Fill in array
@@ -100,48 +143,20 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     ## Initialize transition probability matrix for strategy AB as a copy of B's
     a_P_tunnels_strAB <- a_P_tunnels_strB
     
-    ### Check if transition probability matrix is valid (i.e., elements cannot < 0 or > 1) 
+    ### Check if transition probability matrices are valid
+    ## Check that transition probabilities are [0, 1]
     check_transition_probability(a_P_tunnels_SoC, verbose = TRUE)
     check_transition_probability(a_P_tunnels_strA, verbose = TRUE)
     check_transition_probability(a_P_tunnels_strB, verbose = TRUE)
     check_transition_probability(a_P_tunnels_strAB, verbose = TRUE)
-    ### Check if transition probability matrix sum to 1 (i.e., each row should sum to 1)
+    ### Check that all rows for each slice of the array sum to 1
     check_sum_of_transition_array(a_P_tunnels_SoC, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
     check_sum_of_transition_array(a_P_tunnels_strA, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
     check_sum_of_transition_array(a_P_tunnels_strB, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
     check_sum_of_transition_array(a_P_tunnels_strAB, n_states = n_states_tunnels, n_cycles = n_cycles, verbose = TRUE)
     
     #### Run Markov model ####
-    ## Initial state vector
-    # All starting healthy
-    v_s_init_tunnels <- c(1, rep(0, n_tunnel_size), 0, 0) 
-    
-    ## Initialize cohort trace for history-dependent cSTM
-    m_M_tunnels_SoC <- matrix(0, 
-                          nrow     = (n_cycles + 1), ncol = n_states_tunnels, 
-                          dimnames = list(0:n_cycles, v_names_states_tunnels))
-    # Store the initial state vector in the first row of the cohort trace
-    m_M_tunnels_SoC[1, ] <- v_s_init_tunnels
-    
-    ## Initialize cohort trace for strategies A, B, and AB
-    # Structure and initial states are the same as for SoC
-    m_M_tunnels_strA  <- m_M_tunnels_SoC # Strategy A
-    m_M_tunnels_strB  <- m_M_tunnels_SoC # Strategy B
-    m_M_tunnels_strAB <- m_M_tunnels_SoC # Strategy AB
-    
-    ## Initialize transition array
-    a_A_tunnels_SoC <- array(0,
-                             dim = c(n_states_tunnels, n_states_tunnels, n_cycles + 1),
-                             dimnames = list(v_names_states_tunnels, v_names_states_tunnels, 0:n_cycles))
-    # Set first slice of A with the initial state vector in its diagonal
-    diag(a_A_tunnels_SoC[, , 1]) <- v_s_init_tunnels
-    # Initialize transition-dynamics array for strategies A, B, and AB
-    # Structure and initial states are the same as for SoC
-    a_A_tunnels_strA  <- a_A_tunnels_SoC
-    a_A_tunnels_strB  <- a_A_tunnels_SoC
-    a_A_tunnels_strAB <- a_A_tunnels_SoC
-    
-    ## Iterative solution of age-dependent cSTM
+    ## Iterative solution of state-residence dependent cSTM
     for(t in 1:n_cycles){
       ## Fill in cohort trace
       # For SoC
@@ -198,7 +213,9 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     names(l_a_A) <- v_names_str
     
     ########################################## RETURN OUTPUT  ##########################################
-    out <- list(l_m_M = l_m_M,
+    out <- list(n_cycles = n_cycles,
+                n_tunnel_size = n_tunnel_size,
+                l_m_M = l_m_M,
                 l_a_A = l_a_A)
     
     return(out)
@@ -218,84 +235,95 @@ decision_model <- function(l_params_all, verbose = FALSE) {
 #' 
 calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
   with(as.list(l_params_all), {
+    # Number of cycles
+    n_cycles <- (n_age_max - n_age_init)/cycle_length # time horizon, number of cycles
+    # Number of tunnels, note: in our example the number of tunnels is identical to the number of cycles
+    n_tunnel_size <- n_cycles
+    # Vector with cycles for tunnels
+    v_cycles_tunnel <- 1:n_tunnel_size
+    # Vector with names for tunnel states of Sick state
+    v_Sick_tunnel <- paste("S1_", seq(1, n_tunnel_size), "Yr", sep = "")
     
     ### Run decision model to get transition dynamics array
     model <- decision_model(l_params_all = l_params_all)
     l_a_A <- model[["l_a_A"]]
     
-    #### State Rewards ####
-    ## Vector of utilities for S1 under strategy SoC
+    # State Rewards ----
+    ## Scale by the cycle length ----
+    #* Vector of utilities per cycle for S1 under strategy SoC
     v_u_S1_SoC <- rep(u_S1, n_tunnel_size)
     names(v_u_S1_SoC) <- v_Sick_tunnel
-    ## Vector of state utilities under strategy SoC
+    #* Vector of utilities under strategy SoC
     v_u_SoC <- c(H  = u_H, 
                  v_u_S1_SoC, 
                  S2 = u_S2,
-                 D  = u_D)
-    ## Vector of costs per cycle for S1 under strategy SoC
+                 D  = u_D) * cycle_length
+    #* Vector of costs per cycle for S1 under strategy SoC
     v_c_S1_SoC <- rep(c_S1, n_tunnel_size)
     names(v_c_S1_SoC) <- v_Sick_tunnel
-    ## Vector of state costs per cycle under strategy SoC
+    #* Vector of costs per cycle under strategy SoC
     v_c_SoC <- c(H  = c_H,
                  v_c_S1_SoC, 
                  S2 = c_S2,
-                 D  = c_D)
-    ## Vector of utilities for S1 under strategy A
+                 D  = c_D) * cycle_length
+    
+    #* Vector of utilities per cycle for S1 under strategy A
     v_u_S1_strA <- rep(u_trtA, n_tunnel_size)
     names(v_u_S1_strA) <- v_Sick_tunnel
-    ## Vector of state utilities under strategy A
+    #* Vector of utilities under strategy A
     v_u_strA <- c(H  = u_H, 
                   v_u_S1_strA, 
                   S2 = u_S2, 
-                  D  = u_D)
-    ## Vector of costs per cycle for S1 under strategy A
+                  D  = u_D) * cycle_length
+    #* Vector of costs per cycle for S1 under strategy A
     v_c_S1_strA <- rep(c_S1 + c_trtA, n_tunnel_size)
     names(v_c_S1_strA) <- v_Sick_tunnel
-    ## Vector of state costs per cycle under strategy A
+    #* Vector of state costs per cycle under strategy A
     v_c_strA <- c(H  = c_H, 
                   v_c_S1_strA,
                   S2 = c_S2 + c_trtA,
-                  D  = c_D)
+                  D  = c_D) * cycle_length
     
-    ## Vector of utilities for S1 under strategy B
+    #* Vector of utilities per cycle for S1 under strategy B
     v_u_S1_strB <- rep(u_S1, n_tunnel_size)
     names(v_u_S1_strB) <- v_Sick_tunnel
-    ## Vector of state utilities under strategy B
+    #* Vector of utilities under strategy B
     v_u_strB <- c(H  = u_H, 
                   v_u_S1_strB, 
                   S2 = u_S2,
-                  D  = u_D)
-    ## Vector of costs per cycle for S1 under strategy B
+                  D  = u_D) * cycle_length
+    #* Vector of costs per cycle for S1 under strategy B
     v_c_S1_strB <- rep(c_S1 + c_trtB, n_tunnel_size)
     names(v_c_S1_strB) <- v_Sick_tunnel
-    ## Vector of state costs per cycle under strategy B
+    #* Vector of state costs per cycle under strategy B
     v_c_strB <- c(H  = c_H, 
                   v_c_S1_strB, 
                   S2 = c_S2 + c_trtB,
-                  D  = c_D)
+                  D  = c_D) * cycle_length
     
-    ## Vector of utilities for S1 under strategy AB
+    #* Vector of utilities per cycle for S1 under strategy AB
     v_u_S1_strAB <- rep(u_trtA, n_tunnel_size)
     names(v_u_S1_strAB) <- v_Sick_tunnel
-    ## Vector of state utilities under strategy AB
+    #* Vector of  utilities under strategy AB
     v_u_strAB <- c(H  = u_H, 
                    v_u_S1_strAB, 
                    S2 = u_S2, 
-                   D  = u_D)
-    ## Vector of costs per cycle for S1 under strategy AB
+                   D  = u_D) * cycle_length
+    #* Vector of costs per cycle for S1 under strategy AB
     v_c_S1_strAB <- rep(c_S1 + (c_trtA + c_trtB), n_tunnel_size)
     names(v_c_S1_strAB) <- v_Sick_tunnel
-    ## Vector of state costs per cycle under strategy AB
+    #* Vector of costs per cycle under strategy AB
     v_c_strAB <- c(H  = c_H, 
                    v_c_S1_strAB, 
                    S2 = c_S2 + (c_trtA + c_trtB), 
-                   D  = c_D)
+                   D  = c_D) * cycle_length
     
     ## Store the vectors of state utilities for each strategy in a list 
     l_u   <- list(v_u_SoC,
                   v_u_strA,
                   v_u_strB,
                   v_u_strAB)
+    
     ## Store the vectors of state cost for each strategy in a list 
     l_c   <- list(v_c_SoC,
                   v_c_strA,
@@ -303,7 +331,7 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
                   v_c_strAB)
     
     # assign strategy names to matching items in the lists
-    names(l_u) <- names(l_c) <- v_names_str
+    names(l_u) <- names(l_c) <- names(l_a_A) <- v_names_str
     
     ## create empty vectors to store total utilities and costs 
     v_tot_qaly <- v_tot_cost <- vector(mode = "numeric", length = n_str)
@@ -384,15 +412,20 @@ generate_psa_params <- function(n_sim = 1000, seed = 071818){
   set.seed(seed) # set a seed to be able to reproduce the same results
   df_psa <- data.frame(
     # Transition probabilities (per cycle)
-    p_HS1    = rbeta(n_sim, 30, 170),               # probability to become sick when healthy conditional on surviving
-    p_S1H    = rbeta(n_sim, 60, 60) ,               # probability to become healthy when sick conditional on surviving
+    r_HS1    = rgamma(n_sim, shape = 30, rate = 170 + 30), # constant rate of becoming Sick when Healthy conditional on surviving
+    r_S1H    = rgamma(n_sim, shape = 60, rate = 60 + 60),  # constant rate of becoming Healthy when Sick conditional on surviving
     hr_S1    = rlnorm(n_sim, log(3), 0.01),         # rate ratio of death in S1 vs healthy 
     hr_S2    = rlnorm(n_sim, log(10), 0.02),        # rate ratio of death in S2 vs healthy 
+    
+    # Weibull parameters for state-residence-dependent transition probability of 
+    # becoming Sicker when Sick conditional on surviving
     p_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
     p_S1S2_shape = rlnorm(n_sim, log(1.1), 0.02),   # transition from S1 to S2 - Weibull shape parameter
+    
+    # Effectiveness of treatment B 
     hr_S1S2_trtB = rlnorm(n_sim, log(0.6), 0.1),    # hazard ratio of becoming Sicker when Sick under B
     
-    # State rewards
+    ## State rewards
     # Costs
     c_H    = rgamma(n_sim, shape = 100,   scale = 20),   # cost of remaining one cycle in state H
     c_S1   = rgamma(n_sim, shape = 177.8, scale = 22.5), # cost of remaining one cycle in state S1
@@ -403,7 +436,7 @@ generate_psa_params <- function(n_sim = 1000, seed = 071818){
     # Utilities
     u_H    = rbeta(n_sim, shape1 = 200, shape2 = 3),     # utility when healthy
     u_S1   = rbeta(n_sim, shape1 = 130, shape2 = 45),    # utility when sick
-    u_S2   = rbeta(n_sim, shape1 = 50,  shape2 = 50),    # utility when sicker
+    u_S2   = rbeta(n_sim, shape1 = 230, shape2 = 230),  # utility when sicker
     u_D    = 0,                                          # utility when dead
     u_trtA = rbeta(n_sim, shape1 = 300, shape2 = 15),    # utility when being treated
     
