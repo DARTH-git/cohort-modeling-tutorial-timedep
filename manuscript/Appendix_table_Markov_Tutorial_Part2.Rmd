@@ -50,7 +50,9 @@ This table contains an overview of the key model components used in the code for
 |              | State vector in cycle $t$        | `lt_usa_2005`| list            |                   | numeric     |
 |              | Vector of age-specific mortality rates | `v_r_mort_by_age` | vector        |          | numeric     |
 |              |                                  |              |                 |                        |             |
-|              |  **Transition probabilities**    |              |                 |                   |             |  
+|              |  **Transition probabilities and rates**    |              |                 |                   |             |  
+| $r_{[H,S1]}$  | Constant rate of becoming Sick when Healthy  | `r`_HS1`      | scalar          |    | numeric     |
+| $r_{[S1,H]}$  | Constant rate of becoming Healthy when Sick  | `r`_S1H`      | scalar          |    | numeric     |
 | $p_{[H,S1]}$  | From Healthy to Sick conditional on surviving  | `p_HS1`      | scalar          |    | numeric     |
 | $p_{[S1,H]}$  | From Sick to Healthy conditional on surviving  | `p_S1H`      | scalar          |    | numeric     |
 | $p_{[S1,S2]}$ | From Sick to Sicker conditional on surviving   | `p_S1S2`     | scalar          |    | numeric     |
@@ -60,7 +62,7 @@ This table contains an overview of the key model components used in the code for
 | $hr_{[S1,H]}$ | Hazard ratio of death in Sick vs Healthy       | `hr_S1`       | scalar          |                   | numeric     |
 | $hr_{[S2,H]}$ | Hazard ratio of death in Sicker vs Healthy     | `hr_S2`       | scalar          |                   | numeric     |
 | $hr_{[S1,S2]_{trtB}}$ | Hazard ratio of becoming Sicker when Sick under treatment B    | `hr_S1S2_trtB`| scalar   |  | numeric     |
-| $p_{[S1,S2]_{trtB}}$ | probability to become Sicker when Sick under treatment B conditional on surviving | `p_S1S2_trtB`| scalar   |  | numeric     |
+| $p_{[S1,S2]_{trtB}}$ | Probability to become Sicker when Sick under treatment B conditional on surviving | `p_S1S2_trtB`| scalar   |  | numeric     |
 |              |                                  |              |                 |                        |             |
 |              |  **Weibull parameters for transition probability of becoming Sicker when Sick conditional on surviving** |              |                 |                   |             |  
 | $\lambda$    | scale of the Weibull hazard function  | `p_S1S2_scale`      | scalar          |                   | numeric     |
@@ -74,7 +76,7 @@ This table contains an overview of the key model components used in the code for
 | $p_{[S1,D,t]}$| Age-specific mortality rates in the Sick state   | `v_p_S1Dage`  | vector   | `n_t` x 1   | numeric     |
 | $p_{[S2,D,t]}$| Age-specific mortality rates in the Sicker state | `v_p_S2Dage`  | vector   | `n_t` x 1   | numeric     |
 | $p_{[S1,S2, t]}$ | Time-dependent transition probabilities from sick to sicker  |`v_p_S1S2_tunnels` | vector | `n_t` x 1 | numeric |
-| $r_{[S1,S2, t]}$ | State-residence-dependent transition rate of becoming Sicker when Sick |`v_r_S1S2_tunnels` | vector | `n_t` x 1 | numeric |
+| $\mu_{[S1_{\tau},S2, \tau]}$ | State-residence time-dependent transition rate of becoming Sicker when Sick |`v_r_S1S2_tunnels` | vector | `n_t` x 1 | numeric |
 |               |                                |               |                 |                   |           |
 |        | **Annual costs**                      |               |                 |                   |           |
 |              | Healthy individuals             | `c_H`         | scalar          |                   | numeric   |
