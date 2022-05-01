@@ -13,28 +13,41 @@ following manuscript:
 -   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
     Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
     State-Transition Models in R using a Cost-Effectiveness Analysis
-    Example](https://arxiv.org/abs/2108.13552). arXiv:2108.13552v1.
+    Example](https://arxiv.org/abs/2108.13552). arXiv:2021.13552v1.
     2021:1-37.
 
 The release that accompanies the published article has been archived in
 zenodo: <https://zenodo.org/badge/latestdoi/357371663>
 
 The
+[`analysis`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/analysis)
+folder includes the scripts with all the code, description and comments
+to reproduce the CEA, probabilistic sensitivity analysis (PSA) and
+generation of epidemiological measures of the manuscript:
+
+-   [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_simulation.R):
+    Code to replicate all simulation-time dependent cSTMs analyses of
+    the manuscript.
+-   [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_state_residence.R):
+    Code to replicate all state-residence time dependent cSTMs analyses
+    of the manuscript.
+
+The R scripts require loading functions that synthesize cSTMs outputs
+and conduct several sensitivity analyses included in the
 [`R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/R)
-folder includes two different scripts corresponding to functions used to
-synthesize cSTMs outputs and conduct several sensitivity analyses:
+folder:
 
 -   [`Funtions.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions.R):
     Functions to generate epidemiological measures from time-dependent
     cSTMs.
 -   [`Functions_cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions_cSTM_time_dep_simulation.R):
-    These functions wrap the simulation-time dependent cSTM, compute CEA
-    measures, and generate probabilistic sensitivity analysis (PSA)
-    input datasets.
+    These functions wrap the simulation-time dependent cSTMs, compute
+    CEA and epidemiological measures, and generate probabilistic
+    sensitivity analysis (PSA) input datasets.
 -   [`Functions_cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions_cSTM_time_dep_state_residence.R):
-    These functions wrap the state-residence time dependent cSTM,
-    compute CEA measures, and generate probabilistic sensitivity
-    analysis (PSA) input datasets.
+    These functions wrap the state-residence time dependent cSTMs,
+    compute CEA and epidemiological measures, and generate probabilistic
+    sensitivity analysis (PSA) input datasets.
 
 ## How to cite this R code in your article
 
@@ -105,8 +118,8 @@ in R:
 -   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
     Pechlivanoglou P, Jalal H. [An Introductory Tutorial on Cohort
     State-Transition Models in R Using a Cost-Effectiveness Analysis
-    Example](http://arxiv.org/abs/2001.07824). arXiv:200107824v3.
-    2021:1-26,
+    Example](http://arxiv.org/abs/2001.07824). arXiv:200107824v4.
+    2022:1-26,
 
 and understanding the use of multidimensional arrays to represent cSTM
 dynamics in R described in:
