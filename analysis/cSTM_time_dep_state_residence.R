@@ -124,8 +124,8 @@ hr_S1S2_trtB <- 0.6  # hazard ratio of becoming Sicker when Sick under treatment
 
 #* Weibull parameters for state-residence-dependent transition probability of 
 #* becoming Sicker when Sick conditional on surviving
-p_S1S2_scale <- 0.08 # scale
-p_S1S2_shape <- 1.1  # shape
+r_S1S2_scale <- 0.08 # scale
+r_S1S2_shape <- 1.1  # shape
 
 ## Age-dependent mortality rates ----
 lt_usa_2015 <- read.csv("data/LifeTable_USA_Mx_2015.csv")
@@ -160,7 +160,7 @@ v_dwc  <- 1 / ((1 + (d_e * cycle_length)) ^ (0:n_cycles))
 v_dwe  <- 1 / ((1 + (d_c * cycle_length)) ^ (0:n_cycles))
 
 # Process model inputs ----
-## Age-specific transition probabilities to the Dead state for all cycles ----
+## Age-specific transition rates to the Dead state for all cycles ----
 v_r_HDage  <- rep(v_r_mort_by_age, each = 1/cycle_length)
 #* Name age-specific mortality vector 
 names(v_r_HDage) <- v_age_names
@@ -179,8 +179,8 @@ v_p_S2Dage <- rate_to_prob(v_r_S2Dage, t = cycle_length) # Age-specific mortalit
 
 ## State-residence-dependent transition rate of becoming Sicker when Sick ----
 #* Weibull transition rate
-v_r_S1S2_tunnels <- (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape - 
-                    ((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape
+v_r_S1S2_tunnels <- (v_cycles_tunnel*r_S1S2_scale)^r_S1S2_shape - 
+                    ((v_cycles_tunnel-1)*r_S1S2_scale)^r_S1S2_shape
                             
 ## Weibull transition probability conditional on surviving adjusting by cycle length ----
 v_p_S1S2_tunnels <- rate_to_prob(v_r_S1S2_tunnels, t = cycle_length)
@@ -571,8 +571,8 @@ l_params_all <- list(
   r_S1H        = 0.5,   # constant annual rate of becoming Healthy when Sick conditional on surviving
   hr_S1        = 3,     # hazard ratio of death in Sick vs Healthy 
   hr_S2        = 10,    # hazard ratio of death in Sicker vs Healthy 
-  p_S1S2_scale = 0.08,  # transition from S1 to S2 - Weibull scale parameter
-  p_S1S2_shape = 1.1,   # transition from S1 to S2 - Weibull shape parameter
+  r_S1S2_scale = 0.08,  # transition from S1 to S2 - Weibull scale parameter
+  r_S1S2_shape = 1.1,   # transition from S1 to S2 - Weibull shape parameter
   # Effectiveness of treatment B 
   hr_S1S2_trtB = 0.6,  # hazard ratio of becoming Sicker when Sick under treatment B
   ## State rewards
