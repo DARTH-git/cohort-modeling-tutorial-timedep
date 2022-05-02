@@ -312,6 +312,34 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
 }
 
 #------------------------------------------------------------------------------#
+####                Generate Epidemiological Measures                       ####
+#------------------------------------------------------------------------------#
+generate_epi_measures_SoC <- function(l_params_all){ # User defined
+  with(as.list(l_params_all), {
+    ### Run decision model to get cohort trace and transition dynamics array
+    model <- decision_model(l_params_all = l_params_all)
+    m_M_SoC <- model$l_m_M$`Standard of care`
+    ## Survival curve
+    v_S_SoC <- rowSums(m_M_SoC[, -which(v_names_states == "D")])
+    ## Life expectancy
+    le <- sum(v_S_SoC)
+    ## Prevalence
+    # Prevalence of Sick
+    v_prev_S1_SoC   <- m_M_SoC[, "S1"] / v_S_SoC
+    # Prevalence of Sicker
+    v_prev_S2_SoC   <- m_M_SoC[, "S2"] / v_S_SoC
+    # Prevalence of Sick and Sicker
+    v_prev_S1S2_SoC <- rowSums(m_M_SoC[, c("S1", "S2")])/v_S_SoC
+    l_out_epi <- list(S  = v_S_SoC,
+                      LE = le,
+                      PrevS1   = v_prev_S1_SoC,
+                      PrevS2   = v_prev_S2_SoC,
+                      PrevS1S2 = v_prev_S1S2_SoC)
+    return(l_out_epi)
+  }
+ )
+}
+#------------------------------------------------------------------------------#
 ####             Generate a PSA input parameter dataset                     ####
 #------------------------------------------------------------------------------#
 #' Generate parameter sets for the probabilistic sensitivity analysis (PSA)
@@ -334,15 +362,15 @@ generate_psa_params <- function(n_sim = 1000, seed = 071818){
     hr_S2    = rlnorm(n_sim, meanlog = log(10), sdlog = 0.02), # hazard ratio of death in Sicker vs healthy 
     
     # Effectiveness of treatment B 
-    hr_S1S2_trtB = rlnorm(n_sim, meanlog = log(0.6), sdlog = 0.1), # hazard ratio of becoming Sicker when Sick under treatment B
+    hr_S1S2_trtB = rlnorm(n_sim, meanlog = log(0.6), sdlog = 0.02), # hazard ratio of becoming Sicker when Sick under treatment B
     
     ## State rewards
     # Costs
     c_H    = rgamma(n_sim, shape = 100,   scale = 20),   # cost of remaining one cycle in state H
     c_S1   = rgamma(n_sim, shape = 177.8, scale = 22.5), # cost of remaining one cycle in state S1
     c_S2   = rgamma(n_sim, shape = 225,   scale = 66.7), # cost of remaining one cycle in state S2
-    c_trtA = rgamma(n_sim, shape = 576,   scale = 20.8), # cost of treatment A (per cycle)
-    c_trtB = rgamma(n_sim, shape = 676,   scale = 19.2), # cost of treatment B (per cycle)
+    c_trtA = rgamma(n_sim, shape = 73.5, scale = 163.3), # cost of treatment A (per cycle)
+    c_trtB = rgamma(n_sim, shape = 86.2, scale = 150.8), # cost of treatment B (per cycle)
     c_D    = 0,                                          # cost of being in the death state
     
     # Utilities
