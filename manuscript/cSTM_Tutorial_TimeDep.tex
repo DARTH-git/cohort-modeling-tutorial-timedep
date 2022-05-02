@@ -156,7 +156,7 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Pittsburgh, Pittsburgh, PA, USA}}
-\date{2022-05-01}
+\date{2022-05-02}
 
 \begin{document}
 \maketitle
@@ -301,7 +301,7 @@ In the introductory tutorial, healthy individuals face a constant risk of death.
 
 The S1 state is associated with higher mortality, higher health care costs, and lower quality of life than the H state. Once in the S1 state, individuals may recover (returning to the H state), die (move to the D state), or progress further to the ``Sicker'' state (denoted by ``S2''), with further increases in mortality risk and health care costs and reduced quality of life. We assume that it is not clinically possible to distinguish between individuals in S1 and S2. Individuals in S1 and S2 face an increased hazard of death, compared to healthy individuals, in the form of a hazard ratio (HR) of 3 and 10, respectively, relative to the background age-specific mortality hazard rate. In the state-residence time-dependent model, the risk of progressing from S1 to S2 depends on the time spent in S1. Once simulated individuals die, they transition to the absorbing D state, where they remain, and incur a one-time cost of \$2,000 (\texttt{ic\_D}) for the expected acute care received before dying. All transitions between non-death states are assumed to be conditional on surviving each cycle. We simulated the evolution of the cohort in one-year discrete-time cycles.
 
-We use this cSTM to evaluate the cost-effectiveness of four strategies: Strategy A, strategy B, a combination of A and B (strategy AB), and the standard of care (strategy SoC). Strategy A involves administering treatment A to individuals in S1 and S2. Treatment A increases the QoL of individuals only in S1 from 0.75 (utility without treatment, \texttt{u\_S1}) to 0.95 (utility with treatment A, \texttt{u\_trtA}) and costs \$12,000 per year (\texttt{c\_trtA}). This strategy does not impact the QoL of individuals in S2, nor does it change the risk of becoming sick or progressing through the sick states. Strategy B uses treatment B to reduce the rate of Sick individuals progressing to the S2 state with a hazard ratio (HR) of 0.6 (\texttt{hr\_S1S2\_trtB}) and costs \$13,000 per year (\texttt{c\_trtB}). Treatment B does not affect QoL. Strategy AB involves administering both treatments A and B, resulting in benefits in increased QoL in patients in the S1 state and reduced risk of progression from S1 to S2, accounting for the costs of both treatments. We model the effectiveness of treatment B as a hazard ratio. However, other effect measures can be used, such as odds ratio, risk ratio, or risk differences depending on the methods used to estimate them.\textsuperscript{\protect\hyperlink{ref-Kuntz2001}{13},\protect\hyperlink{ref-Ades2004a}{14}} We discount both costs and QALYs at an annual rate of 3\%. Model parameters and the corresponding R variable names are presented in Table \ref{tab:param-table} and follow the notation described in the DARTH coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{15}} We assume that all parameters are known for the case study. However, in a real-world CEA, parameters are estimated from electronic health records,\textsuperscript{\protect\hyperlink{ref-Rodriguez2021}{16}} clinical trials, and observational studies, and when there is no individual-level data to inform them, through model calibration.\textsuperscript{\protect\hyperlink{ref-Welton2005}{17}}
+We use this cSTM to evaluate the cost-effectiveness of four strategies: Strategy A, strategy B, a combination of A and B (strategy AB), and the standard of care (strategy SoC). Strategy A involves administering treatment A to individuals in S1 and S2. Treatment A increases the QoL of individuals only in S1 from 0.75 (utility without treatment, \texttt{u\_S1}) to 0.95 (utility with treatment A, \texttt{u\_trtA}) and costs \$12,000 per year (\texttt{c\_trtA}). This strategy does not impact the QoL of individuals in S2, nor does it change the risk of becoming sick or progressing through the sick states. Strategy B uses treatment B to reduce the rate of Sick individuals progressing to the S2 state with a hazard ratio (HR) of 0.6 (\texttt{hr\_S1S2\_trtB}) and costs \$13,000 per year (\texttt{c\_trtB}). Treatment B does not affect QoL. Strategy AB involves administering both treatments A and B, resulting in benefits in increased QoL in patients in the S1 state and reduced risk of progression from S1 to S2, accounting for the costs of both treatments. We model the effectiveness of treatment B as a hazard ratio. However, other effect measures can be used, such as odds ratio, risk ratio, or risk differences depending on the methods used to estimate them.\textsuperscript{\protect\hyperlink{ref-Kuntz2001}{13}--\protect\hyperlink{ref-Gidwani2020}{15}} We discount both costs and QALYs at an annual rate of 3\%. Model parameters and the corresponding R variable names are presented in Table \ref{tab:param-table} and follow the notation described in the DARTH coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{16}} We assume that all parameters are known for the case study. However, in a real-world CEA, parameters are estimated from electronic health records,\textsuperscript{\protect\hyperlink{ref-Rodriguez2021}{17}} clinical trials, and observational studies, and when there is no individual-level data to inform them, through model calibration.\textsuperscript{\protect\hyperlink{ref-Welton2005}{18}}
 
 Note that for strategy A, the model has identical transition probabilities to SoC. The only difference is the added cost of the treatment for S1 and S2, and QoL increases for S1. After comparing the four strategies in terms of expected QALYs and costs, we calculate the incremental cost per QALY gained between non-dominated strategies as explained below.
 
@@ -364,7 +364,7 @@ when transitioning to S1 & & & \\
 \hypertarget{incorporating-simulation-time-dependence}{%
 \subsection{Incorporating simulation-time dependence}\label{incorporating-simulation-time-dependence}}
 
-To illustrate simulation-time dependency in the Sick-Sicker cSTM, we model all-cause mortality as a function of age. We obtain all-cause mortality from life tables in the form of age-specific mortality hazard rates, \(\mu(a)\), where \(a\) refers to age. For this example, we create a vector \texttt{v\_r\_mort\_by\_age} to represent age-specific background mortality hazard rates for 25 to 100 year-olds obtained from US life tables.\textsuperscript{\protect\hyperlink{ref-Arias2017}{18}} We repeat each of the one-year-specific rates in \(\mu(a)\) (R variable name \texttt{v\_r\_mort\_by\_age}) as many times as the number of cycles in a year for these ages. To compute the transition probability from state H to state D, corresponding to the cohort's age at each cycle, we transform the rate \(\mu(a)\) to a transition probability assuming a constant exponential hazard rate within each year of age
+To illustrate simulation-time dependency in the Sick-Sicker cSTM, we model all-cause mortality as a function of age. We obtain all-cause mortality from life tables in the form of age-specific mortality hazard rates, \(\mu(a)\), where \(a\) refers to age. For this example, we create a vector \texttt{v\_r\_mort\_by\_age} to represent age-specific background mortality hazard rates for 25 to 100 year-olds obtained from US life tables.\textsuperscript{\protect\hyperlink{ref-Arias2017}{19}} We repeat each of the one-year-specific rates in \(\mu(a)\) (R variable name \texttt{v\_r\_mort\_by\_age}) as many times as the number of cycles in a year for these ages. To compute the transition probability from state H to state D, corresponding to the cohort's age at each cycle, we transform the rate \(\mu(a)\) to a transition probability assuming a constant exponential hazard rate within each year of age
 \[
   p_{[H,D,t]} = 1-\exp\left\{{-\mu(a_0 + t)}\right\},
 \]
@@ -545,7 +545,7 @@ To derive a transition probability from S1 to S2 as a function of the time the c
   p_{\left[S1_{\tau},S2, \tau\right]} = 1-\exp{\left(-\mu_{\left[S1_{\tau},S2, \tau\right]}\right)},
 \label{eq:tp-from-rate}
 \end{equation}
-where \(\mu_{\left[S1_{\tau},S2, \tau\right]}\) is the rate of transition from S1 to S2 in cycle \(\tau\) defined as the difference in cumulative hazards between consecutive cycles\textsuperscript{\protect\hyperlink{ref-Diaby2014}{19}}
+where \(\mu_{\left[S1_{\tau},S2, \tau\right]}\) is the rate of transition from S1 to S2 in cycle \(\tau\) defined as the difference in cumulative hazards between consecutive cycles\textsuperscript{\protect\hyperlink{ref-Diaby2014}{20}}
 \begin{equation}
   \mu_{\left[S1_{\tau},S2, \tau\right]} = H(\tau) - H(\tau-1).
 \label{eq:tr-from-H}
@@ -883,12 +883,12 @@ To obtain the expected costs and QALYs per cycle under SoC, \(\mathbf{y}\), we a
 \hypertarget{within-cycle-correction-and-discounting-future-rewards}{%
 \subsubsection{Within-cycle correction and discounting future rewards}\label{within-cycle-correction-and-discounting-future-rewards}}
 
-We use Simpson's 1/3rd rule for within-cycle correction (WCC),\textsuperscript{\protect\hyperlink{ref-Elbasha2016a}{21}} and use exponential discounting for costs and QALYs. Please see the Supplemental material and introductory cSTM tutorial for a detailed description of implementing discounting and WCC in R.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}}
+We use Simpson's 1/3rd rule for within-cycle correction (WCC),\textsuperscript{\protect\hyperlink{ref-Elbasha2016a}{22}} and use exponential discounting for costs and QALYs. Please see the Supplemental material and introductory cSTM tutorial for a detailed description of implementing discounting and WCC in R.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}}
 
 \hypertarget{incremental-cost-effectiveness-ratios-icers}{%
 \section{Incremental cost-effectiveness ratios (ICERs)}\label{incremental-cost-effectiveness-ratios-icers}}
 
-We follow the coding approach described in the introductory cSTM tutorial to conduct the cost-effectiveness analysis.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} We use the R package \texttt{dampack} (\url{https://cran.r-project.org/web/packages/dampack/})\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021}{22}} to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. \texttt{dampack} organizes and formats the results as a data frame, \texttt{df\_cea}, that can be printed as a formatted table.
+We follow the coding approach described in the introductory cSTM tutorial to conduct the cost-effectiveness analysis.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}} We use the R package \texttt{dampack} (\url{https://cran.r-project.org/web/packages/dampack/})\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021}{23}} to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. \texttt{dampack} organizes and formats the results as a data frame, \texttt{df\_cea}, that can be printed as a formatted table.
 
 In terms of their costs and effectiveness, SoC is the least costly and effective strategy, followed by Strategy B, producing an expected benefit of 1.32 QALYs per individual for an additional expected cost of \$86,162 with an ICER of \$65,288/QALY followed by Strategy AB with an ICER \$104,461/QALY. Strategy A is a dominated strategy. The results of the CEA of the simulation-time-dependent Sick-Sicker model are presented in Table \ref{tab:table-cea}. The non-dominated strategies, SoC, B, and AB, form the cost-effectiveness efficient frontier of the CEA based on the simulation-time-dependent Sick-Sicker model (Figure \ref{fig:Sick-Sicker-CEA-AgeDep}).
 
@@ -920,13 +920,13 @@ Strategy A & 218,789 & 19.636 & NA & NA & NA & D\\
 \hypertarget{probabilistic-sensitivity-analysis}{%
 \section{Probabilistic sensitivity analysis}\label{probabilistic-sensitivity-analysis}}
 
-We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{23}} In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \ref{tab:param-table} and in more detail in the Supplemental Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{15}} The R code to generate the PSA is included in the Supplemental Material. The description of the functions and steps and a brief discussion on choosing distributions are described in more detail in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}}
+We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{24}} In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \ref{tab:param-table} and in more detail in the Supplemental Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{16}} The R code to generate the PSA is included in the Supplemental Material. The description of the functions and steps and a brief discussion on choosing distributions are described in more detail in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021a}{7}}
 
-To conduct the PSA of the CEA using the simulation time-dependent Sick-Sicker cSTM, we sampled 1,000 parameter sets. We computed the total discounted costs and QALYs of each simulated strategy for each parameter set. We generated the cost-effectiveness (CE) scatter plot,\textsuperscript{\protect\hyperlink{ref-Briggs2002}{24}} where each of the 4,000 simulations (i.e., 1,000 combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph (Figure \ref{fig:PSA-figures}A)). We also added the 95\% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy. The CE scatter plot shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
+To conduct the PSA of the CEA using the simulation time-dependent Sick-Sicker cSTM, we sampled 1,000 parameter sets. We computed the total discounted costs and QALYs of each simulated strategy for each parameter set. We generated the cost-effectiveness (CE) scatter plot,\textsuperscript{\protect\hyperlink{ref-Briggs2002}{25}} where each of the 4,000 simulations (i.e., 1,000 combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph (Figure \ref{fig:PSA-figures}A)). We also added the 95\% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy. The CE scatter plot shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
 
 In Figure \ref{fig:PSA-figures}B, we present the cost-effectiveness acceptability curves (CEACs), showing the probability that each strategy is cost-effective, and the cost-effectiveness frontier (CEAF), displaying the probability of the optimal strategy being cost-effective over a range of willingness-to-pay (WTP) thresholds. At WTP thresholds less than \$70,000 per QALY, SoC is the strategy with the highest probability of being cost-effective and the highest expected NMB. Strategy B has the highest probability of being cost-effective and the highest expected NMB for WTP thresholds greater than \$70,000 and lower than \$105,000 per QALY. Strategy AB has the highest expected NMB for WTP thresholds greater than or equal to \$105,000 and is the strategy with the highest probability of being cost-effective.
 
-We quantify the expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs) to complement the PSA results (Figure \ref{fig:PSA-figures}C). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The strategy SoC has the lowest expected loss for WTP thresholds less than \$65,000 per QALY, strategy B has the lowest expected loss for WTP thresholds greater than or equal to \$70,000 and less than \$105,000. Strategy AB has the lowest expected loss for WTP thresholds greater than or equal \$105,000 per QALY. At a WTP threshold of \$100,000 per QALY, the EVPI is highest at \$7,836 (Figures \ref{fig:PSA-figures}C-D). For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019}{25}}
+We quantify the expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs) to complement the PSA results (Figure \ref{fig:PSA-figures}C). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The strategy SoC has the lowest expected loss for WTP thresholds less than \$65,000 per QALY, strategy B has the lowest expected loss for WTP thresholds greater than or equal to \$70,000 and less than \$105,000. Strategy AB has the lowest expected loss for WTP thresholds greater than or equal \$105,000 per QALY. At a WTP threshold of \$100,000 per QALY, the EVPI is highest at \$7,836 (Figures \ref{fig:PSA-figures}C-D). For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019}{26}}
 
 \begin{figure}[H]
 
@@ -940,7 +940,7 @@ We quantify the expected loss from each strategy over a range of WTP thresholds 
 \hypertarget{epidemiological-measures}{%
 \section{Epidemiological measures}\label{epidemiological-measures}}
 
-cSTMs can be used to generate different epidemiological and economic outputs. However, epidemiological outcomes can be helpful for calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{26}} We provide the epidemiological definition of some of these outcomes and how they can be generated from the trace and transition probability objects of a cSTM using the simulation time-dependent Sick-Sicker cSTM under SoC. Similar to the PSA of the economic measures, we generated the epidemiological measures for each of the parameter sets drawn from their distributions and applied the equations described below. We summarized the outcomes with the 95\% posterior predicted interval (PI), defined as the estimated range between the 2.5th and 97.5th percentiles of the model-predicted posterior outputs. The Supplemental Material provides the code to generate these outcomes from the state-residence dependent cSTM.
+cSTMs can be used to generate different epidemiological and economic outputs. However, epidemiological outcomes can be helpful for calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{27}} We provide the epidemiological definition of some of these outcomes and how they can be generated from the trace and transition probability objects of a cSTM using the simulation time-dependent Sick-Sicker cSTM under SoC. Similar to the PSA of the economic measures, we generated the epidemiological measures for each of the parameter sets drawn from their distributions and applied the equations described below. We summarized the outcomes with the 95\% posterior predicted interval (PI), defined as the estimated range between the 2.5th and 97.5th percentiles of the model-predicted posterior outputs. The Supplemental Material provides the code to generate these outcomes from the state-residence dependent cSTM.
 
 \hypertarget{survival-probability}{%
 \subsection{Survival probability}\label{survival-probability}}
@@ -956,7 +956,7 @@ The survival probability, \(S(t)\), captures the proportion of the cohort remain
 \hypertarget{life-expectancy}{%
 \subsection{Life expectancy}\label{life-expectancy}}
 
-Life expectancy (LE) refers to the expected number of time units remaining to be alive.\textsuperscript{\protect\hyperlink{ref-Lee2003a}{27}} In continuous-time, LE is the area under the entire survival curve.\textsuperscript{\protect\hyperlink{ref-Klein2003}{28}}
+Life expectancy (LE) refers to the expected number of time units remaining to be alive.\textsuperscript{\protect\hyperlink{ref-Lee2003a}{28}} In continuous-time, LE is the area under the entire survival curve.\textsuperscript{\protect\hyperlink{ref-Klein2003}{29}}
 
 \[
 LE = \int_{t=0}^{\infty}{S(t) dt}.
@@ -981,7 +981,7 @@ Note that this equation expresses LE in the units of \(t\). We use an annual cyc
 \hypertarget{prevalence}{%
 \subsection{Prevalence}\label{prevalence}}
 
-Prevalence is defined as the proportion of the population or cohort with a specific condition (or being in a particular health state) among those alive.\textsuperscript{\protect\hyperlink{ref-Rothman2008h}{29}} To calculate the prevalence of S1 at cycle \(t\), \(\text{prev}(t)_i\), we compute the ratio between the proportion of the cohort in S1 and the proportion alive at that cycle.\textsuperscript{\protect\hyperlink{ref-Keiding1991}{30}} The proportion of the cohort alive is given by the survival probability \(S(t)\) defined above. The individual prevalence of the S1 and S2 health states and the overall prevalence of sick individuals (i.e., S1 + S2) of the age-dependent Sick-Sicker cSTM at each cycle \(t\) is computed as follows and are shown in Figure \ref{fig:PSA-EPI-figures}C.
+Prevalence is defined as the proportion of the population or cohort with a specific condition (or being in a particular health state) among those alive.\textsuperscript{\protect\hyperlink{ref-Rothman2008h}{30}} To calculate the prevalence of S1 at cycle \(t\), \(\text{prev}(t)_i\), we compute the ratio between the proportion of the cohort in S1 and the proportion alive at that cycle.\textsuperscript{\protect\hyperlink{ref-Keiding1991}{31}} The proportion of the cohort alive is given by the survival probability \(S(t)\) defined above. The individual prevalence of the S1 and S2 health states and the overall prevalence of sick individuals (i.e., S1 + S2) of the age-dependent Sick-Sicker cSTM at each cycle \(t\) is computed as follows and are shown in Figure \ref{fig:PSA-EPI-figures}C.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1007,15 +1007,15 @@ In this tutorial, we conceptualize time-dependent cSTMs with their mathematical 
 
 We implemented simulation-time dependence by expanding the transition probability matrix into a transition probability array, where the third dimension captures time since the start of the simulation. However, there are alternative implementations of simulation-time dependence in cSTMs. For example, the model could be coded such that the time-varying elements of the transition probability matrix \(P_t\) are updated at each time point \(t\) as the simulation is run. This would eliminate the need for the transition probability array \texttt{a\_P}, reducing computer memory requirements. But this comes at the expense of increasing the number of operations at every cycle, potentially slowing down the simulation.
 
-We incorporated state-residence time dependence using tunnel states by expanding the corresponding health states on the first and second dimensions of the 3-dimensional array to account for time spent in the current state in addition to simulation-time dependence. Another approach to account for state-residence time dependency is to use a 3-dimensional transition probability array with dimensions for the current state, future state, and time in the current state.\textsuperscript{\protect\hyperlink{ref-Hawkins2005}{31}} However, in examples combining simulation-time and state-residence time dependencies, this would necessitate a 4-dimensional array, which may be challenging to index.
+We incorporated state-residence time dependence using tunnel states by expanding the corresponding health states on the first and second dimensions of the 3-dimensional array to account for time spent in the current state in addition to simulation-time dependence. Another approach to account for state-residence time dependency is to use a 3-dimensional transition probability array with dimensions for the current state, future state, and time in the current state.\textsuperscript{\protect\hyperlink{ref-Hawkins2005}{32}} However, in examples combining simulation-time and state-residence time dependencies, this would necessitate a 4-dimensional array, which may be challenging to index.
 
 Any time-varying feature in a discrete-time model can most generally be implemented as tunnel states with, at the extreme, every state having a different tunnel state for each time step. The cohort would then progressively move through these tunnel states to capture their progression through time and the model features (e.g., transition probabilities, costs, or utilities) that change over time. Using time-varying transition probabilities is a shortcut when the cohort experiences these time-varying processes simultaneously as a function of the time from the simulation start. Even if the time-varying process has a different periodicity than the cycle length, either tunnel states or time-varying transition probabilities can be used to capture these effects. However, this time-varying process must be represented or approximated over an integer number of cycle lengths.
 
-As described in the introductory tutorial, cSTMs are recommended when the number of states is considered ``not too large.''\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{26}} Incorporating time dependence in cSTMs using the provided approaches requires expanding the number of states by creating a multidimensional array for simulation-time dependence and/or creating tunnel states for state-residence time dependence, increasing the amount of computer memory (RAM) required. It is possible to build reasonably complex time-dependent cSTMs in R as long as there is sufficient RAM to store the transition probability array and outputs of interest. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1,000 states and 600 time-cycle slices. However, if a high degree of granularity is desired, the dimensions of these data objects can grow quickly; if the required number of states gets too large and difficult to code, it may be preferable to use a stochastic (Monte Carlo) version of the state-transition model -- often called individual-based state-transition models (iSTM) or microsimulation models -- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{26}} In an iSTM, the risks and rewards of simulated individuals need not depend only on a current health state; they may also depend on an individual's characteristics and attributes. In addition, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. Thus, we recommend carefully considering the required model structure before implementing it. An iSTM will also require additional functions to describe the dependency of transition probabilities and rewards on individuals' history. A previous tutorial showed how to construct these functions for an iSTM using the Sick-Sicker example.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{32}}
+As described in the introductory tutorial, cSTMs are recommended when the number of states is considered ``not too large.''\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{27}} Incorporating time dependence in cSTMs using the provided approaches requires expanding the number of states by creating a multidimensional array for simulation-time dependence and/or creating tunnel states for state-residence time dependence, increasing the amount of computer memory (RAM) required. It is possible to build reasonably complex time-dependent cSTMs in R as long as there is sufficient RAM to store the transition probability array and outputs of interest. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1,000 states and 600 time-cycle slices. However, if a high degree of granularity is desired, the dimensions of these data objects can grow quickly; if the required number of states gets too large and difficult to code, it may be preferable to use a stochastic (Monte Carlo) version of the state-transition model -- often called individual-based state-transition models (iSTM) or microsimulation models -- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{27}} In an iSTM, the risks and rewards of simulated individuals need not depend only on a current health state; they may also depend on an individual's characteristics and attributes. In addition, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. Thus, we recommend carefully considering the required model structure before implementing it. An iSTM will also require additional functions to describe the dependency of transition probabilities and rewards on individuals' history. A previous tutorial showed how to construct these functions for an iSTM using the Sick-Sicker example.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{33}}
 
 We also described the concept and implementation of transition rewards. While these event-driven impacts could instead be captured by expanding the model state-space to include an initial disease state or a pre-death, end-of-life state, we can avoid state-space expansion by calculating incurred rewards based on the proportion of the cohort making the relevant transition. For implementation, this requires storing not just the cohort trace, which reflects how many individuals are in each state at a given cycle, but also a cohort state-transition array, which records how many individuals are making each possible transition at a given cycle.\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}}
 
-We use \texttt{base} R to implement time-dependent cSTMs to provide flexibility and customizability to model any disease that can be specified as a cSTM and let analysts completely understand how to translate the mathematical specification of cSTMs into code. Other add-on R packages for building and running cSTMs and conducting CEAs, like \texttt{heemod}\textsuperscript{\protect\hyperlink{ref-Filipovic-Pierucci2017}{33}} and \texttt{hesim},\textsuperscript{\protect\hyperlink{ref-Incerti2021}{34}} are made to model arbitrary patient populations or many treatment strategies. These packages can reduce programming time since much of the programming burden has already been done. Users don't need to write functions themselves but instead need to call a series of prewritten functions. And in the case of \texttt{hesim}, all the memory pre-allocation and loops are made at the \texttt{C++} level, making it more efficient than looping over \texttt{base} R but might require more RAM. It is up to the analyst to choose how to develop their cSTM-model based CEAs.
+We use \texttt{base} R to implement time-dependent cSTMs to provide flexibility and customizability to model any disease that can be specified as a cSTM and let analysts completely understand how to translate the mathematical specification of cSTMs into code. Other add-on R packages for building and running cSTMs and conducting CEAs, like \texttt{heemod}\textsuperscript{\protect\hyperlink{ref-Filipovic-Pierucci2017}{34}} and \texttt{hesim},\textsuperscript{\protect\hyperlink{ref-Incerti2021}{35}} are made to model arbitrary patient populations or many treatment strategies. These packages can reduce programming time since much of the programming burden has already been done. Users don't need to write functions themselves but instead need to call a series of prewritten functions. And in the case of \texttt{hesim}, all the memory pre-allocation and loops are made at the \texttt{C++} level, making it more efficient than looping over \texttt{base} R but might require more RAM. It is up to the analyst to choose how to develop their cSTM-model based CEAs.
 
 This tutorial extends our conceptualization of time-independent cSTMs to allow for time dependence. It provides a step-by-step guide to implementing time-dependent cSTMs in R to generate epidemiological and economic measures, accounts for transition rewards, and conducts a CEA and a corresponding PSA. We hope that health decision scientists and health economists find this tutorial helpful in developing their cSTMs in a more flexible, efficient, and open-source manner. Ultimately, our goal is to facilitate R in health economic evaluations with the overall aim to increase model transparency and reproducibility.
 
@@ -1086,84 +1086,88 @@ Dr.~Alarid-Escudero was supported by grants U01-CA199335 and U01-CA253913 from t
 \CSLLeftMargin{14. }
 \CSLRightInline{Ades AE, Lu G, Claxton K. {Expected value of sample information calculations in medical decision modeling.} Medical Decision Making {[}Internet{]}. 2004;24(2):207--27. Available from: \url{http://www.ncbi.nlm.nih.gov/pubmed/15090106}}
 
-\leavevmode\hypertarget{ref-Alarid-Escudero2019e}{}%
+\leavevmode\hypertarget{ref-Gidwani2020}{}%
 \CSLLeftMargin{15. }
+\CSLRightInline{Gidwani R, Russell LB. {Estimating Transition Probabilities from Published Evidence: A Tutorial for Decision Modelers}. PharmacoEconomics {[}Internet{]}. 2020;38(11):1153--64. Available from: \url{https://doi.org/10.1007/s40273-020-00937-z}}
+
+\leavevmode\hypertarget{ref-Alarid-Escudero2019e}{}%
+\CSLLeftMargin{16. }
 \CSLRightInline{Alarid-Escudero F, Krijkamp E, Pechlivanoglou P, Jalal H, Kao S-YZ, Yang A, et al. {A Need for Change! A Coding Framework for Improving Transparency in Decision Modeling}. PharmacoEconomics {[}Internet{]}. 2019;37(11):1329--39. Available from: \url{https://doi.org/10.1007/s40273-019-00837-x}}
 
 \leavevmode\hypertarget{ref-Rodriguez2021}{}%
-\CSLLeftMargin{16. }
+\CSLLeftMargin{17. }
 \CSLRightInline{Rodriguez PJ, Ward ZJ, Long MW, Austin SB, Wright DR. {Applied Methods for Estimating Transition Probabilities from Electronic Health Record Data}. Medical Decision Making {[}Internet{]}. 2021;41(2):143--52. Available from: \url{https://journals.sagepub.com/doi/abs/10.1177/0272989X20985752?casa_token=SIhw-ApH8ogAAAAA:lxalsZ3tBihW8nVpK1WhSjkuVNR3Z7kKUe44gC5UJk4Rs8KfYoAQ6Y9efV8oVvR1GeLeTDwWdRXKtWk}}
 
 \leavevmode\hypertarget{ref-Welton2005}{}%
-\CSLLeftMargin{17. }
+\CSLLeftMargin{18. }
 \CSLRightInline{Welton NJ, Ades AE. {Estimation of markov chain transition probabilities and rates from fully and partially observed data: uncertainty propagation, evidence synthesis, and model calibration.} Medical Decision Making {[}Internet{]}. 2005;25(6):633--45. Available from: \url{http://www.ncbi.nlm.nih.gov/pubmed/16282214}}
 
 \leavevmode\hypertarget{ref-Arias2017}{}%
-\CSLLeftMargin{18. }
+\CSLLeftMargin{19. }
 \CSLRightInline{Arias E, Heron M, Xu J. {United States Life Tables, 2014}. National Vital Statistics Reports {[}Internet{]}. 2017;66(4):63. Available from: \url{https://www.cdc.gov/nchs/data/nvsr/nvsr66/nvsr66\%7B/_\%7D04.pdf}}
 
 \leavevmode\hypertarget{ref-Diaby2014}{}%
-\CSLLeftMargin{19. }
+\CSLLeftMargin{20. }
 \CSLRightInline{Diaby V, Adunlin G, Montero AJ. {Survival modeling for the estimation of transition probabilities in model-based economic evaluations in the absence of individual patient data: A tutorial}. PharmacoEconomics. 2014 Feb;32(2):101--8. }
 
 \leavevmode\hypertarget{ref-Elbasha2016}{}%
-\CSLLeftMargin{20. }
+\CSLLeftMargin{21. }
 \CSLRightInline{Elbasha EH, Chhatwal J. {Theoretical foundations and practical applications of within-cycle correction methods}. Medical Decision Making. 2016;36(1):115--31. }
 
 \leavevmode\hypertarget{ref-Elbasha2016a}{}%
-\CSLLeftMargin{21. }
+\CSLLeftMargin{22. }
 \CSLRightInline{Elbasha EH, Chhatwal J. {Myths and misconceptions of within-cycle correction: a guide for modelers and decision makers}. PharmacoEconomics. 2016;34(1):13--22. }
 
 \leavevmode\hypertarget{ref-Alarid-Escudero2021}{}%
-\CSLLeftMargin{22. }
+\CSLLeftMargin{23. }
 \CSLRightInline{Alarid-Escudero F, Knowlton G, Easterly CA, Enns EA. Decision analytic modeling package (dampack) {[}Internet{]}. 2021. Available from: \url{https://cran.r-project.org/web/packages/dampack/\%20https://github.com/DARTH-git/dampack}}
 
 \leavevmode\hypertarget{ref-Briggs2012}{}%
-\CSLLeftMargin{23. }
+\CSLLeftMargin{24. }
 \CSLRightInline{Briggs AH, Weinstein MC, Fenwick EAL, Karnon J, Sculpher MJ, Paltiel AD. {Model Parameter Estimation and Uncertainty Analysis: A Report of the ISPOR-SMDM Modeling Good Research Practices Task Force Working Group-6.} Medical Decision Making. 2012 Sep;32(5):722--32. }
 
 \leavevmode\hypertarget{ref-Briggs2002}{}%
-\CSLLeftMargin{24. }
+\CSLLeftMargin{25. }
 \CSLRightInline{Briggs AH, Goeree R, Blackhouse G, O'Brien BJ. {Probabilistic Analysis of Cost-Effectiveness Models: Choosing between Treatment Strategies for Gastroesophageal Reflux Disease}. Medical Decision Making {[}Internet{]}. 2002 Jul;22(4):290--308. Available from: \url{http://mdm.sagepub.com/cgi/doi/10.1177/027298902400448867}}
 
 \leavevmode\hypertarget{ref-Alarid-Escudero2019}{}%
-\CSLLeftMargin{25. }
+\CSLLeftMargin{26. }
 \CSLRightInline{Alarid-Escudero F, Enns EA, Kuntz KM, Michaud TL, Jalal H. {"Time Traveling Is Just Too Dangerous" But Some Methods Are Worth Revisiting: The Advantages of Expected Loss Curves Over Cost-Effectiveness Acceptability Curves and Frontier}. Value in Health. 2019;22(5):611--8. }
 
 \leavevmode\hypertarget{ref-Siebert2012c}{}%
-\CSLLeftMargin{26. }
+\CSLLeftMargin{27. }
 \CSLRightInline{Siebert U, Alagoz O, Bayoumi AM, Jahn B, Owens DK, Cohen DJ, et al. {State-Transition Modeling: A Report of the ISPOR-SMDM Modeling Good Research Practices Task Force-3}. Medical Decision Making {[}Internet{]}. 2012;32(5):690--700. Available from: \url{http://mdm.sagepub.com/cgi/doi/10.1177/0272989X12455463}}
 
 \leavevmode\hypertarget{ref-Lee2003a}{}%
-\CSLLeftMargin{27. }
+\CSLLeftMargin{28. }
 \CSLRightInline{Lee ET, Wang JW. {Statistical methods for Survival Data Analysis}. 3rd ed. Hoboken, NJ: Wiley; 2003. }
 
 \leavevmode\hypertarget{ref-Klein2003}{}%
-\CSLLeftMargin{28. }
+\CSLLeftMargin{29. }
 \CSLRightInline{Klein JP, Moeschberger ML. {Survival Analysis: Techniques for Censored and Truncated Data} {[}Internet{]}. 2nd ed. Springer-Verlag; 2003. Available from: \url{http://www.springer.com/statistics/life+sciences,+medicine+\%7B/\&\%7D+health/book/978-0-387-95399-1}}
 
 \leavevmode\hypertarget{ref-Rothman2008h}{}%
-\CSLLeftMargin{29. }
+\CSLLeftMargin{30. }
 \CSLRightInline{Rothman KJ, Greenland S, Lash TL. {Modern Epidemiology}. 3rd ed. Rothman KJ, Greenland S, Lash TL, editors. Lippincott Williams {\&} Wilkins; 2008. }
 
 \leavevmode\hypertarget{ref-Keiding1991}{}%
-\CSLLeftMargin{30. }
+\CSLLeftMargin{31. }
 \CSLRightInline{Keiding N. {Age-Specific Incidence and Prevalence: A Statistical Perspective}. Journal of the Royal Statistical Society Series A (Statistics in Society). 1991;154(3):371--412. }
 
 \leavevmode\hypertarget{ref-Hawkins2005}{}%
-\CSLLeftMargin{31. }
+\CSLLeftMargin{32. }
 \CSLRightInline{Hawkins N, Sculpher M, Epstein D. {Cost-effectiveness analysis of treatments for chronic disease: Using R to incorporate time dependency of treatment response.} Medical Decision Making {[}Internet{]}. 2005;25(5):511--9. Available from: \url{http://www.ncbi.nlm.nih.gov/pubmed/16160207}}
 
 \leavevmode\hypertarget{ref-Krijkamp2018}{}%
-\CSLLeftMargin{32. }
+\CSLLeftMargin{33. }
 \CSLRightInline{Krijkamp EM, Alarid-Escudero F, Enns EA, Jalal HJ, Hunink MGM, Pechlivanoglou P. {Microsimulation Modeling for Health Decision Sciences Using R: A Tutorial}. Medical Decision Making {[}Internet{]}. 2018 Apr;38(3):400--22. Available from: \url{http://journals.sagepub.com/doi/10.1177/0272989X18754513}}
 
 \leavevmode\hypertarget{ref-Filipovic-Pierucci2017}{}%
-\CSLLeftMargin{33. }
+\CSLLeftMargin{34. }
 \CSLRightInline{Filipović-Pierucci A, Zarca K, Durand-Zaleski I. {Markov Models for Health Economic Evaluation: The R Package heemod}. arXiv:170203252v1 {[}Internet{]}. 2017;April:30. Available from: \url{http://arxiv.org/abs/1702.03252}}
 
 \leavevmode\hypertarget{ref-Incerti2021}{}%
-\CSLLeftMargin{34. }
+\CSLLeftMargin{35. }
 \CSLRightInline{Incerti D, Jansen JP. {hesim: Health Economic Simulation Modeling and Decision Analysis}. arXiv:210209437v2 {[}Internet{]}. 2021 Feb;March:38. Available from: \url{http://arxiv.org/abs/2102.09437}}
 
 \end{CSLReferences}
