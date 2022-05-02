@@ -32,8 +32,8 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     
     ## State-residence-dependent transition rate of becoming Sicker when Sick
     # Weibull transition rate
-    v_r_S1S2_tunnels <- (v_cycles_tunnel*p_S1S2_scale)^p_S1S2_shape - 
-                        ((v_cycles_tunnel-1)*p_S1S2_scale)^p_S1S2_shape
+    v_r_S1S2_tunnels <- (v_cycles_tunnel*r_S1S2_scale)^r_S1S2_shape - 
+                        ((v_cycles_tunnel-1)*r_S1S2_scale)^r_S1S2_shape
     
     # Weibull transition probability conditional on surviving adjusting by cycle length
     v_p_S1S2_tunnels <- rate_to_prob(v_r_S1S2_tunnels, t = cycle_length)
@@ -419,19 +419,19 @@ generate_psa_params <- function(n_sim = 1000, seed = 071818){
     
     # Weibull parameters for state-residence-dependent transition probability of 
     # becoming Sicker when Sick conditional on surviving
-    p_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
-    p_S1S2_shape = rlnorm(n_sim, log(1.1), 0.02),   # transition from S1 to S2 - Weibull shape parameter
+    r_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
+    r_S1S2_shape = rlnorm(n_sim, log(1.1), 0.05),   # transition from S1 to S2 - Weibull shape parameter
     
     # Effectiveness of treatment B 
-    hr_S1S2_trtB = rlnorm(n_sim, log(0.6), 0.1),    # hazard ratio of becoming Sicker when Sick under B
+    hr_S1S2_trtB = rlnorm(n_sim, meanlog = log(0.6), sdlog = 0.02),    # hazard ratio of becoming Sicker when Sick under B
     
     ## State rewards
     # Costs
     c_H    = rgamma(n_sim, shape = 100,   scale = 20),   # cost of remaining one cycle in state H
     c_S1   = rgamma(n_sim, shape = 177.8, scale = 22.5), # cost of remaining one cycle in state S1
     c_S2   = rgamma(n_sim, shape = 225,   scale = 66.7), # cost of remaining one cycle in state S2
-    c_trtA = rgamma(n_sim, shape = 576,   scale = 20.8), # cost of treatment A (per cycle) 
-    c_trtB = rgamma(n_sim, shape = 676,   scale = 19.2), # cost of treatment B (per cycle)
+    c_trtA = rgamma(n_sim, shape = 73.5, scale = 163.3), # cost of treatment A (per cycle) 
+    c_trtB = rgamma(n_sim, shape = 86.2, scale = 150.8), # cost of treatment B (per cycle)
     c_D    = 0,                                          # cost of being in the death state
     # Utilities
     u_H    = rbeta(n_sim, shape1 = 200, shape2 = 3),     # utility when healthy
