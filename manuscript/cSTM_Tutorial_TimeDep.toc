@@ -1,7 +1,7 @@
 \contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
 \contentsline {section}{\numberline {2}Simulation-time dependence}{3}{section.2}%
-\contentsline {section}{\numberline {3}Time dependence on state residence}{4}{section.3}%
-\contentsline {section}{\numberline {4}Case study: A Cost-effectiveness analysis using a time-dependent Sick-Sicker model}{6}{section.4}%
+\contentsline {section}{\numberline {3}Time dependence on state-residence}{4}{section.3}%
+\contentsline {section}{\numberline {4}Case study: a cost-effectiveness analysis using a time-dependent Sick-Sicker model}{5}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Incorporating simulation-time dependence}{9}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Incorporating time dependency on state residence}{13}{subsection.4.2}%
 \contentsline {section}{\numberline {5}Economic measures}{18}{section.5}%
