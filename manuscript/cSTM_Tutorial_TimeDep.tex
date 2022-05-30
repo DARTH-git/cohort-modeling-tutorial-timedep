@@ -156,7 +156,7 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Ottawa, Ottawa, ON, Canada}}
-\date{2022-05-27}
+\date{2022-05-30}
 
 \begin{document}
 \maketitle
@@ -302,7 +302,7 @@ In the introductory tutorial, healthy individuals faced a constant risk of death
 
 Individuals in S1 and S2 face an increased hazard of death, compared to healthy individuals, in the form of a hazard ratio (HR) of 3 and 10, respectively, relative to the background age-specific mortality hazard rate. In the state-residence time-dependent model, the risk of progressing from S1 to S2 depends on the time spent in S1. All transitions between non-death states are assumed to be conditional on surviving each cycle.
 
-We use this cSTM to evaluate the cost-effectiveness of different treatment strategies involving up to two different treatments (Treatment A and Treatment B) for the Sick-Sicker disease. We assume that it is not clinically possible to distinguish between individuals in S1 and S2, so any treatment strategy involves treating individuals in both S1 and S2, regardless of whether they experience a benefit. Treatment A increases the QoL of individuals only in S1 from 0.75 (utility without treatment, \texttt{u\_S1}) to 0.95 (utility with treatment A, \texttt{u\_trtA}), costs \$12,000 per year (\texttt{c\_trtA}), and does not impact the transition rates. Treatment B reduces the progression rate from S1 to S2, with a hazard ratio (HR) of 0.6 (\texttt{hr\_S1S2\_trtB}), costs \$13,000 per year (\texttt{c\_trtB}), and does not affect QoL. We consider four treatment strategies: Standard of care with no treatment (SoC strategy), Treatment A only (Strategy A), Treatment B only (Strategy B), and Treatment A and B used in combination (Strategy AB). When combined, the effects of Treatment A and B are assumed to be independent and treatment costs are additive. Note that for strategy A, the model has identical transition probabilities to SoC. The differences are the added cost of the treatment for S1 and S2, and QoL increases for S1. After comparing the four strategies in terms of expected QALYs and costs, we calculate the incremental cost per QALY gained between non-dominated strategies as explained below.
+We use this cSTM to evaluate the cost-effectiveness of different treatment strategies involving up to two different treatments (Treatment A and Treatment B) for the Sick-Sicker disease. We assume that it is not clinically possible to distinguish between individuals in S1 and S2, so any treatment strategy involves treating individuals in both S1 and S2, regardless of whether they experience a benefit. Treatment A increases the QoL of individuals only in S1 from 0.75 (utility without treatment, \texttt{u\_S1}) to 0.95 (utility with treatment A, \texttt{u\_trtA}), costs \$12,000 per year (\texttt{c\_trtA}), and does not impact the transition rates. Treatment B reduces the progression rate from S1 to S2, with a hazard ratio (HR) of 0.6 (\texttt{hr\_S1S2\_trtB}), costs \$13,000 per year (\texttt{c\_trtB}), and does not affect QoL. We consider four treatment strategies: Standard of care with no treatment (SoC Strategy), Treatment A only (Strategy A), Treatment B only (Strategy B), and Treatment A and B used in combination (Strategy AB). When combined, the effects of Treatment A and B are assumed to be independent and treatment costs are additive. Note that for Strategy A, the model has identical transition probabilities to SoC. The differences are the added cost of the treatment for S1 and S2, and QoL increases for S1. After comparing the four strategies in terms of expected QALYs and costs, we calculate the incremental cost per QALY gained between non-dominated strategies as explained below.
 
 We discount both costs and QALYs at an annual rate of 3\%. Model parameters and the corresponding R variable names are presented in Table \ref{tab:param-table}. We follow the notation described in the DARTH coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{14}}
 
@@ -365,7 +365,7 @@ when transitioning to S1 & & & \\
 \hypertarget{incorporating-simulation-time-dependence}{%
 \subsection{Incorporating simulation-time dependence}\label{incorporating-simulation-time-dependence}}
 
-To illustrate simulation-time dependence in the Sick-Sicker cSTM, we model all-cause mortality as a function of age. We obtain all-cause mortality from life tables in the form of age-specific mortality hazard rates, \(\mu(a)\), where \(a\) refers to age. For this example, we create a vector \texttt{v\_r\_mort\_by\_age} to represent age-specific background mortality hazard rates for 25 to 100 year-olds obtained from US life tables.\textsuperscript{\protect\hyperlink{ref-Arias2017}{15}} We repeat each of the one-year-specific rates in \(\mu(a)\) (R variable name \texttt{v\_r\_mort\_by\_age}) as many times as the number of cycles in a year for these ages. To compute the transition probability from state H to state D, corresponding to the cohort's age at each cycle, we transform the rate \(\mu(a)\) to a transition probability assuming a constant exponential hazard rate within each year of age
+To illustrate simulation-time dependence in the Sick-Sicker cSTM, we model all-cause mortality as a function of age. We obtain all-cause mortality from life tables in the form of age-specific mortality hazard rates, \(\mu(a)\), where \(a\) refers to age. For this example, we create a vector \texttt{v\_r\_mort\_by\_age} to represent age-specific background mortality hazard rates for 25 to 100 year-olds obtained from US life tables.\textsuperscript{\protect\hyperlink{ref-Arias2017}{15}} The .csv file with the life tables is included in the Supplementary Material and the GitHub repository. We repeat each of the one-year-specific rates in \(\mu(a)\) (R variable name \texttt{v\_r\_mort\_by\_age}) as many times as the number of cycles in a year for these ages. To compute the transition probability from state H to state D, corresponding to the cohort's age at each cycle, we transform the rate \(\mu(a)\) to a transition probability assuming a constant exponential hazard rate within each year of age
 \[
   p_{[H,D,t]} = 1-\exp\left\{{-\mu(a_0 + t)}\right\},
 \]
@@ -443,14 +443,14 @@ The code below illustrates how to assign age-dependent transition probabilities 
 \DocumentationTok{\#\# From D}
 \NormalTok{a\_P\_SoC[}\StringTok{"D"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]   }\OtherTok{\textless{}{-}} \DecValTok{1}
 
-\DocumentationTok{\#\# Initialize transition probability matrix for strategy A as a copy of SoC\textquotesingle{}s}
+\DocumentationTok{\#\# Initialize transition probability matrix for Strategy A as a copy of SoC\textquotesingle{}s}
 \NormalTok{a\_P\_strA }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_SoC}
 \end{Highlighting}
 \end{Shaded}
 
-Most of this code is equivalent to populating the matrix \(P\) for time-independent cSTM. The only difference is the empty index added to the third dimension of \texttt{a\_P\_SoC} to represent the vector of transitions over time. For time-varying transitions, we provide a vector of transition probabilities. We only need to provide one value for the transition probability for constant transitions over time, and R replicates the value of such transitions as many times as the number of cycles (\(n_T+1\) times in our example). To ensure that the sum of each row of each cycle-specific matrix equals one, we define the probability of staying in each state by subtracting the sum of the exiting probability vectors from one after conditioning on surviving each cycle. Finally, we initialize the transition probability array for strategy A as a copy of SoC's because treatment A does not alter the cohort's transition probabilities.
+Most of this code is equivalent to populating the matrix \(P\) for time-independent cSTM. The only difference is the empty index added to the third dimension of \texttt{a\_P\_SoC} to represent the vector of transitions over time. For time-varying transitions, we provide a vector of transition probabilities. We only need to provide one value for the transition probability for constant transitions over time, and R replicates the value of such transitions as many times as the number of cycles (\(n_T+1\) times in our example). To ensure that the sum of each row of each cycle-specific matrix equals one, we define the probability of staying in each state by subtracting the sum of the exiting probability vectors from one after conditioning on surviving each cycle. Finally, we initialize the transition probability array for Strategy A as a copy of SoC's because treatment A does not alter the cohort's transition probabilities.
 
-Each slice along the third dimension of \texttt{a\_P\_SoC} corresponds to a transition probability matrix from \(t\) to \(t+1\). For example, the transition matrix for 25-year-olds in the Sick-Sicker model under the SoC strategy can be retrieved by indexing the first slice of the array using:
+Each slice along the third dimension of \texttt{a\_P\_SoC} corresponds to a transition probability matrix from \(t\) to \(t+1\). For example, the transition matrix for 25-year-olds in the Sick-Sicker model under the SoC Strategy can be retrieved by indexing the first slice of the array using:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -470,13 +470,13 @@ Similarly, the code below defines \texttt{a\_P\_strB} for Strategy B.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\DocumentationTok{\#\# Initialize transition probability array for strategy B}
+\DocumentationTok{\#\# Initialize transition probability array for Strategy B}
 \NormalTok{a\_P\_strB }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_SoC}
 \DocumentationTok{\#\# Update only transition probabilities from S1 involving p\_S1S2}
 \NormalTok{a\_P\_strB[}\StringTok{"S1"}\NormalTok{, }\StringTok{"S1"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ (p\_S1H }\SpecialCharTok{+}\NormalTok{ p\_S1S2\_trtB))}
 \NormalTok{a\_P\_strB[}\StringTok{"S1"}\NormalTok{, }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1S2\_trtB}
 
-\DocumentationTok{\#\# Initialize transition probability matrix for strategy AB as a copy of B\textquotesingle{}s}
+\DocumentationTok{\#\# Initialize transition probability matrix for Strategy AB as a copy of B\textquotesingle{}s}
 \NormalTok{a\_P\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ a\_P\_strB}
 \end{Highlighting}
 \end{Shaded}
@@ -496,7 +496,7 @@ In the Sick-Sicker model, the entire cohort starts in the Healthy state. Therefo
 \end{Highlighting}
 \end{Shaded}
 
-We use the variable \texttt{v\_m\_init} to initialize the cohort trace, \(M\), represented by \texttt{m\_M} for the cohort under SoC strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, \texttt{v\_m\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the simulation-time-dependent cSTM under SoC, we initialize the cohort trace matrix.
+We use the variable \texttt{v\_m\_init} to initialize the cohort trace, \(M\), represented by \texttt{m\_M} for the cohort under the SoC Strategy. We also create a trace for each of the other treatment-based strategies. Note that the initial state vector, \texttt{v\_m\_init}, can be modified to account for the distribution of the cohort across the states at the start of the simulation and might vary by strategy. To simulate the cohort over the \(n_T\) cycles for the simulation-time-dependent cSTM under SoC, we initialize the cohort trace matrix.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -531,10 +531,10 @@ The state vector of the cohort's distribution at cycle \(t+1\) is obtained by ap
 \caption{Cohort trace of the age-dependent cSTM under SoC.}\label{fig:Sick-Sicker-Trace-AgeDep}
 \end{figure}
 
-\hypertarget{incorporating-time-dependency-on-state-residence}{%
-\subsection{Incorporating time dependency on state residence}\label{incorporating-time-dependency-on-state-residence}}
+\hypertarget{incorporating-time-dependence-on-state-residence-tunnel-states}{%
+\subsection{Incorporating time dependence on state residence (tunnel states)}\label{incorporating-time-dependence-on-state-residence-tunnel-states}}
 
-Here, we add the dependency on state-residence to the simulation-time-dependent Sick-Sicker model defined above. We assume the risk of progression from S1 to S2 increases as a function of the time \(\tau = 1, \ldots, n_{\text{tunnels}}\) the cohort remains in the S1 state. This increase follows a Weibull hazard function, \(h(\tau)\), defined as
+Here, we add the dependence on state-residence to the simulation-time-dependent Sick-Sicker model defined above. We assume the risk of progression from S1 to S2 increases as a function of the time \(\tau = 1, \ldots, n_{\text{tunnels}}\) the cohort remains in the S1 state. This increase follows a Weibull hazard function, \(h(\tau)\), defined as
 \[
   h(\tau) = \gamma \lambda (\lambda \tau)^{\gamma-1},
 \]
@@ -567,9 +567,9 @@ and the transition probability
 \label{eq:tp-from-H-weibull}
 \end{equation}
 
-We assume that state-residence dependency affects the cohort in the S1 state throughout the whole simulation (i.e., \(n_{\text{tunnels}}=n_T\)) and create a new variable called \texttt{n\_tunnel\_size} with the length of the tunnel equal to \texttt{n\_cycles}. Thus, there will be 75 S1 tunnel states plus 3 more states (H, S2, D) resulting in a total of \(n_{S_{\text{tunnels}}}\) = 78.
+We assume that state-residence dependence affects the cohort in the S1 state throughout the whole simulation (i.e., \(n_{\text{tunnels}}=n_T\)) and create a new variable called \texttt{n\_tunnel\_size} with the length of the tunnel equal to \texttt{n\_cycles}. Thus, there will be 75 S1 tunnel states plus 3 more states (H, S2, D) resulting in a total of \(n_{S_{\text{tunnels}}}\) = 78.
 
-Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the Sick-Sicker model's state-transition diagram with state-residence dependency with \(n_{\text{tunnels}}\) tunnel states for S1.
+Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the state-transition diagram of the Sick-Sicker model with state-residence dependency with \(n_{\text{tunnels}}\) tunnel states for S1.
 
 \begin{figure}[H]
 
@@ -580,7 +580,7 @@ Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the Sick-Sicker model's state-tra
 \caption{State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{\text{tunnels}}}$).}\label{fig:STD-Sick-Sicker-tunnels}
 \end{figure}
 
-To implement state-residence dependency in the Sick-Sicker cSTM, we create the vector variables \texttt{v\_Sick\_tunnel} and \texttt{v\_names\_states\_tunnels} with the names of the Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \ref{tab:Timedep-cSTM-components-table}.
+To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables \texttt{v\_Sick\_tunnel} and \texttt{v\_names\_states\_tunnels} with the names of the Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \ref{tab:Timedep-cSTM-components-table}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -607,13 +607,13 @@ Then, the transition rate and probability dependent on state residence from Sick
 \NormalTok{r\_S1S2\_shape }\OtherTok{\textless{}{-}} \FloatTok{1.10} \CommentTok{\# shape}
 \CommentTok{\# Weibull function}
 \NormalTok{v\_r\_S1S2\_tunnels }\OtherTok{\textless{}{-}}\NormalTok{ (v\_cycles\_tunnel}\SpecialCharTok{*}\NormalTok{r\_S1S2\_scale)}\SpecialCharTok{\^{}}\NormalTok{r\_S1S2\_shape }\SpecialCharTok{{-}}
-\NormalTok{                    ((v\_cycles\_tunnel}\DecValTok{{-}1}\NormalTok{)}\SpecialCharTok{*}\NormalTok{r\_S1S2\_scale)}\SpecialCharTok{\^{}}\NormalTok{r\_S1S2\_shape}
+\NormalTok{                    ((v\_cycles\_tunnel }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{)}\SpecialCharTok{*}\NormalTok{r\_S1S2\_scale)}\SpecialCharTok{\^{}}\NormalTok{r\_S1S2\_shape}
                     
 \NormalTok{v\_p\_S1S2\_tunnels }\OtherTok{\textless{}{-}} \DecValTok{1} \SpecialCharTok{{-}} \FunctionTok{exp}\NormalTok{(}\SpecialCharTok{{-}}\NormalTok{v\_r\_S1S2\_tunnels}\SpecialCharTok{*}\NormalTok{cycle\_length)}
 \end{Highlighting}
 \end{Shaded}
 
-To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependency in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, \texttt{a\_P\_tunnels\_SoC}. The dimensions of this array are \(n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T\). A visual representation of \texttt{a\_P\_tunnels\_SoC} of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \ref{fig:Array-Time-Dependent-Tunnels}.
+To adapt the 3-dimensional transition probability array to incorporate both age and state-residence dependence in the Sick-Sicker model under SoC, we first create an expanded 3-dimensional array accounting for tunnels, \texttt{a\_P\_tunnels\_SoC}. The dimensions of this array are \(n_{S_{\text{tunnels}}} \times n_{S_{\text{tunnels}}} \times n_T\). A visual representation of \texttt{a\_P\_tunnels\_SoC} of the Sick-Sicker model with tunnel states expanding the Sick state is shown in Figure \ref{fig:Array-Time-Dependent-Tunnels}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -627,14 +627,14 @@ To adapt the 3-dimensional transition probability array to incorporate both age 
 
 \begin{figure}[H]
 
-{\centering \includegraphics[width=1\linewidth]{figs/3D-state-transition-array-sick-sicker-tunnels} 
+{\centering \includegraphics[width=1\linewidth]{figs/Figure 5 - 3D-state-transition-array-sick-sicker-tunnels} 
 
 }
 
 \caption{The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for simulation-time and state-residence dependency using $\tau$ tunnel states for S1.}\label{fig:Array-Time-Dependent-Tunnels}
 \end{figure}
 
-Filling \texttt{a\_P\_tunnels\_SoC} with the corresponding transition probabilities is similar to how it's done with \texttt{a\_P\_SoC} above, with the difference being that we now fill the transition probabilities from all the tunnel states by iterating through all the tunnel states and assigning the corresponding disease progression transition probabilities for each tunnel state as described in Section \ref{time-dependence-on-state-residence} and Algorithm \ref{alg:fill-tunnels}.
+Filling \texttt{a\_P\_tunnels\_SoC} with the corresponding transition probabilities works similarly to \texttt{a\_P\_SoC} above. The difference is that we now fill the transition probabilities to/from tunnel states by iterating over the tunnel and assigning the appropriate disease progression transition probabilities for each state, as described in Section \ref{time-dependence-on-state-residence} and Algorithm \ref{alg:fill-tunnels}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -673,9 +673,9 @@ Filling \texttt{a\_P\_tunnels\_SoC} with the corresponding transition probabilit
 \end{Highlighting}
 \end{Shaded}
 
-Similar to the simulation-time dependent cSTM, we check the three-dimensional transition probability array with tunnels is valid using the \texttt{darthtools} package.
+Again, we check the three-dimensional transition probability array with tunnels is valid using the \texttt{darthtools} package.
 
-To simulate the cohort and store its state occupation over the \(n_T\) cycles for the cSTM accounting for state-residence dependency, we initialize a cohort trace matrix for SoC strategy, \texttt{m\_M\_tunnels\_SoC}. The dimensions of both the matrix are \((n_T+1) \times n_{S_{\text{tunnels}}}\).
+To simulate the cohort and store its state occupation over the \(n_T\) cycles for the cSTM accounting for state-residence dependency, we initialize a cohort trace matrix for SoC Strategy, \texttt{m\_M\_tunnels\_SoC}. The dimensions of the matrix are \((n_T+1) \times n_{S_{\text{tunnels}}}\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -699,7 +699,7 @@ We then use the matrix product, similar to the simulation-time-dependent cSTM, t
 \end{Highlighting}
 \end{Shaded}
 
-To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D states under SoC, we aggregate over the tunnel states in each cycle. The complete code for all the strategies is presented in the Supplemental Material.
+To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D states under SoC, we aggregate over the S1 tunnel states in each cycle. The complete code for all the strategies is included in the Supplemental Material.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -724,12 +724,12 @@ To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D st
 \hypertarget{economic-measures}{%
 \section{Economic measures}\label{economic-measures}}
 
-In a CEA, the main outcomes are typically the total discounted expected QALYs and total costs accrued by the cohort over the predefined time horizon. We calculate economic outcomes from state and transition rewards. A ``state reward'' refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A ``transition reward'' refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. The introductory tutorial describes how to incorporate state rewards in CEA in detail.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} Here, we describe and illustrate how to implement both state and transition rewards together using a transition dynamics array.
+In a CEA, the main outcomes are typically the total expected discounted QALYs and costs accrued by the cohort over the predefined time horizon. Below, we calculate economic outcomes from state and transition rewards. A ``state reward'' refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A ``transition reward'' refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. The introductory tutorial describes how to incorporate state rewards in CEA in detail.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} Here, we describe and illustrate how to implement both state and transition rewards together using a transition dynamics array.
 
 \hypertarget{state-rewards}{%
 \subsection{State rewards}\label{state-rewards}}
 
-As shown in the introductory tutorial, to add state rewards to the Sick-Sicker model, we first create a vector of utilities and costs for each of the four strategies considered. The vectors of utilities and costs, \texttt{v\_u\_SoC} and \texttt{v\_c\_SoC}, respectively, contain the utilities and costs corresponding to being in each of the four health states under SoC, shown in Table \ref{tab:param-table}.
+To add state rewards to the Sick-Sicker model, we first create a vector of utilities and costs for each of the four strategies considered. The vectors of utilities and costs, \texttt{v\_u\_SoC} and \texttt{v\_c\_SoC}, respectively, contain the utilities and costs corresponding to being in each of the four health states under SoC, shown in Table \ref{tab:param-table}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -740,34 +740,34 @@ As shown in the introductory tutorial, to add state rewards to the Sick-Sicker m
 \end{Highlighting}
 \end{Shaded}
 
-We account for the benefits and costs of both treatments individually and their combination to create the state-reward vectors under treatments A and B (strategies A and B, respectively) and when applied jointly (strategy AB). Only treatment A affects QoL, so we create a vector of utilities for strategy A, \texttt{v\_u\_strA}, where we substitute the utility of being in S1 under SoC, \texttt{u\_S1}, with the utility associated with the benefit of treatment A in being in that state, \texttt{u\_trtA}. Treatment B does not affect QoL, so the vector of utilities for strategy B, \texttt{v\_u\_strB}, is the same as SoC's vector. However, when both treatments A and B are applied jointly (strategy AB), the resulting vector of utilities \texttt{v\_u\_strAB} equals that of strategy A.
+We account for the benefits and costs of both treatments individually and their combination to create the state-reward vectors under treatments A and B (strategies A and B, respectively) and when applied jointly (Strategy AB). Only treatment A affects QoL, so we create a vector of utilities for Strategy A, \texttt{v\_u\_strA}, substituting the utility of being in S1 under SoC, \texttt{u\_S1}, with that under treatment A, \texttt{u\_trtA}. Treatment B does not affect QoL, so the vector of utilities for Strategy B, \texttt{v\_u\_strB}, is the same as SoC's vector. However, when both treatments A and B are applied jointly (Strategy AB), the resulting vector of utilities \texttt{v\_u\_strAB} equals that of Strategy A.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Vector of state utilities for strategy A}
+\CommentTok{\# Vector of state utilities for Strategy A}
 \NormalTok{v\_u\_strA }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =}\NormalTok{ u\_H, }\AttributeTok{S1 =}\NormalTok{ u\_trtA, }\AttributeTok{S2 =}\NormalTok{ u\_S2, }\AttributeTok{D =}\NormalTok{ u\_D)}
-\CommentTok{\# Vector of state utilities for strategy B}
+\CommentTok{\# Vector of state utilities for Strategy B}
 \NormalTok{v\_u\_strB }\OtherTok{\textless{}{-}}\NormalTok{ v\_u\_SoC}
-\CommentTok{\# Vector of state utilities for strategy AB}
+\CommentTok{\# Vector of state utilities for Strategy AB}
 \NormalTok{v\_u\_strAB }\OtherTok{\textless{}{-}}\NormalTok{ v\_u\_strA}
 \end{Highlighting}
 \end{Shaded}
 
-Both treatments A and B incur a cost. To create the vector of state costs for strategy A, \texttt{v\_c\_strA}, we add the cost of treatment A, \texttt{c\_trtA}, to S1 and S2 state costs. Similarly, when constructing the vector of state costs for strategy B, \texttt{v\_c\_strB}, we add the cost of treatment B, \texttt{c\_trtB}, to S1 and S2 state costs. Finally, for the vector of state costs for strategy AB, \texttt{v\_c\_strAB}, we add both treatment costs to the state costs of S1 and S2.
+Both treatments A and B incur a cost. To create the vector of state costs for Strategy A, \texttt{v\_c\_strA}, we add the cost of treatment A, \texttt{c\_trtA}, to S1 and S2 state costs. Similarly, when constructing the vector of state costs for Strategy B, \texttt{v\_c\_strB}, we add the cost of treatment B, \texttt{c\_trtB}, to S1 and S2 state costs. Finally, for the vector of state costs for Strategy AB, \texttt{v\_c\_strAB}, we add both treatment costs to the state costs of S1 and S2.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{\# Vector of state costs for strategy A}
+\CommentTok{\# Vector of state costs for Strategy A}
 \NormalTok{v\_c\_strA }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H  =}\NormalTok{ c\_H, }
               \AttributeTok{S1 =}\NormalTok{ c\_S1 }\SpecialCharTok{+}\NormalTok{ c\_trtA, }
               \AttributeTok{S2 =}\NormalTok{ c\_S2 }\SpecialCharTok{+}\NormalTok{ c\_trtA, }
               \AttributeTok{D  =}\NormalTok{ c\_D)}
-\CommentTok{\# Vector of state costs for strategy B}
+\CommentTok{\# Vector of state costs for Strategy B}
 \NormalTok{v\_c\_strB }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H  =}\NormalTok{ c\_H, }
               \AttributeTok{S1 =}\NormalTok{ c\_S1 }\SpecialCharTok{+}\NormalTok{ c\_trtB, }
               \AttributeTok{S2 =}\NormalTok{ c\_S2 }\SpecialCharTok{+}\NormalTok{ c\_trtB, }
               \AttributeTok{D  =}\NormalTok{ c\_D)}
-\CommentTok{\# Vector of state costs for strategy AB}
+\CommentTok{\# Vector of state costs for Strategy AB}
 \NormalTok{v\_c\_strAB }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H  =}\NormalTok{ c\_H, }
                \AttributeTok{S1 =}\NormalTok{ c\_S1 }\SpecialCharTok{+}\NormalTok{ (c\_trtA }\SpecialCharTok{+}\NormalTok{ c\_trtB), }
                \AttributeTok{S2 =}\NormalTok{ c\_S2 }\SpecialCharTok{+}\NormalTok{ (c\_trtA }\SpecialCharTok{+}\NormalTok{ c\_trtB), }
@@ -778,7 +778,7 @@ Both treatments A and B incur a cost. To create the vector of state costs for st
 \hypertarget{transition-rewards}{%
 \subsubsection{Transition rewards}\label{transition-rewards}}
 
-As previously mentioned, dying (i.e., transitioning to the Dead state) incurs a one-time cost of \$2,000 that reflects the acute care that might be received immediately preceding death. We also have a disutility and a cost increment on the transition from H to S1. Incorporating transition rewards requires keeping track of the proportion of the cohort that transitions between health states in each cycle while capturing the origin and destination states for each transition. The cohort trace, \(M\), does not capture this information. However, obtaining this information is relatively straightforward in a cSTM and is described in detail by Krijkamp et al.~(2020).\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}} Briefly, this approach involves changing the core computation in a traditional cSTM, from \(m_t P_t\) to \(\text{diag}(m_t) P_t\). This simple change allows us to compute the proportion of the cohort that transitions between any two states in a cycle \(t\). The result is no longer a cohort trace matrix but rather a three-dimensional array that we refer to as a transition-dynamics array (\(\mathbf{A}\)) with dimensions \(n_S \times n_S \times [n_T+1]\). The \(t-\)th slice of \(\mathbf{A}\), \(A_t\), is the matrix that stores the proportion of the population that transitioned between any two states from cycles \(t-1\) to \(t\). Similarly, we define the transition rewards by the states of origin and destination.
+As previously mentioned, dying (i.e., transitioning to the Dead state) incurs a one-time cost of \$2,000 that reflects the acute care that might be received immediately preceding death. We also assume a disutility and a cost increment on the transition from H to S1. Incorporating transition rewards requires keeping track of the proportion of the cohort that transitions between health states in each cycle while capturing the origin and destination states for each transition. The cohort trace, \(M\), does not capture this information. However, obtaining this information is relatively straightforward in a cSTM and is described in detail by Krijkamp et al.~(2020).\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}} Briefly, this approach involves changing the core computation in a traditional cSTM, from \(m_t P_t\) to \(\text{diag}(m_t) P_t\). This simple change allows us to compute the proportion of the cohort that transitions between any two states in a cycle \(t\). The result is no longer a cohort trace matrix but rather a three-dimensional array that we refer to as a transition-dynamics array (\(\mathbf{A}\)) with dimensions \(n_S \times n_S \times [n_T+1]\). The \(t-\)th slice of \(\mathbf{A}\), \(A_t\), is the matrix that stores the proportion of the population that transitioned between any two states from cycles \(t-1\) to \(t\). Similarly, we define the transition rewards by the states of origin and destination.
 
 To account for state and transition rewards, we create a \emph{matrix} of rewards \(R_t\) of dimensions \(n_S \times n_S\). The off-diagonal entries of \(R_t\) store the transition rewards, and the diagonal of \(R_t\) stores the state rewards for cycle \(t\) and assumes that rewards occur at the beginning of the cycle.\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}} Finally, we multiply this matrix by \(A_t\), the \(t\)-th slice of \(A\), apply discounting, within-cycle correction, and compute the overall reward for each strategy outcome. Below, we illustrate these computations in R.
 
@@ -806,7 +806,7 @@ We then compute a matrix multiplication between a diagonal matrix of each of the
 \end{Highlighting}
 \end{Shaded}
 
-To create the arrays of rewards for costs and utilities for the simulation-time-dependent Sick-Sicker cSTM under SoC, we create three-dimensional arrays of rewards and fill each row across the third dimension with the vector of state rewards.
+To create the arrays of rewards for costs and utilities for the simulation-time-dependent Sick-Sicker cSTM under SoC, we initialize three-dimensional arrays of rewards and fill each row across the third dimension with the vector of state rewards.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -851,7 +851,7 @@ In a similar approach, we add the costs of transitioning from H to S1 and the co
 ## D  2000 4000 15000    0
 \end{verbatim}
 
-The state and transition rewards are applied to the model dynamics by element-wise multiplication between \(\mathbf{A}\) and \(\mathbf{R}\), indicated by the \(\odot\) sign, which produces the array of outputs for all \(n_T\) cycles, \(\mathbf{Y}\). Formally,
+The state and transition rewards are applied to the model dynamics by element-wise multiplication between \(\mathbf{A}\) and \(\mathbf{R}\), indicated by the \(\odot\) sign, which produces the array of economic outcomes for all \(n_T\) cycles, \(\mathbf{Y}\). Formally,
 \begin{equation}
   \mathbf{Y} = \mathbf{A} \odot \mathbf{R}
   \label{eq:array-outputs}
@@ -873,7 +873,7 @@ The total rewards for each health state at cycle \(t\), \(\mathbf{y}_t\), is obt
   \label{eq:exp-rewd-trans}
 \end{equation}
 
-To obtain the expected costs and QALYs per cycle under SoC, \(\mathbf{y}\), we apply Equation \eqref{eq:exp-rewd-trans} again across all the matrices of the third dimension of \(\mathbf{Y}\) for all the outcomes. The complete code for all the strategies is presented in the Supplemental Material.
+To obtain the expected costs and QALYs per cycle under SoC, \(\mathbf{y}\), we apply Equation \eqref{eq:exp-rewd-trans} again across all the matrices of the third dimension of \(\mathbf{Y}\) for all the outcomes. The complete code for all the strategies is presented in the Supplementary Material.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -893,9 +893,9 @@ We use Simpson's 1/3rd rule for within-cycle correction (WCC),\textsuperscript{\
 \hypertarget{incremental-cost-effectiveness-ratios-icers}{%
 \section{Incremental cost-effectiveness ratios (ICERs)}\label{incremental-cost-effectiveness-ratios-icers}}
 
-We follow the coding approach described in the introductory cSTM tutorial to conduct the cost-effectiveness analysis.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} We use the R package \texttt{dampack} (\url{https://cran.r-project.org/web/packages/dampack/})\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021}{19}} to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. \texttt{dampack} organizes and formats the results as a data frame, \texttt{df\_cea}, that can be printed as a formatted table.
+We followed the coding approach described in the introductory cSTM tutorial to conduct the cost-effectiveness analysis.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} We use the R package \texttt{dampack} (\url{https://cran.r-project.org/web/packages/dampack/})\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2021}{19}} to calculate the incremental costs and effectiveness and the incremental cost-effectiveness ratio (ICER) between non-dominated strategies. \texttt{dampack} organizes and formats the results as a data frame, \texttt{df\_cea}, that can be printed as a formatted table.
 
-In terms of their costs and effectiveness, SoC is the least costly and effective strategy, followed by Strategy B, producing an expected benefit of 1.32 QALYs per individual for an additional expected cost of \$86,162 with an ICER of \$65,288/QALY followed by Strategy AB with an ICER \$104,461/QALY. Strategy A is a dominated strategy. The results of the CEA of the simulation-time-dependent Sick-Sicker model are presented in Table \ref{tab:table-cea}. The non-dominated strategies, SoC, B, and AB, form the cost-effectiveness efficient frontier of the CEA based on the simulation-time-dependent Sick-Sicker model (Figure \ref{fig:Sick-Sicker-CEA-AgeDep}).
+The SoC Strategy is the least costly and effective strategy, followed by Strategy B, producing an expected benefit of 1.32 QALYs per individual for an additional expected cost of \$86,162 with an ICER of \$65,288/QALY followed by Strategy AB with an ICER \$104,461/QALY. Strategy A is a dominated strategy. The results of the CEA of the simulation-time-dependent Sick-Sicker model are presented in Table \ref{tab:table-cea}. The non-dominated strategies, SoC, B, and AB, form the cost-effectiveness efficient frontier of the CEA based on the simulation-time-dependent Sick-Sicker model (Figure \ref{fig:Sick-Sicker-CEA-AgeDep}).
 
 \begin{table}[!h]
 
@@ -925,13 +925,13 @@ Strategy A & 218,789 & 19.636 & NA & NA & NA & D\\
 \hypertarget{probabilistic-sensitivity-analysis}{%
 \section{Probabilistic sensitivity analysis}\label{probabilistic-sensitivity-analysis}}
 
-We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{20}} In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \ref{tab:param-table} and in more detail in the Supplemental Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{14}} The R code to generate the PSA is included in the Supplemental Material. The description of the functions and steps and a brief discussion on choosing distributions are described in more detail in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}}
+We conducted a probabilistic sensitivity analysis (PSA) to quantify the effect of model parameter uncertainty on cost-effectiveness outcomes.\textsuperscript{\protect\hyperlink{ref-Briggs2012}{20}} In a PSA, we randomly draw parameter sets from distributions that reflect the current uncertainty in model parameter estimates. The parameters' distributions and their values are described in Table \ref{tab:param-table} and in more detail in the Supplementary Material. We compute model outcomes for each sampled set of parameter values (e.g., total discounted cost and QALYs) for each strategy. We follow the steps to conduct a PSA from a previously published article describing the Decision Analysis in R for technologies in Health (DARTH) coding framework.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019e}{14}} The R code to generate the PSA is included in the Supplementary Material. The description of the functions and steps and a brief discussion on choosing distributions are described in more detail in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}}
 
-To conduct the PSA of the CEA using the simulation time-dependent Sick-Sicker cSTM, we sampled 1,000 parameter sets. We computed the total discounted costs and QALYs of each simulated strategy for each parameter set. We generated the cost-effectiveness (CE) scatter plot,\textsuperscript{\protect\hyperlink{ref-Briggs2002}{21}} where each of the 4,000 simulations (i.e., 1,000 combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph (Figure \ref{fig:PSA-figures}A)). We also added the 95\% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy. The CE scatter plot shows that strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than strategy A. And therefore, strategy A is strongly dominated by strategy B.
+To conduct the PSA of the CEA using the simulation time-dependent Sick-Sicker cSTM, we sampled 1,000 parameter sets. We computed the total discounted costs and QALYs of each simulated strategy for each parameter set. We generated the cost-effectiveness scatter plot,\textsuperscript{\protect\hyperlink{ref-Briggs2002}{21}} where each of the 4,000 simulations (i.e., 1,000 combinations of total discounted expected costs and QALYs for each of the four strategies) are plotted as a point in the graph (Figure \ref{fig:PSA-figures}A)). We also added the 95\% confidence ellipse, and the expected values of the total discounted costs and QALYs for each strategy. The CE scatter plot shows that Strategy AB has the highest expected costs and QALYs. Standard of care has the lowest expected cost and QALYs. Strategy B is more effective and least costly than Strategy A. Therefore, Strategy A is strongly dominated by Strategy B.
 
 In Figure \ref{fig:PSA-figures}B, we present the cost-effectiveness acceptability curves (CEACs), showing the probability that each strategy is cost-effective, and the cost-effectiveness frontier (CEAF), displaying the probability of the optimal strategy being cost-effective over a range of willingness-to-pay (WTP) thresholds. At WTP thresholds less than \$70,000 per QALY, SoC is the strategy with the highest probability of being cost-effective and the highest expected NMB. Strategy B has the highest probability of being cost-effective and the highest expected NMB for WTP thresholds greater than \$70,000 and lower than \$105,000 per QALY. Strategy AB has the highest expected NMB for WTP thresholds greater than or equal to \$105,000 and is the strategy with the highest probability of being cost-effective.
 
-We quantify the expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs) to complement the PSA results (Figure \ref{fig:PSA-figures}C). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The strategy SoC has the lowest expected loss for WTP thresholds less than \$65,000 per QALY, strategy B has the lowest expected loss for WTP thresholds greater than or equal to \$70,000 and less than \$105,000. Strategy AB has the lowest expected loss for WTP thresholds greater than or equal \$105,000 per QALY. At a WTP threshold of \$100,000 per QALY, the EVPI is highest at \$7,836 (Figures \ref{fig:PSA-figures}C-D). For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019}{22}}
+We quantify the expected loss from each strategy over a range of WTP thresholds with the expected loss curves (ELCs) to complement the PSA results (Figure \ref{fig:PSA-figures}C). The expected loss considers both the probability of making the wrong decision and the magnitude of the loss due to this decision, representing the foregone benefits of choosing a suboptimal strategy. The SoC Strategy has the lowest expected loss for WTP thresholds less than \$65,000 per QALY, Strategy B has the lowest expected loss for WTP thresholds greater than or equal to \$70,000 and less than \$105,000. Strategy AB has the lowest expected loss for WTP thresholds greater than or equal \$105,000 per QALY. At a WTP threshold of \$100,000 per QALY, the EVPI is highest at \$7,836 (Figures \ref{fig:PSA-figures}C-D). For a more detailed description of these outputs and the R code to generate them, we refer the reader to a previous publication by our group.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2019}{22}}
 
 \begin{figure}[H]
 
@@ -945,7 +945,7 @@ We quantify the expected loss from each strategy over a range of WTP thresholds 
 \hypertarget{epidemiological-measures}{%
 \section{Epidemiological measures}\label{epidemiological-measures}}
 
-cSTMs can be used to generate different epidemiological and economic outputs. However, epidemiological outcomes can be helpful for calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{23}} We provide the epidemiological definition of some of these outcomes and how they can be generated from the trace and transition probability objects of a cSTM using the simulation time-dependent Sick-Sicker cSTM under SoC. Similar to the PSA of the economic measures, we generated the epidemiological measures for each of the parameter sets drawn from their distributions and applied the equations described below. We summarized the outcomes with the 95\% posterior predicted interval (PI), defined as the estimated range between the 2.5th and 97.5th percentiles of the model-predicted posterior outputs. The Supplemental Material provides the code to generate these outcomes from the state-residence dependent cSTM.
+cSTMs can be used to generate epidemiological outcomes that can be of direct interest to the decision maker or be helpful for model calibration and validation. Some common epidemiological outcomes include survival, prevalence, incidence, the average number of events, and lifetime risk of events.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{23}} We provide the epidemiological definitions of some of these outcomes and how they can be generated from the trace and transition probability objects of a cSTM using the simulation time-dependent Sick-Sicker cSTM under SoC. Similar to the PSA of the economic measures, we generated the epidemiological measures for each of the parameter sets drawn from their distributions and applied the equations described below. We summarized the outcomes with the 95\% posterior predicted interval (PI), defined as the estimated range between the 2.5th and 97.5th percentiles of the model-predicted posterior outputs. The Supplemental Material provides the code to generate these outcomes from the state-residence dependent cSTM.
 
 \hypertarget{survival-probability}{%
 \subsection{Survival probability}\label{survival-probability}}
@@ -973,7 +973,7 @@ In discrete-time using cSTMs, we often calculate restricted LE over a fixed time
   LE = \sum_{t=0}^{n_T}{S(t)}.
 \]
 
-In the simulation-time dependent Sick-Sicker model, where we simulated a cohort over \(n_T\)= 75 cycles, life expectancy \texttt{le\_SoC} is 40.8 (95\% credible interval:{[}38.4, 43.6{]}) cycles (Figure \ref{fig:PSA-EPI-figures}B), which is calculated as
+In the simulation-time dependent Sick-Sicker model, where we simulated a cohort over \(n_T\)= 75 cycles, restricted life expectancy \texttt{le\_SoC} is 40.8 (95\% credible interval:{[}38.4, 43.6{]}) cycles (Figure \ref{fig:PSA-EPI-figures}B), which is calculated as
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1002,25 +1002,25 @@ Prevalence is defined as the proportion of the population or cohort with a speci
 
 \}
 
-\textbackslash caption\{Epidemiological outcomes generated from the probabilistic sensitivity analysis (PSA) output for the simulation-time dependent cSTM. A) Survival curve. B) Density of life expectancy. C) Prevalence of sock states over time. The shaded area shows the 95\% posterior model-predictive interval of the outcomes and colored lines shows the posterior model-predicted mean based on 1,000 simulations\}\label{fig:PSA-EPI-figures}
+\textbackslash caption\{Epidemiological outcomes generated from the probabilistic sensitivity analysis (PSA) output for the simulation-time dependent cSTM. A) Survival curve. B) Density of life expectancy. C) Prevalence of sick states over time. The shaded area shows the 95\% posterior model-predictive interval of the outcomes and colored lines shows the posterior model-predicted mean based on 1,000 simulations\}\label{fig:PSA-EPI-figures}
 \textbackslash end\{figure\}
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
 
-In this tutorial, we conceptualize time-dependent cSTMs with their mathematical description and a walk-through of their implementation for a CEA in R using the Sick-Sicker example. We described two types of time dependence: on the time since the start of the simulation (simulation-time dependence) or on the time spent in a health state (state-residence time dependence). We also illustrate how to generate various epidemiological measures from the model, incorporate transition rewards in CEAs, and conduct a PSA.
+In this tutorial, we conceptualize time-dependent cSTMs with their mathematical description and a walk-through of their implementation for a CEA in R using the Sick-Sicker example. We described two types of time dependence: on the time since the start of the simulation (simulation-time dependence) or on the time spent in a health state (state-residence time dependence). We illustrated how to generate various epidemiological measures from the model, incorporate transition rewards in CEAs, and conduct a PSA.
 
-We implemented simulation-time dependence by expanding the transition probability matrix into a transition probability array, where the third dimension captures time since the start of the simulation. However, there are alternative implementations of simulation-time dependence in cSTMs. For example, the model could be coded such that the time-varying elements of the transition probability matrix \(P_t\) are updated at each time point \(t\) as the simulation is run. This would eliminate the need for the transition probability array \texttt{a\_P}, reducing computer memory requirements. But this comes at the expense of increasing the number of operations at every cycle, potentially slowing down the simulation.
+We implemented simulation-time dependence by expanding the two-dimensional transition probability matrix into a three-dimensional transition probability array, where the third dimension captures time since the start of the simulation. However, there are alternative implementations of simulation-time dependence in cSTMs. For example, the model could be coded such that the time-varying elements of the transition probability matrix \(P_t\) are updated at each time point \(t\) as the simulation is run. This would eliminate the need for the transition probability array \texttt{a\_P}, reducing computer memory requirements. But this comes at the expense of increasing the number of operations at every cycle, potentially slowing down the simulation.
 
-We incorporated state-residence time dependence using tunnel states by expanding the corresponding health states on the first and second dimensions of the 3-dimensional array to account for time spent in the current state in addition to simulation-time dependence. Another approach to account for state-residence time dependency is to use a 3-dimensional transition probability array with dimensions for the current state, future state, and time in the current state.\textsuperscript{\protect\hyperlink{ref-Hawkins2005}{28}} However, in examples combining simulation-time and state-residence time dependencies, this would necessitate a 4-dimensional array, which may be challenging to index.
+We incorporated state-residence time dependence using tunnel states by expanding the corresponding health states on the first and second dimensions of the 3-dimensional array to account for time spent in the current state in addition to simulation-time dependence. Another approach to account for state-residence time dependence is to use a three-dimensional transition probability array with dimensions for the current state, future state, and time in the current state.\textsuperscript{\protect\hyperlink{ref-Hawkins2005}{28}} However, combining simulation-time and state-residence time dependencies could necessitate a four-dimensional array, which may prove challenging.
 
 Any time-varying feature in a discrete-time model can most generally be implemented as tunnel states with, at the extreme, every state having a different tunnel state for each time step. The cohort would then progressively move through these tunnel states to capture their progression through time and the model features (e.g., transition probabilities, costs, or utilities) that change over time. Using time-varying transition probabilities is a shortcut when the cohort experiences these time-varying processes simultaneously as a function of the time from the simulation start. Even if the time-varying process has a different periodicity than the cycle length, either tunnel states or time-varying transition probabilities can be used to capture these effects. However, this time-varying process must be represented or approximated over an integer number of cycle lengths.
 
-As described in the introductory tutorial, cSTMs are recommended when the number of states is considered ``not too large.''\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{23}} Incorporating time dependence in cSTMs using the provided approaches requires expanding the number of states by creating a multidimensional array for simulation-time dependence and/or creating tunnel states for state-residence time dependence, increasing the amount of computer memory (RAM) required. For example, as state-residence time dependence extends in more health states, the total number of health states will increase, causing a ``state explosion'`. It is possible to build reasonably complex time-dependent cSTMs in R as long as there is sufficient RAM to store the transition probability array and outputs of interest. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1,000 states and 600 time-cycle slices. However, if a high degree of granularity is desired, the dimensions of these data objects can grow quickly; if the required number of states gets too large and difficult to code, it may be preferable to use a stochastic (Monte Carlo) version of the state-transition model -- often called individual-based state-transition models (iSTM) or microsimulation models -- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{23}} In an iSTM, the risks and rewards of simulated individuals need not depend only on a current health state; they may also depend on an individual's characteristics and attributes. In addition, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. Thus, we recommend carefully considering the required model structure before implementing it. An iSTM will also require additional functions to describe the dependency of transition probabilities and rewards on individuals' history. A previous tutorial showed how to construct these functions for an iSTM using the Sick-Sicker example.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{29}}
+As described in the introductory tutorial, cSTMs are recommended when the number of states is considered ``not too large.''\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{23}} Incorporating time dependence in cSTMs using the provided approaches requires expanding the number of states by creating a multidimensional array for simulation-time dependence and/or creating tunnel states for state-residence time dependence, increasing the amount of computer memory (RAM) required. For example, as state-residence time dependence extends in more health states, the total number of health states will increase, causing a ``state explosion'`. It is possible to build reasonably complex time-dependent cSTMs in R as long as there is sufficient RAM to store the transition probability array and outputs of interest. For example, a typical PC with 8GB of RAM can handle a transition probability array of about 1,000 states and 600 time-cycle slices. However, if a high degree of granularity is desired, the dimensions of these data objects can grow quickly; if the required number of states gets too large and difficult to code, it may be preferable to use a stochastic (Monte Carlo) version of the state-transition model -- often called individual-based state-transition models (iSTM) or microsimulation models -- rather than a cohort simulation model.\textsuperscript{\protect\hyperlink{ref-Siebert2012c}{23}} In an iSTM, the risks and rewards of simulated individuals need not depend only on a current health state; they may also depend on an individual's characteristics and attributes. In addition, modelers can store health state history and other events over time for each individual to determine the risk of new events and corresponding costs and effects. Thus, we recommend carefully considering the required model structure before implementing it. An iSTM will require additional functions to describe the dependence of transition probabilities and rewards on individuals' histories. A previous tutorial showed how to construct these functions for an iSTM using the Sick-Sicker example.\textsuperscript{\protect\hyperlink{ref-Krijkamp2018}{29}}
 
 We described the concept and implementation of transition rewards. While these event-driven impacts could instead be captured by expanding the model state-space to include an initial disease state or a pre-death, end-of-life state, we can avoid state-space expansion by calculating incurred rewards based on the proportion of the cohort making the relevant transition. For implementation, this requires storing not just the cohort trace, which reflects how many individuals are in each state at a given cycle, but also a cohort state-transition array, which records how many individuals are making each possible transition at a given cycle.\textsuperscript{\protect\hyperlink{ref-Krijkamp2019}{9}} We model the effectiveness of treatment B as a hazard ratio. However, other effect measures can be used, such as odds ratio, risk ratio, or risk differences depending on the methods used to estimate them.\textsuperscript{\protect\hyperlink{ref-Kuntz2001}{30}--\protect\hyperlink{ref-Gidwani2020}{32}} We assume that all parameters are known for the case study. However, in a real-world CEA, parameters are estimated from electronic health records,\textsuperscript{\protect\hyperlink{ref-Rodriguez2021}{33}} clinical trials, and observational studies, and when there is no individual-level data to inform them, through model calibration.\textsuperscript{\protect\hyperlink{ref-Welton2005}{34}}
 
-We use \texttt{base} R to implement time-dependent cSTMs to provide flexibility and customizability to model any disease that can be specified as a cSTM and let analysts completely understand how to translate the mathematical specification of cSTMs into code. Other add-on R packages for building and running cSTMs and conducting CEAs, like \texttt{heemod}\textsuperscript{\protect\hyperlink{ref-Filipovic-Pierucci2017}{35}} and \texttt{hesim},\textsuperscript{\protect\hyperlink{ref-Incerti2021}{36}} are made to model arbitrary patient populations or many treatment strategies. These packages can reduce programming time since much of the programming burden has already been done. Users don't need to write functions themselves but instead need to call a series of prewritten functions. And in the case of \texttt{hesim}, all the memory pre-allocation and loops are made at the \texttt{C++} level, making it more efficient than looping over \texttt{base} R but might require more RAM. It is up to the analyst to choose how to develop their cSTM-model based CEAs.
+We use \texttt{base} R to implement time-dependent cSTMs as the most transparent way to illustrate how to translate the mathematical specification of cSTMs into code. Using a \texttt{base} R implementation maximizes flexibility and customizability to model any disease that can be specified as a cSTM. However, there are R packages for building and running cSTMs and conducting CEAs, such as \texttt{heemod}\textsuperscript{\protect\hyperlink{ref-Filipovic-Pierucci2017}{35}} and \texttt{hesim},\textsuperscript{\protect\hyperlink{ref-Incerti2021}{36}} that are made such that they can support modeling arbitrary patient populations or many treatment strategies. Since much of the programming burden has already been done, these packages can reduce programming time. Users don't need to write functions themselves but instead need to call a series of prewritten functions. And in the case of \texttt{hesim}, all the memory pre-allocation and loops are made at the \texttt{C++} level, making it more efficient than looping over \texttt{base} R but might require more RAM. Ultimately, it is up to the analyst to decide the most appropriate approach to implementing their cSTM-based CEAs.
 
 This tutorial extends our conceptualization of time-independent cSTMs to allow for time dependence. It provides a step-by-step guide to implementing time-dependent cSTMs in R to generate epidemiological and economic measures, accounts for transition rewards, and conducts a CEA and a corresponding PSA. We hope that health decision scientists and health economists find this tutorial helpful in developing their cSTMs in a more flexible, efficient, and open-source manner. Ultimately, our goal is to facilitate R in health economic evaluations with the overall aim to increase model transparency and reproducibility.
 
