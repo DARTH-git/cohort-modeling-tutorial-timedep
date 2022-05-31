@@ -1,4 +1,4 @@
-# Appendix code to Time-dependent cSTMs in R: State-residence time dependency ----
+# Appendix code to Time-dependent cSTMs in R: State-residence time dependence ----
 
 #* This code forms the basis for the state-transition model of the tutorial: 
 #* 'A Tutorial on Time-Dependent Cohort State-Transition Models in R using a 
@@ -228,22 +228,22 @@ a_P_tunnels_SoC["H", "H", ]              <- (1 - v_p_HDage) * (1 - p_HS1)
 a_P_tunnels_SoC["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
 a_P_tunnels_SoC["H", "D", ]              <- v_p_HDage
 ## From S1
-for(i in 1:(n_tunnel_size - 1)){
+for(i in 1:n_tunnel_size){
   a_P_tunnels_SoC[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-  a_P_tunnels_SoC[v_Sick_tunnel[i], 
-              v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
-                                           (1 - (p_S1H + v_p_S1S2_tunnels[i]))
   a_P_tunnels_SoC[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
   a_P_tunnels_SoC[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
+  if(i == n_tunnel_size){
+    # If reaching last tunnel state, ensure that the cohort that does not
+    # transition out of the Sick state, remain in the last Sick tunnel state
+    a_P_tunnels_SoC[v_Sick_tunnel[i],
+                    v_Sick_tunnel[i], ] <- (1 - v_p_S1Dage) *
+      (1 - (p_S1H + v_p_S1S2_tunnels[i]))
+  } else{
+    a_P_tunnels_SoC[v_Sick_tunnel[i], 
+                    v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
+      (1 - (p_S1H + v_p_S1S2_tunnels[i]))
+  }
 }
-# repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
-a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size],
-            v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) *
-                                               (1 - (p_S1H + v_p_S1S2_tunnels[n_tunnel_size]))
-a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) * 
-                                                     v_p_S1S2_tunnels[n_tunnel_size]
-a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 ## From S2
 a_P_tunnels_SoC["S2", "S2", ] <- 1 - v_p_S2Dage
 a_P_tunnels_SoC["S2", "D", ]  <- v_p_S2Dage
