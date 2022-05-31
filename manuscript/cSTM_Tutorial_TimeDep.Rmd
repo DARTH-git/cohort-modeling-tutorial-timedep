@@ -772,21 +772,6 @@ m_M_tunnels_SoC_sum <- cbind(H = m_M_tunnels_SoC[, "H"],
                              D = m_M_tunnels_SoC[, "D"])
 ```
 
-```{r Sick-Sicker-Trace-HistDep, echo=FALSE, fig.cap='Cohort trace of the age-dependent cSTM accounting for state-residence dependency under SoC.', message=FALSE, warning=FALSE, fig.pos="H"} 
-cols <- get_DARTH_cols()
-lty <-  c("H" = 1, "S1" = 2, "S2" = 4, "D" = 3)
-ggplot(melt(m_M_tunnels_SoC_sum), aes(x = Var1, y = value, 
-                         color = Var2, linetype = Var2)) +
-  geom_line(size = 1) +
-  scale_color_manual(name = "Health state", values = cols) +
-  scale_linetype_manual(name = "Health state", values = lty) +
-  scale_x_continuous(breaks = number_ticks(8)) +
-  xlab("Cycle") +
-  ylab("Proportion of the cohort") +
-  theme_bw(base_size = 16) +
-  theme(legend.position = "bottom", 
-        legend.background = element_rect(fill = NA))
-```
 # Economic outcomes
 In a CEA, the main outcomes are typically the total expected discounted QALYs and costs accrued by the cohort over the predefined time horizon. Below, we calculate economic outcomes from state and transition rewards. A "state reward" refers to a value (e.g., cost, utility) assigned to individuals for remaining in a given health state for one cycle. A "transition reward" refers to the increase or decrease in either costs or utilities of transitioning from one health state to another, which may be associated with a one-time cost or utility impact. The introductory tutorial describes how to incorporate state rewards in CEA in detail.[@Alarid-Escudero2022b] Here, we describe and illustrate how to implement state and transition rewards together using a transition dynamics array.
 
