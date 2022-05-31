@@ -412,7 +412,7 @@ v_p_S2Dage <- 1 - exp(-v_r_S2Dage) # when Sicker
 To incorporate simulation-time dependence into the transition probability matrix, we expand the dimensions of the matrix and create a 3-dimensional transition probability array, $\mathbf{P}$ and use `a_P` in R, of dimensions $n_S \times n_S \times n_T$. The first two dimensions of this array correspond to transitions between states, where the rows determine departing states and columns destination states. The third dimension refers to the time since the simulation started. The third dimension refers to time since simulation start. The $t$-th element in the third dimension corresponds to the transition probability matrix at cycle $t$. A visual representation of `a_P` is shown in Figure \@ref(fig:Array-Time-Dependent).
 
 ```{r Array-Time-Dependent, echo=FALSE, out.width='100%', fig.cap="A 3-dimensional representation of the transition probability array of the Sick-Sicker model with simulation-time dependence.",fig.pos="H"}
-knitr::include_graphics("figs/Figure 2 - 3D-state-transition-array-sick-sicker-without-tunnels.pdf")
+knitr::include_graphics("figs/Figure 2 - 3D-state-transition-array-sick-sicker-without-tunnels.png")
 ```
 
 First, we initialize the transition probability array for SoC, `a_P_SoC`, with a default value of zero for all transition probabilities.
@@ -640,8 +640,8 @@ a_P_tunnels_SoC <- array(0, dim = c(n_states_tunnels, n_states_tunnels, n_cycles
                                          0:(n_cycles - 1)))
 ```
 
-```{r Array-Time-Dependent-Tunnels, echo=FALSE, out.width='100%', fig.cap="The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for simulation-time and state-residence dependency using $\\tau$ tunnel states for S1.", fig.pos="H"}
-knitr::include_graphics("figs/Figure 5 - 3D-state-transition-array-sick-sicker-tunnels.pdf")
+```{r Array-Time-Dependent-Tunnels, echo=FALSE, out.width='100%', fig.cap="The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for simulation-time and state-residence time dependence using $\\tau$ tunnel states for S1.", fig.pos="H"}
+knitr::include_graphics("figs/Figure 5 - 3D-state-transition-array-sick-sicker-tunnels.png")
 ```
 
 Filling `a_P_tunnels_SoC` with the corresponding transition probabilities works similarly to `a_P_SoC` above. The difference is that we now fill the transition probabilities to/from tunnel states by iterating over the tunnel and assigning the appropriate disease progression transition probabilities for each state, as described in Section \@ref(time-dependence-on-state-residence) and Algorithm \@ref(alg:fill-tunnels).
@@ -1051,7 +1051,7 @@ We use Simpson's 1/3rd rule for within-cycle correction (WCC),[@Elbasha2016, @El
 ## Vector with cycles
 v_cycles <- seq(1, n_cycles + 1)
 ## Generate 2/3 and 4/3 multipliers for even and odd entries, respectively
-v_wcc <- ((v_cycles %% 2)==0)*(2/3) + ((v_cycles %% 2)!=0)*(4/3)
+v_wcc <- ((v_cycles %% 2) == 0)*(2/3) + ((v_cycles %% 2) != 0)*(4/3)
 ## Substitute 1/3 in first and last entries
 v_wcc[1] <- v_wcc[n_cycles + 1] <- 1/3
 ```

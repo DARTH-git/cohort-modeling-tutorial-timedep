@@ -631,7 +631,7 @@ To adapt the 3-dimensional transition probability array to incorporate both age 
 
 }
 
-\caption{The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for simulation-time and state-residence dependency using $\tau$ tunnel states for S1.}\label{fig:Array-Time-Dependent-Tunnels}
+\caption{The 3-dimensional transition probability array of the Sick-Sicker model expanded to account for simulation-time and state-residence time dependence using $\tau$ tunnel states for S1.}\label{fig:Array-Time-Dependent-Tunnels}
 \end{figure}
 
 Filling \texttt{a\_P\_tunnels\_SoC} with the corresponding transition probabilities works similarly to \texttt{a\_P\_SoC} above. The difference is that we now fill the transition probabilities to/from tunnel states by iterating over the tunnel and assigning the appropriate disease progression transition probabilities for each state, as described in Section \ref{time-dependence-on-state-residence} and Algorithm \ref{alg:fill-tunnels}.
