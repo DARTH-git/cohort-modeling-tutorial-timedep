@@ -33,7 +33,7 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     ## State-residence-dependent transition rate of becoming Sicker when Sick
     # Weibull transition rate
     v_r_S1S2_tunnels <- (v_cycles_tunnel*r_S1S2_scale)^r_S1S2_shape - 
-                        ((v_cycles_tunnel-1)*r_S1S2_scale)^r_S1S2_shape
+                        ((v_cycles_tunnel - 1)*r_S1S2_scale)^r_S1S2_shape
     
     # Weibull transition probability conditional on surviving adjusting by cycle length
     v_p_S1S2_tunnels <- rate_to_prob(v_r_S1S2_tunnels, t = cycle_length)
@@ -93,7 +93,7 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     a_P_tunnels_SoC["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
     a_P_tunnels_SoC["H", "D", ]              <- v_p_HDage
     ## From S1
-    for(i in 1:(n_tunnel_size - 1)){
+    for (i in 1:(n_tunnel_size - 1)) {
       a_P_tunnels_SoC[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
       a_P_tunnels_SoC[v_Sick_tunnel[i], 
                   v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
@@ -123,7 +123,7 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     a_P_tunnels_strB <- a_P_tunnels_SoC
     ## Only need to update the probabilities involving the transition from Sick to Sicker, v_p_S1S2_tunnels
     # From S1
-    for(i in 1:(n_tunnel_size - 1)){
+    for (i in 1:(n_tunnel_size - 1)) {
       a_P_tunnels_strB[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
       a_P_tunnels_strB[v_Sick_tunnel[i], 
                        v_Sick_tunnel[i + 1], ]        <- (1 - v_p_S1Dage) * 
@@ -135,7 +135,7 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "H", ] <- (1 - v_p_S1Dage) * p_S1H
     a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size],
                      v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) * 
-      (1 - (p_S1H +v_p_S1S2_tunnels_trtB[n_tunnel_size]))
+      (1 - (p_S1H + v_p_S1S2_tunnels_trtB[n_tunnel_size]))
     a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) *
       v_p_S1S2_tunnels_trtB[n_tunnel_size]
     a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
@@ -157,7 +157,7 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     
     #### Run Markov model ####
     ## Iterative solution of state-residence dependent cSTM
-    for(t in 1:n_cycles){
+    for (t in 1:n_cycles) {
       ## Fill in cohort trace
       # For SoC
       m_M_tunnels_SoC[t + 1, ]   <- m_M_tunnels_SoC[t, ] %*% a_P_tunnels_SoC[, , t]
@@ -181,19 +181,19 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     
     # Create aggregated trace
     m_M_tunnels_SoC_sum <- cbind(H  = m_M_tunnels_SoC[, "H"], 
-                                 S1 = rowSums(m_M_tunnels_SoC[, 2:(n_tunnel_size +1)]), 
+                                 S1 = rowSums(m_M_tunnels_SoC[, 2:(n_tunnel_size + 1)]), 
                                  S2 = m_M_tunnels_SoC[, "S2"],
                                  D  = m_M_tunnels_SoC[, "D"])
     m_M_tunnels_strA_sum <- cbind(H  = m_M_tunnels_strA[, "H"], 
-                                  S1 = rowSums(m_M_tunnels_strA[, 2:(n_tunnel_size +1)]), 
+                                  S1 = rowSums(m_M_tunnels_strA[, 2:(n_tunnel_size + 1)]), 
                                   S2 = m_M_tunnels_strA[, "S2"],
                                   D  = m_M_tunnels_strA[, "D"])
     m_M_tunnels_strB_sum <- cbind(H  = m_M_tunnels_strA[, "H"], 
-                                  S1 = rowSums(m_M_tunnels_strB[, 2:(n_tunnel_size +1)]), 
+                                  S1 = rowSums(m_M_tunnels_strB[, 2:(n_tunnel_size + 1)]), 
                                   S2 = m_M_tunnels_strB[, "S2"],
                                   D  = m_M_tunnels_strB[, "D"])
     m_M_tunnels_strAB_sum <- cbind(H  = m_M_tunnels_strAB[, "H"], 
-                                   S1 = rowSums(m_M_tunnels_strAB[, 2:(n_tunnel_size +1)]), 
+                                   S1 = rowSums(m_M_tunnels_strAB[, 2:(n_tunnel_size + 1)]), 
                                    S2 = m_M_tunnels_strAB[, "S2"],
                                    D  = m_M_tunnels_strAB[, "D"])
     
