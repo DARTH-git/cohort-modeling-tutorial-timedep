@@ -285,16 +285,7 @@ For a more detailed description of these components with their variable types, d
 \hypertarget{case-study-a-cost-effectiveness-analysis-using-a-time-dependent-sick-sicker-model}{%
 \section{Case study: a cost-effectiveness analysis using a time-dependent Sick-Sicker model}\label{case-study-a-cost-effectiveness-analysis-using-a-time-dependent-sick-sicker-model}}
 
-We demonstrate simulation-time and state-residence time-dependence in R by expanding the time-independent 4-state ``Sick-Sicker'' model described in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} The state-transition diagram of the Sick-Sicker model is presented in Figure \ref{fig:STD-Sick-Sicker}. We first modify this cSTM to account for simulation-time dependence by incorporating age-dependent background mortality. We then expand it to account for state-residence time dependence in the ``Sick'' state. We will use the time-dependent cSTM to conduct a CEA of different treatment strategies, which we will also use to demonstrate the implementation of transition rewards in cSTM-based CEAs.
-
-\begin{figure}[H]
-
-{\centering \includegraphics[width=10.64in]{figs/Sick-Sicker} 
-
-}
-
-\caption{State-transition diagram of the Sick-Sicker cohort state-transition model. The circles represent the health states, and the arrows represent the possible transition probabilities. The labels next to the arrows represent the variable names for these transitions.}\label{fig:STD-Sick-Sicker}
-\end{figure}
+We demonstrate simulation-time and state-residence time-dependence in R by expanding the time-independent 4-state ``Sick-Sicker'' model described in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} We first modify this cSTM to account for simulation-time dependence by incorporating age-dependent background mortality. We then expand it to account for state-residence time dependence in the ``Sick'' state. We will use the time-dependent cSTM to conduct a CEA of different treatment strategies, which we will also use to demonstrate the implementation of transition rewards in cSTM-based CEAs.
 
 As described in the introductory tutorial, this model simulates the health care costs and quality-adjusted life-years (QALYs) of a cohort of 25-year-old individuals at-risk of developing a hypothetical disease with two stages: ``Sick'' and ``Sicker.''\textsuperscript{\protect\hyperlink{ref-Enns2015e}{12}} We simulate the cohort of individuals who all start in the ``Healthy'' state (denoted by ``H'') over their lifetime (up to a maximum age of 100 years old) in annual cycles, which means that we will simulate the cohort for 75 cycles. The total number of cycles is defined in R as \texttt{n\_cycles}. We assume the cycle length is one year for the case study, but modelers can adjust the transition probabilities and rewards for a different cycle length. A detailed description of determining the cycle length has been described in the literature.\textsuperscript{\protect\hyperlink{ref-OMahony2015}{13}}
 
@@ -511,7 +502,7 @@ We use the variable \texttt{v\_m\_init} to initialize the cohort trace, \(M\), r
 
 The code below iteratively computes the cohort's distribution across health states over time.
 
-The state vector of the cohort's distribution at cycle \(t+1\) is obtained by applying Equation \eqref{eq:time-dep-matrix-mult}, the matrix product between the row vector \texttt{m\_M\_SoC{[}t,\ {]}} and the transition probability matrix \texttt{a\_P\_SoC{[},\ ,\ t{]}}. This equation is comparable to the one described for the time-independent model in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} The only modification required is to index the third dimension of the transition probability arrays by \(t\) to obtain the SoC's cycle-specific transition probability matrix. The vectors across all cycles are obtained by iteratively applying Equation \eqref{eq:time-dep-matrix-mult} to each transition probability matrix of \texttt{a\_P\_SoC} across the third dimension using a \texttt{for} loop. The complete code for all the strategies is included in the Supplemental Material.
+The state vector of the cohort's distribution at cycle \(t+1\) is obtained by applying Equation \eqref{eq:time-dep-matrix-mult}, the matrix product between the row vector \texttt{m\_M\_SoC{[}t,\ {]}} and the transition probability matrix \texttt{a\_P\_SoC{[},\ ,\ t{]}}. This equation is comparable to the one described for the time-independent model in the introductory tutorial.\textsuperscript{\protect\hyperlink{ref-Alarid-Escudero2022b}{7}} The only modification required is to index the third dimension of the transition probability arrays by \(t\) to obtain the SoC's cycle-specific transition probability matrix. The vectors across all cycles are obtained by iteratively applying Equation \eqref{eq:time-dep-matrix-mult} to each transition probability matrix of \texttt{a\_P\_SoC} across the third dimension using a \texttt{for} loop. Figure \ref{fig:Sick-Sicker-Trace-AgeDep} shows the cohort's trace for all cycles of the age-dependent cSTM under SoC. The complete code for all the strategies is included in the Supplemental Material.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -521,6 +512,15 @@ The state vector of the cohort's distribution at cycle \(t+1\) is obtained by ap
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
+
+\begin{figure}[H]
+
+{\centering \includegraphics{figs/Sick-Sicker-Trace-AgeDep-1} 
+
+}
+
+\caption{Cohort trace of the age-dependent cSTM under SoC.}\label{fig:Sick-Sicker-Trace-AgeDep}
+\end{figure}
 
 \hypertarget{incorporating-time-dependence-on-state-residence-tunnel-states}{%
 \subsection{Incorporating time dependence on state residence (tunnel states)}\label{incorporating-time-dependence-on-state-residence-tunnel-states}}
@@ -568,7 +568,7 @@ Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the state-transition diagram of t
 
 }
 
-\caption{State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{\text{tunnels}}}$).}\label{fig:STD-Sick-Sicker-tunnels}
+\caption{State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{\text{tunnels}}}$). The circles represent the health states, and the arrows represent the possible transition probabilities. The labels next to the arrows represent the variable names for these transitions.}\label{fig:STD-Sick-Sicker-tunnels}
 \end{figure}
 
 To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables \texttt{v\_Sick\_tunnel} and \texttt{v\_names\_states\_tunnels} with the names of the Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \ref{tab:Timedep-cSTM-components-table}.
