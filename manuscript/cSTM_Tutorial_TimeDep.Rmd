@@ -1197,8 +1197,8 @@ l_psa <- make_psa_obj(cost          = df_c,
                       parameters    = df_psa_input, 
                       strategies    = v_names_str)
 l_psa$strategies <- v_names_str
-colnames(l_psa$effectiveness)<- v_names_str
-colnames(l_psa$cost)<- v_names_str
+colnames(l_psa$effectiveness) <- v_names_str
+colnames(l_psa$cost) <- v_names_str
 
 # Vector with willingness-to-pay (WTP) thresholds.
 v_wtp <- seq(0, 200000, by = 5000)
@@ -1309,7 +1309,7 @@ gg_surv_psa <- ggplot(df_surv_summ, aes(x = as.numeric(Time), y = value,
 
 #### Life Expectancy ---
 gg_le_psa <- ggplot(df_le, aes(x = LE)) +
-  geom_density(color="darkblue", fill="lightblue") +
+  geom_density(color = "darkblue", fill = "lightblue") +
   scale_x_continuous(breaks = number_ticks(8)) + 
   xlab("Life expectancy") +
   ylab("") +
@@ -1379,7 +1379,7 @@ v_prev_S1S2_SoC <- rowSums(m_M_SoC[, c("S1", "S2")])/v_S_SoC # prevalence of Sic
 ```
 
 
-```{r PSA-EPI-figures, echo=FALSE, fig.cap='Epidemiological outcomes generated from the probabilistic sensitivity analysis (PSA) output for the simulation-time dependent cSTM. A) Survival curve. B) Density of life expectancy. C) Prevalence of sick states over time. The shaded area shows the 95% posterior model-predictive interval of the outcomes and colored lines shows the posterior model-predicted mean based on 1,000 simulations', message=FALSE, warning=FALSE, fig.pos="H", fig.width=11, fig.height=8} 
+```{r PSA-EPI-figures, echo=FALSE, fig.cap='Epidemiological outcomes generated from the probabilistic sensitivity analysis (PSA) output for the simulation-time dependent cSTM. A) Survival curve. B) Density of life expectancy. C) Prevalence of sick states over time. The shaded area in A and C shows the 95% posterior model-predictive interval of the outcomes and colored lines shows the posterior model-predicted mean based on 1,000 simulations.', message=FALSE, warning=FALSE, fig.pos="H", fig.width=11, fig.height=8} 
 patched_epi <- (gg_surv_psa / gg_le_psa) | gg_prev_psa
 gg_psa_epi_plots <- patched_epi + 
   plot_annotation(tag_levels = 'A')
