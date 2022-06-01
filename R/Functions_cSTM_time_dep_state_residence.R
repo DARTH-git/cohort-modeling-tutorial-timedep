@@ -410,17 +410,28 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
 #' @export
 generate_psa_params <- function(n_sim = 1000, seed = 071818){
   set.seed(seed) # set a seed to be able to reproduce the same results
+  ## Parameters for multivariate lognormal distribution
+  v_means  <- c(0.08, 1.1)    # mean vector
+  v_var    <- c(0.02, 0.05)^2 # vector containing the diagonal of covariances
+  coef_cor <- 0.5             # correlation coefficient
+  m_cor <- toeplitz(coef_cor^(0:1)) # correlation matrix
+  m_r_S1S2_scale_shape <- MethylCapSig::mvlognormal(n = n_sim, 
+                                                    Mu = v_means, 
+                                                    Sigma = v_var,
+                                                    R = m_cor)
+  colnames(m_r_S1S2_scale_shape) <- c("r_S1S2_scale", "r_S1S2_shape")
+  ## Create data.frame with PSA dataset
   df_psa <- data.frame(
     # Transition probabilities (per cycle)
-    r_HS1    = rgamma(n_sim, shape = 30, rate = 170 + 30), # constant rate of becoming Sick when Healthy conditional on surviving
-    r_S1H    = rgamma(n_sim, shape = 60, rate = 60 + 60),  # constant rate of becoming Healthy when Sick conditional on surviving
-    hr_S1    = rlnorm(n_sim, log(3), 0.01),         # rate ratio of death in S1 vs healthy 
-    hr_S2    = rlnorm(n_sim, log(10), 0.02),        # rate ratio of death in S2 vs healthy 
+    r_HS1 = rgamma(n_sim, shape = 30, rate = 170 + 30), # constant rate of becoming Sick when Healthy conditional on surviving
+    r_S1H = rgamma(n_sim, shape = 60, rate = 60 + 60),  # constant rate of becoming Healthy when Sick conditional on surviving
+    hr_S1 = rlnorm(n_sim, log(3), 0.01),         # rate ratio of death in S1 vs healthy 
+    hr_S2 = rlnorm(n_sim, log(10), 0.02),        # rate ratio of death in S2 vs healthy 
     
     # Weibull parameters for state-residence-dependent transition probability of 
     # becoming Sicker when Sick conditional on surviving
-    r_S1S2_scale = rlnorm(n_sim, log(0.08), 0.02),  # transition from S1 to S2 - Weibull scale parameter
-    r_S1S2_shape = rlnorm(n_sim, log(1.1), 0.05),   # transition from S1 to S2 - Weibull shape parameter
+    r_S1S2_scale = m_r_S1S2_scale_shape[, "r_S1S2_scale"],  # transition from S1 to S2 - Weibull scale parameter
+    r_S1S2_shape = m_r_S1S2_scale_shape[, "r_S1S2_shape"],   # transition from S1 to S2 - Weibull shape parameter
     
     # Effectiveness of treatment B 
     hr_S1S2_trtB = rlnorm(n_sim, meanlog = log(0.6), sdlog = 0.02),    # hazard ratio of becoming Sicker when Sick under B
