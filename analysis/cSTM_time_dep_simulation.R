@@ -425,7 +425,7 @@ for (i in 1:n_str) { # i <- 1
   #* Add transition cost per cycle due to transition from H to S1
   a_R_c_str["H", "S1", ]      <- a_R_c_str["H", "S1", ]       + ic_HS1
   #* Add transition cost  per cycle of dying from all non-dead states
-  a_R_c_str[-n_states, "D", ] <- a_R_c_str[- n_states, "D", ] + ic_D
+  a_R_c_str[-n_states, "D", ] <- a_R_c_str[-n_states, "D", ] + ic_D
   
   ###* Expected QALYs and costs for all transitions per cycle
   #* QALYs = life years x QoL
@@ -578,7 +578,7 @@ df_prevS1S2 <- data.frame(States = "S1 + S2",
 #* Conduct probabilistic sensitivity analysis
 #* Run Markov model on each parameter set of PSA input dataset
 n_time_init_psa_series <- Sys.time()
-for(i in 1:n_sim){ # i <- 1
+for (i in 1:n_sim) { # i <- 1
   l_psa_input <- update_param_list(l_params_all, df_psa_input[i,])
   # Economics Measures
   l_out_ce_temp  <- calculate_ce_out(l_psa_input)
@@ -592,7 +592,7 @@ for(i in 1:n_sim){ # i <- 1
   df_prevS2[i, -1] <- l_out_epi_temp$PrevS2
   df_prevS1S2[i, -1] <- l_out_epi_temp$PrevS1S2
   # Display simulation progress
-  if(i/(n_sim/100) == round(i/(n_sim/100), 0)) { # display progress every 5%
+  if (i/(n_sim/100) == round(i/(n_sim/100), 0)) { # display progress every 5%
     cat('\r', paste(i/n_sim * 100, "% done", sep = " "))
   }
 }
@@ -602,19 +602,19 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
              round(n_time_total_psa_series, 2), " ", 
              units(n_time_total_psa_series)))
 
-# ## Run Markov model on each parameter set of PSA input dataset in parallel
-# # Uncomment next section to run in parallel
-# ## Get OS
-# os <- get_os()
-# 
-# no_cores <- parallel::detectCores() - 1
-# 
-# print(paste0("Parallelized PSA on ", os, " using ", no_cores, " cores."))
-# 
-# n_time_init_psa_parallel <- Sys.time()
-# 
+## Run Markov model on each parameter set of PSA input dataset in parallel
+# Uncomment next section to run in parallel
+## Get OS
+os <- get_os()
+
+no_cores <- parallel::detectCores() - 1
+
+print(paste0("Parallelized PSA on ", os, " using ", no_cores, " cores."))
+
+n_time_init_psa_parallel <- Sys.time()
+
 # ## Run parallelized PSA based on OS
-# if(os == "osx"){
+# if (os == "osx") {
 #   # Initialize cluster object
 #   cl <- parallel::makeForkCluster(no_cores)
 #   # Register clusters
@@ -626,11 +626,11 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
 #   }
 #   # Extract costs and effects from the PSA dataset
 #   df_c <- df_ce[, 1:n_str]
-#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   df_e <- df_ce[, (n_str + 1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa_parallel <- Sys.time()
 # }
-# if(os == "windows"){
+# if (os == "windows") {
 #   # Initialize cluster object
 #   cl <- parallel::makeCluster(no_cores)
 #   # Register clusters
@@ -639,18 +639,18 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
 #   # Run parallelized PSA
 #   df_ce <- foreach::foreach(i = 1:n_samp, .combine = rbind,
 #                             .export = ls(globalenv()),
-#                             .packages=c("dampack"),
+#                             .packages = c("dampack"),
 #                             .options.snow = opts) %dopar% {
 #                               l_out_temp <- calculate_ce_out(df_psa_input[i, ])
 #                               df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
 #                             }
 #   # Extract costs and effects from the PSA dataset
 #   df_c <- df_ce[, 1:n_str]
-#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   df_e <- df_ce[, (n_str + 1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa_parallel <- Sys.time()
 # }
-# if(os == "linux"){
+# if (os == "linux") {
 #   # Initialize cluster object
 #   cl <- parallel::makeCluster(no_cores)
 #   # Register clusters
@@ -662,7 +662,7 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
 #   }
 #   # Extract costs and effects from the PSA dataset
 #   df_c <- df_ce[, 1:n_str]
-#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   df_e <- df_ce[, (n_str + 1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa_parallel <- Sys.time()
 # }
@@ -681,8 +681,8 @@ l_psa <- make_psa_obj(cost          = df_c,
                       parameters    = df_psa_input, 
                       strategies    = v_names_str)
 l_psa$strategies <- v_names_str
-colnames(l_psa$effectiveness)<- v_names_str
-colnames(l_psa$cost)<- v_names_str
+colnames(l_psa$effectiveness) <- v_names_str
+colnames(l_psa$cost) <- v_names_str
 
 #* Vector with willingness-to-pay (WTP) thresholds.
 v_wtp <- seq(0, 200000, by = 5000)
@@ -792,6 +792,7 @@ df_prev_summ <- data_summary(df_prev_lng, varname = "value",
                              groupnames = c("States", "Time"))
 df_prev_summ$States <- ordered(df_prev_summ$States,
                                levels = c("S1", "S2", "S1 + S2"))
+
 ### Plot epidemiological measures ---
 txtsize_epi <- 16
 #### Survival ---
@@ -808,7 +809,7 @@ gg_surv_psa
 
 #### Life Expectancy ---
 gg_le_psa <- ggplot(df_le, aes(x = LE)) +
-  geom_density(color="darkblue", fill="lightblue") +
+  geom_density(color = "darkblue", fill = "lightblue") +
   scale_x_continuous(breaks = number_ticks(8)) + 
   xlab("Life expectancy") +
   ylab("") +
@@ -838,7 +839,7 @@ gg_prev_psa <- ggplot(df_prev_summ, aes(x = as.numeric(Time), y = value,
 gg_prev_psa
 
 ### Combine all figures into one ----
-patched_epi <- (gg_surv_psa / gg_prev_psa) | gg_le_psa
+patched_epi <- (gg_surv_psa / gg_le_psa) | gg_prev_psa
 gg_psa_epi_plots <- patched_epi + 
   plot_annotation(tag_levels = 'A')
 gg_psa_epi_plots
