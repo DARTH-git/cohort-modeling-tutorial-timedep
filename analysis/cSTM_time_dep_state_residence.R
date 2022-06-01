@@ -77,7 +77,7 @@ n_age_init <- 25  # age at baseline
 n_age_max  <- 100 # maximum age of follow up
 n_cycles <- (n_age_max - n_age_init)/cycle_length # time horizon, number of cycles
 #* Age labels 
-v_age_names <- paste(rep(n_age_init:(n_age_max-1), each = 1/cycle_length), 
+v_age_names <- paste(rep(n_age_init:(n_age_max - 1), each = 1/cycle_length), 
                      1:(1/cycle_length), 
                      sep = ".")
 #* the 4 health states of the model:
@@ -181,7 +181,7 @@ v_p_S2Dage <- rate_to_prob(v_r_S2Dage, t = cycle_length) # Age-specific mortalit
 ## State-residence-dependent transition rate of becoming Sicker when Sick ----
 #* Weibull transition rate
 v_r_S1S2_tunnels <- (v_cycles_tunnel*r_S1S2_scale)^r_S1S2_shape - 
-                    ((v_cycles_tunnel-1)*r_S1S2_scale)^r_S1S2_shape
+                    ((v_cycles_tunnel - 1)*r_S1S2_scale)^r_S1S2_shape
                             
 ## Weibull transition probability conditional on surviving adjusting by cycle length ----
 v_p_S1S2_tunnels <- rate_to_prob(v_r_S1S2_tunnels, t = cycle_length)
@@ -229,11 +229,11 @@ a_P_tunnels_SoC["H", "H", ]              <- (1 - v_p_HDage) * (1 - p_HS1)
 a_P_tunnels_SoC["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
 a_P_tunnels_SoC["H", "D", ]              <- v_p_HDage
 ## From S1
-for(i in 1:n_tunnel_size){
+for (i in 1:n_tunnel_size) {
   a_P_tunnels_SoC[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
   a_P_tunnels_SoC[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
   a_P_tunnels_SoC[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
-  if(i == n_tunnel_size){
+  if (i == n_tunnel_size) {
     # If reaching last tunnel state, ensure that the cohort that does not
     # transition out of the Sick state, remain in the last Sick tunnel state
     a_P_tunnels_SoC[v_Sick_tunnel[i],
@@ -257,22 +257,22 @@ a_P_tunnels_strA <- a_P_tunnels_SoC
 ### Initialize transition probability array for strategy B ----
 a_P_tunnels_strB <- a_P_tunnels_SoC
 #* Update only transition probabilities from S1 involving v_p_S1S2_tunnels
-for(i in 1:(n_tunnel_size - 1)){
-  a_P_tunnels_strB[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-  a_P_tunnels_strB[v_Sick_tunnel[i], 
-              v_Sick_tunnel[i + 1], ]        <- (1 - v_p_S1Dage) * 
-                                                (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+for (i in 1:n_tunnel_size) {
+  a_P_tunnels_strB[v_Sick_tunnel[i], "H", ] <- (1 - v_p_S1Dage) * p_S1H
   a_P_tunnels_strB[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels_trtB[i]
   a_P_tunnels_strB[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
+  if (i == n_tunnel_size) {
+    # If reaching last tunnel state, ensure that the cohort that does not
+    # transition out of the Sick state, remain in the last Sick tunnel state
+    a_P_tunnels_strB[v_Sick_tunnel[i],
+                     v_Sick_tunnel[i], ] <- (1 - v_p_S1Dage) *
+      (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+  } else{
+    a_P_tunnels_strB[v_Sick_tunnel[i], 
+                     v_Sick_tunnel[i + 1], ] <- (1 - v_p_S1Dage) *
+      (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+  }
 }
-#* repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
-a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "H", ] <- (1 - v_p_S1Dage) * p_S1H
-a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size],
-            v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) * 
-                                               (1 - (p_S1H +v_p_S1S2_tunnels_trtB[n_tunnel_size]))
-a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) *
-                                                           v_p_S1S2_tunnels_trtB[n_tunnel_size]
-a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 
 ### Initialize transition probability array for strategy AB as a copy of B's ----
 a_P_tunnels_strAB <- a_P_tunnels_strB
@@ -306,7 +306,7 @@ a_A_tunnels_strAB <- a_A_tunnels_SoC
 
 #  Run Markov model ----
 #* Iterative solution of state-residence dependent cSTM
-for(t in 1:n_cycles){
+for (t in 1:n_cycles) {
   ## Fill in cohort trace
   # For SoC
   m_M_tunnels_SoC[t + 1, ]   <- m_M_tunnels_SoC[t, ] %*% a_P_tunnels_SoC[, , t]
@@ -330,19 +330,19 @@ for(t in 1:n_cycles){
 
 #* Create aggregated trace
 m_M_tunnels_SoC_sum <- cbind(H  = m_M_tunnels_SoC[, "H"], 
-                             S1 = rowSums(m_M_tunnels_SoC[, 2:(n_tunnel_size +1)]), 
+                             S1 = rowSums(m_M_tunnels_SoC[, 2:(n_tunnel_size + 1)]), 
                              S2 = m_M_tunnels_SoC[, "S2"],
                              D  = m_M_tunnels_SoC[, "D"])
 m_M_tunnels_strA_sum <- cbind(H  = m_M_tunnels_strA[, "H"], 
-                              S1 = rowSums(m_M_tunnels_strA[, 2:(n_tunnel_size +1)]), 
+                              S1 = rowSums(m_M_tunnels_strA[, 2:(n_tunnel_size + 1)]), 
                               S2 = m_M_tunnels_strA[, "S2"],
                               D  = m_M_tunnels_strA[, "D"])
 m_M_tunnels_strB_sum <- cbind(H  = m_M_tunnels_strA[, "H"], 
-                              S1 = rowSums(m_M_tunnels_strB[, 2:(n_tunnel_size +1)]), 
+                              S1 = rowSums(m_M_tunnels_strB[, 2:(n_tunnel_size + 1)]), 
                               S2 = m_M_tunnels_strB[, "S2"],
                               D  = m_M_tunnels_strB[, "D"])
 m_M_tunnels_strAB_sum <- cbind(H  = m_M_tunnels_strAB[, "H"], 
-                               S1 = rowSums(m_M_tunnels_strAB[, 2:(n_tunnel_size +1)]), 
+                               S1 = rowSums(m_M_tunnels_strAB[, 2:(n_tunnel_size + 1)]), 
                                S2 = m_M_tunnels_strAB[, "S2"],
                                D  = m_M_tunnels_strAB[, "D"])
 
@@ -648,14 +648,43 @@ df_e <- as.data.frame(matrix(0,
                              ncol = n_str))
 colnames(df_e) <- v_names_str
 
+#* data.frame of survival
+m_surv <- matrix(NA, nrow = n_sim, ncol = (n_cycles + 1), 
+                 dimnames = list(1:n_sim, 0:n_cycles))
+df_surv <- data.frame(Outcome = "Survival",
+                      m_surv, check.names = "FALSE")
+#* data.frame of life expectancy
+df_le <- data.frame(Outcome = "Life Expectancy",
+                    LE = m_surv[, 1])
+#* data.frame of prevalence of S1
+m_prev <- matrix(NA, nrow = n_sim, ncol = (n_cycles + 1), 
+                 dimnames = list(1:n_sim, 0:n_cycles))
+df_prevS1 <- data.frame(States = "S1",
+                        m_prev, check.names = "FALSE")
+#* data.frame of prevalence of S2
+df_prevS2 <- data.frame(States = "S2",
+                        m_prev, check.names = "FALSE")
+
+#* data.frame of prevalence of S1 & S2
+df_prevS1S2 <- data.frame(States = "S1 + S2",
+                          m_prev, check.names = "FALSE")
+ 
 #* Conduct probabilistic sensitivity analysis
 #* Run Markov model on each parameter set of PSA input dataset
 n_time_init_psa_series <- Sys.time()
-for (i in 1:n_sim) {
+for (i in 1:n_sim) {# i <- 1
   l_psa_input <- update_param_list(l_params_all, df_psa_input[i,])
-  l_out_temp <- calculate_ce_out(l_psa_input)
-  df_c[i, ]  <- l_out_temp$Cost  
-  df_e[i, ]  <- l_out_temp$Effect
+  # Economics Measures
+  l_out_ce_temp  <- calculate_ce_out(l_psa_input)
+  df_c[i, ]  <- l_out_ce_temp$Cost  
+  df_e[i, ]  <- l_out_ce_temp$Effect
+  # Epidemiological Measures
+  l_out_epi_temp <- generate_epi_measures_SoC(l_psa_input)
+  df_surv[i, -1] <- l_out_epi_temp$S
+  df_le[i, -1] <- l_out_epi_temp$LE
+  df_prevS1[i, -1] <- l_out_epi_temp$PrevS1
+  df_prevS2[i, -1] <- l_out_epi_temp$PrevS2
+  df_prevS1S2[i, -1] <- l_out_epi_temp$PrevS1S2
   # Display simulation progress
   if (i/(n_sim/100) == round(i/(n_sim/100), 0)) { # display progress every 5%
     cat('\r', paste(i/n_sim * 100, "% done", sep = " "))
@@ -667,19 +696,8 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
              round(n_time_total_psa_series, 2), " ", 
              units(n_time_total_psa_series)))
 
-# ## Run Markov model on each parameter set of PSA input dataset in parallel
-# # Uncomment next section to run in parallel
-# ## Get OS
-# os <- get_os()
-# 
-# no_cores <- parallel::detectCores() - 1
-# 
-# print(paste0("Parallelized PSA on ", os, " using ", no_cores, " cores."))
-# 
-# n_time_init_psa_parallel <- Sys.time()
-# 
 # ## Run parallelized PSA based on OS
-# if(os == "osx"){
+# if (os == "osx") {
 #   # Initialize cluster object
 #   cl <- parallel::makeForkCluster(no_cores)
 #   # Register clusters
@@ -691,11 +709,11 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
 #   }
 #   # Extract costs and effects from the PSA dataset
 #   df_c <- df_ce[, 1:n_str]
-#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   df_e <- df_ce[, (n_str + 1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa_parallel <- Sys.time()
 # }
-# if(os == "windows"){
+# if (os == "windows") {
 #   # Initialize cluster object
 #   cl <- parallel::makeCluster(no_cores)
 #   # Register clusters
@@ -704,18 +722,18 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
 #   # Run parallelized PSA
 #   df_ce <- foreach::foreach(i = 1:n_samp, .combine = rbind,
 #                             .export = ls(globalenv()),
-#                             .packages=c("dampack"),
+#                             .packages = c("dampack"),
 #                             .options.snow = opts) %dopar% {
 #                               l_out_temp <- calculate_ce_out(df_psa_input[i, ])
 #                               df_ce <- c(l_out_temp$Cost, l_out_temp$Effect)
 #                             }
 #   # Extract costs and effects from the PSA dataset
 #   df_c <- df_ce[, 1:n_str]
-#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   df_e <- df_ce[, (n_str + 1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa_parallel <- Sys.time()
 # }
-# if(os == "linux"){
+# if (os == "linux") {
 #   # Initialize cluster object
 #   cl <- parallel::makeCluster(no_cores)
 #   # Register clusters
@@ -727,7 +745,7 @@ print(paste0("PSA with ", scales::comma(n_sim), " simulations run in series in "
 #   }
 #   # Extract costs and effects from the PSA dataset
 #   df_c <- df_ce[, 1:n_str]
-#   df_e <- df_ce[, (n_str+1):(2*n_str)]
+#   df_e <- df_ce[, (n_str + 1):(2*n_str)]
 #   # Register end time of parallelized PSA
 #   n_time_end_psa_parallel <- Sys.time()
 # }
@@ -746,21 +764,26 @@ l_psa <- make_psa_obj(cost          = df_c,
                       parameters    = df_psa_input, 
                       strategies    = v_names_str)
 l_psa$strategies <- v_names_str
-colnames(l_psa$effectiveness)<- v_names_str
-colnames(l_psa$cost)<- v_names_str
+colnames(l_psa$effectiveness) <- v_names_str
+colnames(l_psa$cost) <- v_names_str
 
 #* Vector with willingness-to-pay (WTP) thresholds.
 v_wtp <- seq(0, 200000, by = 5000)
 
 ### Cost-Effectiveness Scatter plot ----
+txtsize <- 13
 #* Function included in "R/Functions.R"; depends on `tidyr` and `ellipse` packages.
 #* The latest version can be found in `dampack` package
-plot.psa(l_psa) +
+gg_scattter <- plot.psa(l_psa, txtsize = txtsize) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
+  scale_y_continuous("Cost (Thousand $)", 
+                     breaks = number_ticks(10),
+                     labels = function(x) x/1000) +
   xlab("Effectiveness (QALYs)") +
   guides(col = guide_legend(nrow = 2)) +
   theme(legend.position = "bottom")
+gg_scattter
 
 ### Incremental cost-effectiveness ratios (ICERs) with probabilistic output ----
 #* Compute expected costs and effects for each strategy from the PSA
@@ -777,7 +800,7 @@ df_cea_psa
 ### Plot cost-effectiveness frontier with probabilistic output ----
 #* Function included in "R/Functions.R"; depends on the `ggplot2`  and `ggrepel` packages.
 #* The latest version can be found in `dampack` package
-plot.icers(df_cea_psa, label = "all", txtsize = 16) +
+plot.icers(df_cea_psa, label = "all", txtsize = txtsize) +
   expand_limits(x = max(table_cea$QALYs) + 0.1) +
   theme(legend.position = c(0.8, 0.2))
 
@@ -787,10 +810,11 @@ ceac_obj <- ceac(wtp = v_wtp, psa = l_psa)
 #* Regions of highest probability of cost-effectiveness for each strategy
 summary(ceac_obj)
 #* CEAC & CEAF plot
-plot.ceac(ceac_obj, txtsize = 16, xlim = c(0, NA)) +
+gg_ceac <- plot.ceac(ceac_obj, txtsize = txtsize, xlim = c(0, NA), n_x_ticks = 14) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
-  theme(legend.position = c(0.82, 0.5))
+  theme(legend.position = c(0.8, 0.48))
+gg_ceac
 
 ## Expected Loss Curves (ELCs) ----
 #* Function included in "R/Functions.R".The latest version can be found in `dampack` package
@@ -798,19 +822,107 @@ elc_obj <- calc_exp_loss(wtp = v_wtp, psa = l_psa)
 elc_obj
 
 #* ELC plot
-plot(elc_obj, log_y = FALSE, txtsize = 16, xlim = c(0, NA), n_x_ticks = 14, 
-     col = "full") +
+gg_elc <- plot.exp_loss(elc_obj, log_y = FALSE, 
+                        txtsize = txtsize, xlim = c(0, NA), n_x_ticks = 14,
+                        col = "full") +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   # geom_point(aes(shape = as.name("Strategy"))) +
   scale_y_continuous("Expected Loss (Thousand $)", 
                      breaks = number_ticks(10),
                      labels = function(x) x/1000) +
-  theme(legend.position = c(0.4, 0.7))
+  theme(legend.position = c(0.4, 0.7),)
+gg_elc
 
 ## Expected value of perfect information (EVPI) ----
 #* Function included in "R/Functions.R". The latest version can be found in `dampack` package
 evpi <- calc_evpi(wtp = v_wtp, psa = l_psa)
 #* EVPI plot
-plot.evpi(evpi, effect_units = "QALY")
+gg_evpi <- plot.evpi(evpi, effect_units = "QALY", 
+                     txtsize = txtsize, xlim = c(0, NA), n_x_ticks = 14) +
+  scale_y_continuous("EVPI (Thousand $)", 
+                     breaks = number_ticks(10),
+                     labels = function(x) x/1000)
+gg_evpi
 
+### Combine all figures into one ----
+patched_cea <- (gg_scattter +  gg_ceac + plot_layout(guides = "keep"))/(gg_elc + gg_evpi)
+gg_psa_plots <- patched_cea + 
+  plot_annotation(tag_levels = 'A')
+gg_psa_plots
+
+## Visualize PSA results for Epidemiological Measures ----
+### Wrangle PSA output ----
+#* Combine prevalence measures 
+df_prev <- dplyr::bind_rows(df_prevS1,
+                            df_prevS2,
+                            df_prevS1S2)
+#* Transform to long format
+df_surv_lng <- reshape2::melt(df_surv, 
+                              id.vars = c("Outcome"), 
+                              # value.name = "Survival",
+                              variable.name = "Time")
+df_prev_lng <- reshape2::melt(df_prev, 
+                              id.vars = c("States"), 
+                              # value.name = "Proportion",
+                              variable.name = "Time")
+#* Compute posterior-predicted 95% CI
+df_surv_summ <- data_summary(df_surv_lng, varname = "value",
+                             groupnames = c("Outcome", "Time"))
+df_le_summ <- data_summary(df_le, varname = "LE",
+                           groupnames = c("Outcome"))
+df_prev_summ <- data_summary(df_prev_lng, varname = "value",
+                             groupnames = c("States", "Time"))
+df_prev_summ$States <- ordered(df_prev_summ$States,
+                               levels = c("S1", "S2", "S1 + S2"))
+
+### Plot epidemiological measures ---
+txtsize_epi <- 16
+#### Survival ---
+gg_surv_psa <- ggplot(df_surv_summ, aes(x = as.numeric(Time), y = value, 
+                                        ymin = lb, ymax = ub)) +
+  geom_line() +
+  geom_ribbon(alpha = 0.4) +
+  scale_x_continuous(breaks = number_ticks(8)) + 
+  xlab("Cycle") +
+  ylab("Proportion alive") +
+  theme_bw(base_size = txtsize_epi) +
+  theme()
+gg_surv_psa
+
+#### Life Expectancy ---
+gg_le_psa <- ggplot(df_le, aes(x = LE)) +
+  geom_density(color = "darkblue", fill = "lightblue") +
+  scale_x_continuous(breaks = number_ticks(8)) + 
+  xlab("Life expectancy") +
+  ylab("") +
+  theme_bw(base_size = txtsize_epi) +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank())
+gg_le_psa
+
+#### Prevalence ---
+gg_prev_psa <- ggplot(df_prev_summ, aes(x = as.numeric(Time), y = value, 
+                                        ymin = lb, ymax = ub,
+                                        color = States, linetype = States, 
+                                        fill = States)) +
+  geom_line() +
+  geom_ribbon(alpha = 0.4, color = NA) +
+  scale_x_continuous(breaks = number_ticks(8)) + 
+  scale_y_continuous(breaks = number_ticks(8),
+                     labels = scales::percent_format(accuracy = 1)) + 
+  scale_color_discrete(name = "Health state", l = 50) +
+  scale_linetype(name = "Health state") +
+  scale_fill_discrete(name = "Health state", l = 50) +
+  xlab("Cycle") +
+  ylab("Prevalence (%)") +
+  theme_bw(base_size = 16) +
+  theme(legend.position = c(0.83, 0.83))
+gg_prev_psa
+
+### Combine all figures into one ----
+patched_epi <- (gg_surv_psa / gg_le_psa) | gg_prev_psa
+gg_psa_epi_plots <- patched_epi + 
+  plot_annotation(tag_levels = 'A')
+gg_psa_epi_plots
