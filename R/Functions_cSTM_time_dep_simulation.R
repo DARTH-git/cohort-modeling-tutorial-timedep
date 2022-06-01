@@ -118,7 +118,7 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     
     #### Run Markov model ####
     ## Iterative solution of age-dependent cSTM
-    for(t in 1:n_cycles){
+    for (t in 1:n_cycles) {
       ## Fill in cohort trace
       # For SoC
       m_M_SoC[t + 1, ]  <- m_M_SoC[t, ]  %*% a_P_SoC[, , t]
@@ -277,7 +277,7 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
       # Add transition cost per cycle due to transition from H to S1
       a_R_c_str["H", "S1", ]      <- a_R_c_str["H", "S1", ]       + ic_HS1
       # Add transition cost  per cycle of dying from all non-dead states
-      a_R_c_str[-n_states, "D", ] <- a_R_c_str[- n_states, "D", ] + ic_D
+      a_R_c_str[-n_states, "D", ] <- a_R_c_str[-n_states, "D", ] + ic_D
       
       #### Expected QALYs and Costs for all transitions per cycle ####
       # QALYs = life years x QoL

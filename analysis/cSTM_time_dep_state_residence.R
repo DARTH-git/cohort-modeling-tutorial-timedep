@@ -650,13 +650,13 @@ colnames(df_e) <- v_names_str
 #* Conduct probabilistic sensitivity analysis
 #* Run Markov model on each parameter set of PSA input dataset
 n_time_init_psa_series <- Sys.time()
-for(i in 1:n_sim){
+for (i in 1:n_sim) {
   l_psa_input <- update_param_list(l_params_all, df_psa_input[i,])
   l_out_temp <- calculate_ce_out(l_psa_input)
   df_c[i, ]  <- l_out_temp$Cost  
   df_e[i, ]  <- l_out_temp$Effect
   # Display simulation progress
-  if(i/(n_sim/100) == round(i/(n_sim/100), 0)) { # display progress every 5%
+  if (i/(n_sim/100) == round(i/(n_sim/100), 0)) { # display progress every 5%
     cat('\r', paste(i/n_sim * 100, "% done", sep = " "))
   }
 }
