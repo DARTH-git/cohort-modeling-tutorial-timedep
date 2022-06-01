@@ -390,7 +390,7 @@ v_r_HDage  <- rep(v_r_mort_by_age, each = 1/cycle_length)
 v_p_HDage  <- 1 - exp(-v_r_HDage * cycle_length) 
 ```
 
-Because mortality in S1 and S2 are relative to background mortality which depends on age,  mortality in S1 and S2 will also be age-dependent. To generate the age-specific mortality in S1 and S2, we multiply the age-specific background mortality rate, `v_r_HDage`, by the constant hazard ratios `hr_S1` and `hr_S2`, respectively. We then convert the resulting age-specific mortality rates to probabilities.
+Because mortality in S1 and S2 are relative to background mortality which depends on age, mortality in S1 and S2 will also be age-dependent. To generate the age-specific mortality in S1 and S2, we multiply the age-specific background mortality rate, `v_r_HDage`, by the constant hazard ratios `hr_S1` and `hr_S2`, respectively. We then convert the resulting age-specific mortality rates to probabilities.
 
 ```{r}
 ## Age-specific mortality rates in the Sick and Sicker states
@@ -676,9 +676,6 @@ a_P_tunnels_trtB <- a_P_tunnels_SoC
 ## Update only transition probabilities from S1 involving v_p_S1S2_tunnels
 for (i in 1:n_tunnel_size) {
   a_P_tunnels_trtB[v_Sick_tunnel[i], "H", ] <- (1 - v_p_S1Dage) * p_S1H
-  # a_P_tunnels_trtB[v_Sick_tunnel[i], 
-  #             v_Sick_tunnel[i + 1], ] <- (1 - v_p_S1Dage) * 
-  #                                        (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
   a_P_tunnels_trtB[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels_trtB[i]
   a_P_tunnels_trtB[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
    if (i == n_tunnel_size) {
