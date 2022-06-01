@@ -93,22 +93,22 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     a_P_tunnels_SoC["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
     a_P_tunnels_SoC["H", "D", ]              <- v_p_HDage
     ## From S1
-    for (i in 1:(n_tunnel_size - 1)) {
+    for (i in 1:n_tunnel_size) {
       a_P_tunnels_SoC[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-      a_P_tunnels_SoC[v_Sick_tunnel[i], 
-                  v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
-        (1 - (p_S1H + v_p_S1S2_tunnels[i]))
       a_P_tunnels_SoC[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
       a_P_tunnels_SoC[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
+      if (i == n_tunnel_size) {
+        # If reaching last tunnel state, ensure that the cohort that does not
+        # transition out of the Sick state, remain in the last Sick tunnel state
+        a_P_tunnels_SoC[v_Sick_tunnel[i],
+                        v_Sick_tunnel[i], ] <- (1 - v_p_S1Dage) *
+          (1 - (p_S1H + v_p_S1S2_tunnels[i]))
+      } else{
+        a_P_tunnels_SoC[v_Sick_tunnel[i], 
+                        v_Sick_tunnel[i + 1], ]   <- (1 - v_p_S1Dage) *
+          (1 - (p_S1H + v_p_S1S2_tunnels[i]))
+      }
     }
-    # repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
-    a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-    a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size],
-                v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) *
-      (1 - (p_S1H + v_p_S1S2_tunnels[n_tunnel_size]))
-    a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) * 
-      v_p_S1S2_tunnels[n_tunnel_size]
-    a_P_tunnels_SoC[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
     ## From S2
     a_P_tunnels_SoC["S2", "S2", ] <- 1 - v_p_S2Dage
     a_P_tunnels_SoC["S2", "D", ]  <- v_p_S2Dage
@@ -123,22 +123,22 @@ decision_model <- function(l_params_all, verbose = FALSE) {
     a_P_tunnels_strB <- a_P_tunnels_SoC
     ## Only need to update the probabilities involving the transition from Sick to Sicker, v_p_S1S2_tunnels
     # From S1
-    for (i in 1:(n_tunnel_size - 1)) {
-      a_P_tunnels_strB[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
-      a_P_tunnels_strB[v_Sick_tunnel[i], 
-                       v_Sick_tunnel[i + 1], ]        <- (1 - v_p_S1Dage) * 
-        (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+    for (i in 1:n_tunnel_size) {
+      a_P_tunnels_strB[v_Sick_tunnel[i], "H", ] <- (1 - v_p_S1Dage) * p_S1H
       a_P_tunnels_strB[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels_trtB[i]
       a_P_tunnels_strB[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
+      if (i == n_tunnel_size) {
+        # If reaching last tunnel state, ensure that the cohort that does not
+        # transition out of the Sick state, remain in the last Sick tunnel state
+        a_P_tunnels_strB[v_Sick_tunnel[i],
+                         v_Sick_tunnel[i], ] <- (1 - v_p_S1Dage) *
+          (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+      } else{
+        a_P_tunnels_strB[v_Sick_tunnel[i], 
+                         v_Sick_tunnel[i + 1], ] <- (1 - v_p_S1Dage) *
+          (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+      }
     }
-    # repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
-    a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "H", ] <- (1 - v_p_S1Dage) * p_S1H
-    a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size],
-                     v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) * 
-      (1 - (p_S1H + v_p_S1S2_tunnels_trtB[n_tunnel_size]))
-    a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) *
-      v_p_S1S2_tunnels_trtB[n_tunnel_size]
-    a_P_tunnels_strB[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
     
     ## Initialize transition probability matrix for strategy AB as a copy of B's
     a_P_tunnels_strAB <- a_P_tunnels_strB
@@ -392,6 +392,35 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
                         NMB      = v_nmb)
     
     return(df_ce)
+  }
+  )
+}
+
+#------------------------------------------------------------------------------#
+####                Generate Epidemiological Measures                       ####
+#------------------------------------------------------------------------------#
+generate_epi_measures_SoC <- function(l_params_all){ # User defined
+  with(as.list(l_params_all), {
+    ### Run decision model to get cohort trace and transition dynamics array
+    model <- decision_model(l_params_all = l_params_all)
+    m_M_SoC <- model$l_m_M$`Standard of care`
+    ## Survival curve
+    v_S_SoC <- rowSums(m_M_SoC[, -which(v_names_states == "D")])
+    ## Life expectancy
+    le <- sum(v_S_SoC)
+    ## Prevalence
+    # Prevalence of Sick
+    v_prev_S1_SoC   <- m_M_SoC[, "S1"] / v_S_SoC
+    # Prevalence of Sicker
+    v_prev_S2_SoC   <- m_M_SoC[, "S2"] / v_S_SoC
+    # Prevalence of Sick and Sicker
+    v_prev_S1S2_SoC <- rowSums(m_M_SoC[, c("S1", "S2")])/v_S_SoC
+    l_out_epi <- list(S  = v_S_SoC,
+                      LE = le,
+                      PrevS1   = v_prev_S1_SoC,
+                      PrevS2   = v_prev_S2_SoC,
+                      PrevS1S2 = v_prev_S1S2_SoC)
+    return(l_out_epi)
   }
   )
 }
