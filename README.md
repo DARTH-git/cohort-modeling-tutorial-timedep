@@ -20,6 +20,11 @@ The release that accompanies the published article has been archived in
 zenodo: <https://zenodo.org/badge/latestdoi/357371663>
 
 The
+[`manuscript`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/manuscript)
+folder includes the RMarkdown files with the text and code to generate
+the tutorial and Supplementary table pdf files. The manuscript RMarkdown
+file does not include all the code for all the analyses for both types
+of time dependence. The
 [`analysis`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/analysis)
 folder includes the scripts with all the code, description and comments
 to reproduce the CEA, probabilistic sensitivity analysis (PSA) and

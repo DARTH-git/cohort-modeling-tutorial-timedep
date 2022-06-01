@@ -13,7 +13,7 @@ This GitHub repository provides the code of the tutorial on how to implement tim
 
 The release that accompanies the published article has been archived in zenodo: https://zenodo.org/badge/latestdoi/357371663
 
-The [`analysis`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/analysis) folder includes the scripts with all the code, description and comments to reproduce the CEA, probabilistic sensitivity analysis (PSA) and generation of epidemiological measures of the manuscript:
+The [`manuscript`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/manuscript) folder includes the RMarkdown files with the text and code to generate the tutorial and Supplementary table pdf files. The manuscript RMarkdown file does not include all the code for all the analyses for both types of time dependence. The [`analysis`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/analysis) folder includes the scripts with all the code, description and comments to reproduce the CEA, probabilistic sensitivity analysis (PSA) and generation of epidemiological measures of the manuscript:
 
    - [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_simulation.R): Code to replicate all simulation-time dependent cSTMs analyses of the manuscript.
    - [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_state_residence.R): Code to replicate all state-residence time dependent cSTMs analyses of the manuscript.
