@@ -2,18 +2,17 @@
 \contentsline {section}{\numberline {2}Simulation-time dependence}{3}{section.2}%
 \contentsline {section}{\numberline {3}Time dependence on state-residence}{4}{section.3}%
 \contentsline {section}{\numberline {4}Case study: a cost-effectiveness analysis using a time-dependent Sick-Sicker model}{5}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Incorporating simulation-time dependence}{8}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Incorporating time dependence on state residence (tunnel states)}{12}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.1}Incorporating simulation-time dependence}{7}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Incorporating time dependence on state residence (tunnel states)}{11}{subsection.4.2}%
 \contentsline {section}{\numberline {5}Economic outcomes}{16}{section.5}%
-\contentsline {subsection}{\numberline {5.1}State rewards}{17}{subsection.5.1}%
-\contentsline {subsubsection}{\numberline {5.1.1}Transition rewards}{18}{subsubsection.5.1.1}%
-\contentsline {subsubsection}{\numberline {5.1.2}Within-cycle correction and discounting future rewards}{20}{subsubsection.5.1.2}%
-\contentsline {section}{\numberline {6}Incremental cost-effectiveness ratios (ICERs)}{20}{section.6}%
-\contentsline {section}{\numberline {7}Probabilistic sensitivity analysis}{21}{section.7}%
-\contentsline {section}{\numberline {8}Epidemiological outcomes}{23}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Survival probability}{24}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Life expectancy}{24}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Prevalence}{24}{subsection.8.3}%
-\contentsline {section}{\numberline {9}Discussion}{25}{section.9}%
-\contentsline {section}{\numberline {10}Acknowledgements}{27}{section.10}%
-\contentsline {section}{References}{27}{section*.2}%
+\contentsline {subsection}{\numberline {5.1}Transition rewards}{16}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Within-cycle correction and discounting future rewards}{18}{subsection.5.2}%
+\contentsline {section}{\numberline {6}Incremental cost-effectiveness ratios (ICERs)}{18}{section.6}%
+\contentsline {section}{\numberline {7}Probabilistic sensitivity analysis}{19}{section.7}%
+\contentsline {section}{\numberline {8}Epidemiological outcomes}{21}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Survival probability}{22}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Life expectancy}{22}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Prevalence}{22}{subsection.8.3}%
+\contentsline {section}{\numberline {9}Discussion}{23}{section.9}%
+\contentsline {section}{\numberline {10}Acknowledgements}{25}{section.10}%
+\contentsline {section}{References}{25}{section*.2}%
