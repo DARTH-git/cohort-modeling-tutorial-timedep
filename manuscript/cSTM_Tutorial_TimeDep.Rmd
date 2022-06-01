@@ -266,7 +266,6 @@ $M$ stores cohort's distribution across states over time. Thus, $M$ can be used 
 # Time dependence on state-residence
 The implementation of state-residence time dependence is more involved than simulation-time dependence. To account for state-residence time dependence, we expand the state of interest with as many transient states as the number of cycles required to track the history of the cohort in that state. For example, if a transition rate decreases over the first three cycles spent in a state and then is constant from the fourth cycle onward, four transient states would be needed for that state. These transient states are often called *tunnel* states, where the cohort resides in each transient state for exactly one cycle, after which they either exit the tunnel or transition to the next tunnel state. The total number of states for a cSTM with tunnels is $n_{S_\text{tunnels}} = n_S + n_{\text{tunnels}} - 1$, where $n_{\text{tunnels}}$ is the total number of times a health state needs to be expanded to capture the relevant residence-time dependence. We subtract one because the original state is replaced by the $n_{\text{tunnels}}$ tunnel states. The transition probability matrix also needs to be expanded to incorporate these additional transient states, resulting in a transition probability matrix of dimensions $n_{S_\text{tunnels}} \times n_{S_\text{tunnels}}$.  If the transition probabilities are also dependent on simulation time, as described in the previous section, we need to expand to a 3-dimensional transition array, with dimensions \(n_{S_\text{tunnels}} \times n_{S_\text{tunnels}} \times n_T\). 
 
-<!-- The transition probability with tunnels is populated similarly to the simulation-time dependence case for all states with no state-residence time-dependence with three main differences that involve the state or states that can transition to or from the state expanded with tunnels. Filling these transition probabilities requires iterating over the tunnel states up until the second to last tunnel state because it is the last time for which transitions between two contiguous states are allowed. For the cohort in the last tunnel state that does not transition to other states, we ensure they stay in that state at the end of the simulation, as described in Algorithm \@ref(alg:fill-tunnels). -->
 The algorithm below (Algorithm \@ref(alg:fill-tunnels)) describes populating the transition probability array for state-residence time-dependent cSTMs. 
 
 \begin{algorithm}
@@ -295,7 +294,7 @@ The algorithm below (Algorithm \@ref(alg:fill-tunnels)) describes populating the
 
 The transition probability array with tunnels is populated similarly to the simulation-time dependence case. However, we need a different approach for the state expanded with tunnel states and any state(s) with transitions to or from the tunnel. Filling in the transition probabilities for these states requires iterating through the tunnel states. There is typically some probability that the cohort remains in that state in the last tunnel state, like for other non-transient states. Here we only discuss models with a single tunnel. The same principles can be applied for adding more tunnels as needed.  
 
-Table \@ref(tab:Timedep-cSTM-components-table) describes the core components of time-dependent cSTMs and their suggested R code names. The Supplementary Material contains a more detailed description of these components, including their R data structure and dimensions.
+Table \@ref(tab:Timedep-cSTM-components-table) describes the core components of time-dependent cSTMs and their suggested R code names. The Supplementary Material contains a more detailed description of these components with their variable types, including their R data structure and dimensions.
 
 
 Table: (\#tab:Timedep-cSTM-components-table) Core components of time-dependent cSTMs with their R name.
@@ -311,8 +310,6 @@ Table: (\#tab:Timedep-cSTM-components-table) Core components of time-dependent c
 | $n_{\text{tunnels}}$| Number of tunnel states | `n_tunnel_size`|   |
 | $n_{S_{\text{tunnels}}}$| Number of states including tunnel states | `n_states_tunnels` |   |
 | $\mathbf{m}_{\text{tunnels}_0}$| Initial state vector for the model with tunnel states | `v_m_init_tunnels` |   |
-
-For a more detailed description of these components with their variable types, data structure, R name, and initialization of the input parameters, please see the Supplemental Material.
 
 # Case study: a cost-effectiveness analysis using a time-dependent Sick-Sicker model
 
@@ -546,7 +543,7 @@ ggplot(melt(m_M_SoC), aes(x = Var1, y = value,
 ```
 
 ## Incorporating time dependence on state residence (tunnel states)
-Here, we add the dependence on state-residence to the simulation-time-dependent Sick-Sicker model defined above. We assume the risk of progression from S1 to S2 increases as a function of the time $\tau = 1, \ldots, n_{\text{tunnels}}$ the cohort remains in the S1 state. This increase follows a Weibull hazard function, $h(\tau)$, defined as
+We add the dependence on state-residence to the simulation-time-dependent Sick-Sicker model defined above. We assume the risk of progression from S1 to S2 increases as a function of the time $\tau = 1, \ldots, n_{\text{tunnels}}$ the cohort remains in the S1 state. This increase follows a Weibull hazard function, $h(\tau)$, defined as
 $$
   h(\tau) = \gamma \lambda (\lambda \tau)^{\gamma-1},
 $$
@@ -587,7 +584,7 @@ Figure \@ref(fig:STD-Sick-Sicker-tunnels) shows the state-transition diagram of 
 knitr::include_graphics("figs/Figure 3 - Sick-Sicker-with-tunnels.png")
 ```
 
-To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables `v_Sick_tunnel` and `v_names_states_tunnels` with the names of the  Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \@ref(tab:Timedep-cSTM-components-table).
+To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables `v_Sick_tunnel` and `v_names_states_tunnels` with the names of the  Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Tables \@ref(tab:Timedep-cSTM-components-table) and \@ref(tab:param-table).
 
 ```{r}
 ## Number of tunnels
@@ -677,22 +674,25 @@ v_p_S1S2_tunnels_trtB <- 1 - exp(-v_r_S1S2_tunnels_trtB*cycle_length)
 ## Initialize transition probability array for Treatment B
 a_P_tunnels_trtB <- a_P_tunnels_SoC
 ## Update only transition probabilities from S1 involving v_p_S1S2_tunnels
-for(i in 1:(n_tunnel_size - 1)){
+for (i in 1:n_tunnel_size) {
   a_P_tunnels_trtB[v_Sick_tunnel[i], "H", ] <- (1 - v_p_S1Dage) * p_S1H
-  a_P_tunnels_trtB[v_Sick_tunnel[i], 
-              v_Sick_tunnel[i + 1], ] <- (1 - v_p_S1Dage) * 
-                                         (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+  # a_P_tunnels_trtB[v_Sick_tunnel[i], 
+  #             v_Sick_tunnel[i + 1], ] <- (1 - v_p_S1Dage) * 
+  #                                        (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
   a_P_tunnels_trtB[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels_trtB[i]
   a_P_tunnels_trtB[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
+   if (i == n_tunnel_size) {
+    # If reaching last tunnel state, ensure that the cohort that does not
+    # transition out of the Sick state, remain in the last Sick tunnel state
+    a_P_tunnels_trtB[v_Sick_tunnel[i],
+                     v_Sick_tunnel[i], ] <- (1 - v_p_S1Dage) *
+                                            (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+  } else{
+    a_P_tunnels_trtB[v_Sick_tunnel[i], 
+                     v_Sick_tunnel[i + 1], ] <- (1 - v_p_S1Dage) *
+                                                (1 - (p_S1H + v_p_S1S2_tunnels_trtB[i]))
+  }
 }
-# repeat code for the last cycle to force the cohort stay in the last tunnel state of Sick
-a_P_tunnels_trtB[v_Sick_tunnel[n_tunnel_size], "H", ] <- (1 - v_p_S1Dage) * p_S1H
-a_P_tunnels_trtB[v_Sick_tunnel[n_tunnel_size],
-            v_Sick_tunnel[n_tunnel_size], ] <- (1 - v_p_S1Dage) * 
-                                               (1 - (p_S1H +v_p_S1S2_tunnels_trtB[n_tunnel_size]))
-a_P_tunnels_trtB[v_Sick_tunnel[n_tunnel_size], "S2", ] <- (1 - v_p_S1Dage) *
-                                                           v_p_S1S2_tunnels_trtB[n_tunnel_size]
-a_P_tunnels_trtB[v_Sick_tunnel[n_tunnel_size], "D", ]  <- v_p_S1Dage
 ```
 
 Again, we check the three-dimensional transition probability array with tunnels is valid using the `darthtools` package.
@@ -735,7 +735,7 @@ We then use the matrix product, similar to the simulation-time-dependent cSTM, t
 
 ```{r Sick-Sicker-TimeDependent-Tunnels-Solution, echo=FALSE}
 # Iterative solution of state-residence-dependent cSTM
-for(t in 1:n_cycles){
+for (t in 1:n_cycles) {
   # For SoC
   m_M_tunnels_SoC[t + 1, ] <- m_M_tunnels_SoC[t, ] %*% a_P_tunnels_SoC[, , t]
   # Under Treatment B
@@ -750,7 +750,7 @@ for(t in 1:n_cycles){
 }
 ```
 
-To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D states under SoC, we aggregate over the S1 tunnel states in each cycle. The complete code for all the strategies is included in the Supplemental Material.
+To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D states under SoC, we aggregate over the S1 tunnel states in each cycle. The complete code for all the strategies is included in the Supplementary Material.
 
 ```{r}
 # Create aggregated trace
@@ -1109,7 +1109,7 @@ kable(table_cea,
 
 ```{r Sick-Sicker-CEA-AgeDep, echo=FALSE, fig.cap='Cost-effectiveness efficient frontier of all four strategies for the simulation-time-dependent Sick-Sicker model.', message=FALSE, warning=FALSE, fig.pos="H", dev = c('png', 'pdf', 'jpeg'), dpi = 900} 
 plot(df_cea, label = "all", txtsize = 16) +
-  expand_limits(x = c(NA, 21.5)) +
+  expand_limits(x = max(table_cea$QALYs) + 0.1) +
   theme(legend.position = c(0.8, 0.2))
 ```
 
@@ -1159,7 +1159,7 @@ df_prevS1S2 <- data.frame(States = "S1 + S2",
 ```{r PSA-run, eval=TRUE, echo=FALSE, cache=TRUE, message=FALSE, warning=FALSE}
 ## Conduct probabilistic sensitivity analysis
 # Run Markov model on each parameter set of PSA input dataset
-for(i in 1:n_sim){
+for (i in 1:n_sim) {
   l_psa_input <- update_param_list(l_params_all, df_psa_input[i, ])
   # Economics Measures
   l_out_ce_temp  <- calculate_ce_out(l_psa_input)

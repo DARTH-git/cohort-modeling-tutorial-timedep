@@ -252,7 +252,7 @@ The algorithm below (Algorithm \ref{alg:fill-tunnels}) describes populating the 
 
 The transition probability array with tunnels is populated similarly to the simulation-time dependence case. However, we need a different approach for the state expanded with tunnel states and any state(s) with transitions to or from the tunnel. Filling in the transition probabilities for these states requires iterating through the tunnel states. There is typically some probability that the cohort remains in that state in the last tunnel state, like for other non-transient states. Here we only discuss models with a single tunnel. The same principles can be applied for adding more tunnels as needed.
 
-Table \ref{tab:Timedep-cSTM-components-table} describes the core components of time-dependent cSTMs and their suggested R code names. The Supplementary Material contains a more detailed description of these components, including their R data structure and dimensions.
+Table \ref{tab:Timedep-cSTM-components-table} describes the core components of time-dependent cSTMs and their suggested R code names. The Supplementary Material contains a more detailed description of these components with their variable types, including their R data structure and dimensions.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.19}}
@@ -279,8 +279,6 @@ Element & Description & R name & \\
 \(\mathbf{m}_{\text{tunnels}_0}\) & Initial state vector for the model with tunnel states & \texttt{v\_m\_init\_tunnels} & \\
 \bottomrule
 \end{longtable}
-
-For a more detailed description of these components with their variable types, data structure, R name, and initialization of the input parameters, please see the Supplemental Material.
 
 \hypertarget{case-study-a-cost-effectiveness-analysis-using-a-time-dependent-sick-sicker-model}{%
 \section{Case study: a cost-effectiveness analysis using a time-dependent Sick-Sicker model}\label{case-study-a-cost-effectiveness-analysis-using-a-time-dependent-sick-sicker-model}}
@@ -497,7 +495,7 @@ The state vector of the cohort's distribution at cycle \(t+1\) is obtained by ap
 \hypertarget{incorporating-time-dependence-on-state-residence-tunnel-states}{%
 \subsection{Incorporating time dependence on state residence (tunnel states)}\label{incorporating-time-dependence-on-state-residence-tunnel-states}}
 
-Here, we add the dependence on state-residence to the simulation-time-dependent Sick-Sicker model defined above. We assume the risk of progression from S1 to S2 increases as a function of the time \(\tau = 1, \ldots, n_{\text{tunnels}}\) the cohort remains in the S1 state. This increase follows a Weibull hazard function, \(h(\tau)\), defined as
+We add the dependence on state-residence to the simulation-time-dependent Sick-Sicker model defined above. We assume the risk of progression from S1 to S2 increases as a function of the time \(\tau = 1, \ldots, n_{\text{tunnels}}\) the cohort remains in the S1 state. This increase follows a Weibull hazard function, \(h(\tau)\), defined as
 \[
   h(\tau) = \gamma \lambda (\lambda \tau)^{\gamma-1},
 \]
@@ -543,7 +541,7 @@ Figure \ref{fig:STD-Sick-Sicker-tunnels} shows the state-transition diagram of t
 \caption{State-transition diagram of the Sick-Sicker model with tunnel states expanding the Sick state ($S1_1, S1_2,...,S1_{n_{\text{tunnels}}}$). The circles represent the health states, and the arrows represent the possible transition probabilities. The labels next to the arrows represent the variable names for these transitions.}\label{fig:STD-Sick-Sicker-tunnels}
 \end{figure}
 
-To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables \texttt{v\_Sick\_tunnel} and \texttt{v\_names\_states\_tunnels} with the names of the Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Table \ref{tab:Timedep-cSTM-components-table}.
+To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables \texttt{v\_Sick\_tunnel} and \texttt{v\_names\_states\_tunnels} with the names of the Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Tables \ref{tab:Timedep-cSTM-components-table} and \ref{tab:param-table}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -657,7 +655,7 @@ We then use the matrix product, similar to the simulation-time-dependent cSTM, t
 \end{Highlighting}
 \end{Shaded}
 
-To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D states under SoC, we aggregate over the S1 tunnel states in each cycle. The complete code for all the strategies is included in the Supplemental Material.
+To compute a summarized cohort trace to capture occupancy in the H, S1, S2, D states under SoC, we aggregate over the S1 tunnel states in each cycle. The complete code for all the strategies is included in the Supplementary Material.
 
 \begin{Shaded}
 \begin{Highlighting}[]
