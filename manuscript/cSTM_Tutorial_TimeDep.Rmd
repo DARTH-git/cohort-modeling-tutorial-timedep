@@ -345,8 +345,8 @@ Table: (\#tab:param-table) Description of parameters, their R variable name, bas
 | - Time-independent disease progression (S1 to S2) | `r_S1S2` |  0.105 | gamma(84, 800) |
 | - Time-dependent disease progression (S1 to S2) | `v_r_S1S2_tunnels` | | |
 |   &nbsp;&nbsp;&nbsp;&nbsp;Weibull parameters |         |               | |
-|   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scale ($\lambda$) | `r_S1S2_scale` |  0.08 | lognormal(log(0.08), 0.02) |
-|   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shape ($\gamma$)  | `r_S1S2_shape` |  1.10 | lognormal(log(1.10), 0.05) |
+|   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Scale ($\lambda$) | `r_S1S2_scale` |  0.08 | MVLN($\mu=(0.08, 1.10)$,  |
+|   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shape ($\gamma$)  | `r_S1S2_shape` |  1.10 | $\sigma=(0.02, 0.05)$, $\rho=0.5$)|
 | Annual mortality                   |             |               |                |
 | - Age-dependent background mortality rate (H to D)| `v_r_HDage`    |  age-specific |  - |
 | - Hazard ratio of death in S1 vs H | `hr_S1`     |  3.0          | lognormal(log(3.0), 0.01) |
@@ -522,7 +522,7 @@ The code below iteratively computes the cohort's distribution across health stat
 
 ```{r Sick-Sicker-TimeDependent-Solution, echo=FALSE}
 # Iterative solution of age-dependent cSTM
-for(t in 1:n_cycles){
+for (t in 1:n_cycles) {
   # For SoC
   m_M_SoC[t + 1, ] <- m_M_SoC[t, ] %*% a_P_SoC[, , t]
   # For Strategy A
@@ -652,11 +652,11 @@ a_P_tunnels_SoC["H", "H", ]              <- (1 - v_p_HDage) * (1 - p_HS1)
 a_P_tunnels_SoC["H", v_Sick_tunnel[1], ] <- (1 - v_p_HDage) * p_HS1
 a_P_tunnels_SoC["H", "D", ]              <- v_p_HDage
 ## From S1
-for(i in 1:n_tunnel_size){
+for (i in 1:n_tunnel_size) {
   a_P_tunnels_SoC[v_Sick_tunnel[i], "H", ]  <- (1 - v_p_S1Dage) * p_S1H
   a_P_tunnels_SoC[v_Sick_tunnel[i], "S2", ] <- (1 - v_p_S1Dage) * v_p_S1S2_tunnels[i]
   a_P_tunnels_SoC[v_Sick_tunnel[i], "D", ]  <- v_p_S1Dage
-  if(i == n_tunnel_size){
+  if (i == n_tunnel_size) {
     # If reaching last tunnel state, ensure that the cohort that does not
     # transition out of the Sick state, remain in the last Sick tunnel state
     a_P_tunnels_SoC[v_Sick_tunnel[i],

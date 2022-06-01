@@ -156,7 +156,7 @@
 
 \title{A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example}
 \author{Fernando Alarid-Escudero, PhD\footnote{Division of Public Administration, Center for Research and Teaching in Economics (CIDE), Aguascalientes, AGS, Mexico} \and Eline Krijkamp, MSc\footnote{Department of Epidemiology, Erasmus University Medical Center, Rotterdam, The Netherlands} \and Eva A. Enns, PhD\footnote{Division of Health Policy and Management, University of Minnesota School of Public Health, Minneapolis, MN, USA} \and Alan Yang, MSc\footnote{The Hospital for Sick Children, Toronto} \and Myriam G.M. Hunink, PhD\(^\dagger\)\footnote{Center for Health Decision Sciences, Harvard T.H. Chan School of Public Health, Boston, USA} \and Petros Pechlivanoglou, PhD\footnote{The Hospital for Sick Children, Toronto and University of Toronto, Toronto, Ontario, Canada} \and Hawre Jalal, MD, PhD\footnote{University of Ottawa, Ottawa, ON, Canada}}
-\date{2022-05-31}
+\date{2022-06-01}
 
 \begin{document}
 \maketitle
@@ -322,8 +322,8 @@ Annual transition rates & & & \\
 - Time-independent disease progression (S1 to S2) & \texttt{r\_S1S2} & 0.105 & gamma(84, 800) \\
 - Time-dependent disease progression (S1 to S2) & \texttt{v\_r\_S1S2\_tunnels} & & \\
 ~~~~Weibull parameters & & & \\
-~~~~~~~~Scale (\(\lambda\)) & \texttt{r\_S1S2\_scale} & 0.08 & lognormal(log(0.08), 0.02) \\
-~~~~~~~~Shape (\(\gamma\)) & \texttt{r\_S1S2\_shape} & 1.10 & lognormal(log(1.10), 0.05) \\
+~~~~~~~~Scale (\(\lambda\)) & \texttt{r\_S1S2\_scale} & 0.08 & MVLN(\(\mu=(0.08, 1.10)\), \\
+~~~~~~~~Shape (\(\gamma\)) & \texttt{r\_S1S2\_shape} & 1.10 & \(\sigma=(0.02, 0.05)\), \(\rho=0.5\)) \\
 Annual mortality & & & \\
 - Age-dependent background mortality rate (H to D) & \texttt{v\_r\_HDage} & age-specific & - \\
 - Hazard ratio of death in S1 vs H & \texttt{hr\_S1} & 3.0 & lognormal(log(3.0), 0.01) \\
@@ -635,11 +635,11 @@ Filling \texttt{a\_P\_tunnels\_SoC} with the corresponding transition probabilit
 \NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"H"}\NormalTok{, v\_Sick\_tunnel[}\DecValTok{1}\NormalTok{], ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_HDage) }\SpecialCharTok{*}\NormalTok{ p\_HS1}
 \NormalTok{a\_P\_tunnels\_SoC[}\StringTok{"H"}\NormalTok{, }\StringTok{"D"}\NormalTok{, ]              }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_HDage}
 \DocumentationTok{\#\# From S1}
-\ControlFlowTok{for}\NormalTok{(i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_tunnel\_size)\{}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{n\_tunnel\_size) \{}
 \NormalTok{  a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i], }\StringTok{"H"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ p\_S1H}
 \NormalTok{  a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i], }\StringTok{"S2"}\NormalTok{, ] }\OtherTok{\textless{}{-}}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{{-}}\NormalTok{ v\_p\_S1Dage) }\SpecialCharTok{*}\NormalTok{ v\_p\_S1S2\_tunnels[i]}
 \NormalTok{  a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i], }\StringTok{"D"}\NormalTok{, ]  }\OtherTok{\textless{}{-}}\NormalTok{ v\_p\_S1Dage}
-  \ControlFlowTok{if}\NormalTok{(i }\SpecialCharTok{==}\NormalTok{ n\_tunnel\_size)\{}
+  \ControlFlowTok{if}\NormalTok{ (i }\SpecialCharTok{==}\NormalTok{ n\_tunnel\_size) \{}
     \CommentTok{\# If reaching last tunnel state, ensure that the cohort that does not}
     \CommentTok{\# transition out of the Sick state, remain in the last Sick tunnel state}
 \NormalTok{    a\_P\_tunnels\_SoC[v\_Sick\_tunnel[i],}
@@ -711,9 +711,9 @@ To add state rewards to the Sick-Sicker model, we first create a vector of utili
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Vector of state utilities under SoC}
-\NormalTok{v\_u\_SoC }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =}\NormalTok{ u\_H, }\AttributeTok{S1 =}\NormalTok{ u\_S1, }\AttributeTok{S2 =}\NormalTok{ u\_S2, }\AttributeTok{D =}\NormalTok{ u\_D)}
+\NormalTok{v\_u\_SoC }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =}\NormalTok{ u\_H, }\AttributeTok{S1 =}\NormalTok{ u\_S1, }\AttributeTok{S2 =}\NormalTok{ u\_S2, }\AttributeTok{D =}\NormalTok{ u\_D) }\SpecialCharTok{*}\NormalTok{ cycle\_length}
 \CommentTok{\# Vector of state costs under SoC}
-\NormalTok{v\_c\_SoC }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =}\NormalTok{ c\_H, }\AttributeTok{S1 =}\NormalTok{ c\_S1, }\AttributeTok{S2 =}\NormalTok{ c\_S2, }\AttributeTok{D =}\NormalTok{ c\_D)}
+\NormalTok{v\_c\_SoC }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =}\NormalTok{ c\_H, }\AttributeTok{S1 =}\NormalTok{ c\_S1, }\AttributeTok{S2 =}\NormalTok{ c\_S2, }\AttributeTok{D =}\NormalTok{ c\_D) }\SpecialCharTok{*}\NormalTok{ cycle\_length}
 \end{Highlighting}
 \end{Shaded}
 
@@ -722,7 +722,7 @@ We account for the benefits and costs of both treatments individually and their 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Vector of state utilities for Strategy A}
-\NormalTok{v\_u\_strA }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =}\NormalTok{ u\_H, }\AttributeTok{S1 =}\NormalTok{ u\_trtA, }\AttributeTok{S2 =}\NormalTok{ u\_S2, }\AttributeTok{D =}\NormalTok{ u\_D)}
+\NormalTok{v\_u\_strA }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H =}\NormalTok{ u\_H, }\AttributeTok{S1 =}\NormalTok{ u\_trtA, }\AttributeTok{S2 =}\NormalTok{ u\_S2, }\AttributeTok{D =}\NormalTok{ u\_D) }\SpecialCharTok{*}\NormalTok{ cycle\_length}
 \CommentTok{\# Vector of state utilities for Strategy B}
 \NormalTok{v\_u\_strB }\OtherTok{\textless{}{-}}\NormalTok{ v\_u\_SoC}
 \CommentTok{\# Vector of state utilities for Strategy AB}
@@ -738,17 +738,17 @@ Both treatments A and B incur a cost. To create the vector of state costs for St
 \NormalTok{v\_c\_strA }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H  =}\NormalTok{ c\_H, }
               \AttributeTok{S1 =}\NormalTok{ c\_S1 }\SpecialCharTok{+}\NormalTok{ c\_trtA, }
               \AttributeTok{S2 =}\NormalTok{ c\_S2 }\SpecialCharTok{+}\NormalTok{ c\_trtA, }
-              \AttributeTok{D  =}\NormalTok{ c\_D)}
+              \AttributeTok{D  =}\NormalTok{ c\_D) }\SpecialCharTok{*}\NormalTok{ cycle\_length}
 \CommentTok{\# Vector of state costs for Strategy B}
 \NormalTok{v\_c\_strB }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H  =}\NormalTok{ c\_H, }
               \AttributeTok{S1 =}\NormalTok{ c\_S1 }\SpecialCharTok{+}\NormalTok{ c\_trtB, }
               \AttributeTok{S2 =}\NormalTok{ c\_S2 }\SpecialCharTok{+}\NormalTok{ c\_trtB, }
-              \AttributeTok{D  =}\NormalTok{ c\_D)}
+              \AttributeTok{D  =}\NormalTok{ c\_D) }\SpecialCharTok{*}\NormalTok{ cycle\_length}
 \CommentTok{\# Vector of state costs for Strategy AB}
 \NormalTok{v\_c\_strAB }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{H  =}\NormalTok{ c\_H, }
                \AttributeTok{S1 =}\NormalTok{ c\_S1 }\SpecialCharTok{+}\NormalTok{ (c\_trtA }\SpecialCharTok{+}\NormalTok{ c\_trtB), }
                \AttributeTok{S2 =}\NormalTok{ c\_S2 }\SpecialCharTok{+}\NormalTok{ (c\_trtA }\SpecialCharTok{+}\NormalTok{ c\_trtB), }
-               \AttributeTok{D  =}\NormalTok{ c\_D)}
+               \AttributeTok{D  =}\NormalTok{ c\_D) }\SpecialCharTok{*}\NormalTok{ cycle\_length}
 \end{Highlighting}
 \end{Shaded}
 
