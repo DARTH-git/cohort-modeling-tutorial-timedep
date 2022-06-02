@@ -584,7 +584,7 @@ Figure \@ref(fig:STD-Sick-Sicker-tunnels) shows the state-transition diagram of 
 knitr::include_graphics("figs/Figure 3 - Sick-Sicker-with-tunnels.png")
 ```
 
-To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables `v_Sick_tunnel` and `v_names_states_tunnels` with the names of the  Sick tunnel states' and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Tables \@ref(tab:Timedep-cSTM-components-table) and \@ref(tab:param-table).
+To implement state-residence dependence in the Sick-Sicker cSTM, we create the vector variables `v_Sick_tunnel` and `v_names_states_tunnels` with the names of the  Sick tunnel states and all the states of the cSTM, including tunnels, respectively, and use the parameters listed in Tables \@ref(tab:Timedep-cSTM-components-table) and \@ref(tab:param-table).
 
 ```{r}
 ## Number of tunnels
@@ -1365,7 +1365,7 @@ v_prev_S1S2_SoC <- rowSums(m_M_SoC[, c("S1", "S2")])/v_S_SoC # prevalence of Sic
 ```
 
 
-```{r PSA-EPI-figures, echo=FALSE, fig.cap='Epidemiological outcomes generated from the probabilistic sensitivity analysis (PSA) output for the simulation-time dependent cSTM. A) Survival curve. B) Density of life expectancy. C) Prevalence of sick states over time. The shaded area in A and C shows the 95\\% posterior model-predictive interval of the outcomes and colored lines shows the posterior model-predicted mean based on 1,000 simulations.', message=FALSE, warning=FALSE, fig.pos="H", fig.width=11, fig.height=8, dev = c('png', 'pdf', 'jpeg'), dpi = 900} 
+```{r PSA-EPI-figures, echo=FALSE, fig.cap='Epidemiological outcomes generated from the probabilistic sensitivity analysis (PSA) output for the simulation-time dependent cSTM. A) Survival curve. B) Density of life expectancy. C) Prevalence of sick states over time. The shaded area in A and C shows the 95\\% posterior model-predictive interval of the outcomes and colored lines show the posterior model-predicted mean based on 1,000 simulations.', message=FALSE, warning=FALSE, fig.pos="H", fig.width=11, fig.height=8, dev = c('png', 'pdf', 'jpeg'), dpi = 900} 
 patched_epi <- (gg_surv_psa / gg_le_psa) | gg_prev_psa
 gg_psa_epi_plots <- patched_epi + 
   plot_annotation(tag_levels = 'A')
