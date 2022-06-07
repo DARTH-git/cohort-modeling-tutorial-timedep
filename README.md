@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-[![DOI](https://zenodo.org/badge/357371663.svg)](https://zenodo.org/badge/latestdoi/357371663)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6620902.svg)](https://doi.org/10.5281/zenodo.6620902)
 
 # A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example
 
@@ -17,7 +17,7 @@ following manuscript:
     2022:1-37.
 
 The release that accompanies the published article has been archived in
-zenodo: <https://zenodo.org/badge/latestdoi/357371663>
+zenodo: <https://zenodo.org/badge/latestdoi/6620902>
 
 The
 [`manuscript`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/manuscript)
@@ -69,10 +69,10 @@ accessed’ date):
 > 2022:1-37.
 
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
-> Pechlivanoglou P, Jalal H (2021). R Code for A Tutorial on
+> Pechlivanoglou P, Jalal H (2022). R Code for A Tutorial on
 > Time-Dependent Cohort State-Transition Models in R using a
-> Cost-Effectiveness Analysis Example (Version v0.1.0). Zenodo.
-> [10.5281/zenodo.5338819](https://www.doi.org/10.5281/zenodo.5338819).
+> Cost-Effectiveness Analysis Example (Version v0.2.0). Zenodo.
+> [10.5281/zenodo.6620902](https://www.doi.org/10.5281/zenodo.6620902).
 > Last accessed 7 June 2022.
 
 If you adapted the code, you should indicate “Adapted from:” or “Based
