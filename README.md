@@ -29,10 +29,13 @@ zenodo: <https://zenodo.org/badge/latestdoi/6620902>
 
 The
 [`manuscript`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/manuscript)
-folder includes the RMarkdown files with the text and code to generate
-the tutorial and Supplementary table pdf files. The manuscript RMarkdown
-file does not include all the code for all the analyses for both types
-of time dependence. The
+folder includes the RMarkdown files
+[`cSTM_Tutorial_TimeDep.Rmd`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/manuscript/cSTM_Tutorial_TimeDep.Rmd)
+and
+[`Appendix_table_Markov_Tutorial_Part2.Rmd`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/manuscript/Appendix_table_Markov_Tutorial_Part2.Rmd)
+with the text and code to generate the tutorial and Supplementary table
+pdf files, respectively. The manuscript RMarkdown file does not include
+all the code for all the analyses for both types of time dependence. The
 [`analysis`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/analysis)
 folder includes the scripts with all the code, description and comments
 to reproduce the CEA, probabilistic sensitivity analysis (PSA) and
