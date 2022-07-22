@@ -11,6 +11,14 @@ using a cost-effectiveness analysis (CEA) example, explained in the
 following manuscript:
 
 -   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
+    Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort
+    State-Transition Models in R using a Cost-Effectiveness Analysis
+    Example. [Medical Decision
+    Making](https://journals.sagepub.com/home/mdm). 2022 (In press).
+
+and its corresponding pre-print:
+
+-   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
     Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
     State-Transition Models in R using a Cost-Effectiveness Analysis
     Example](https://arxiv.org/abs/2108.13552). arXiv:2108.13552v2.
@@ -30,10 +38,10 @@ folder includes the scripts with all the code, description and comments
 to reproduce the CEA, probabilistic sensitivity analysis (PSA) and
 generation of epidemiological measures of the manuscript:
 
--   [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_simulation.R):
+-   [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_simulation.R):
     Code to replicate all simulation-time dependent cSTMs analyses of
     the manuscript.
--   [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_state_residence.R):
+-   [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_state_residence.R):
     Code to replicate all state-residence time dependent cSTMs analyses
     of the manuscript.
 
@@ -65,8 +73,7 @@ accessed’ date):
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort
 > State-Transition Models in R using a Cost-Effectiveness Analysis
-> Example (<https://arxiv.org/abs/2108.13552>). arXiv:2108.13552v2.
-> 2022:1-37.
+> Example. Medical Decision Making. 2022 (In press).
 
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H (2022). R Code for A Tutorial on

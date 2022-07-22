@@ -9,14 +9,18 @@ output: github_document
 
 This GitHub repository provides the code of the tutorial on how to implement time-dependent cohort state-transition models (cSTMs) in R using a cost-effectiveness analysis (CEA) example, explained in the following manuscript: 
 
+- Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example. [Medical Decision Making](https://journals.sagepub.com/home/mdm). 2022 (In press).
+
+and its corresponding pre-print: 
+
 - Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example](https://arxiv.org/abs/2108.13552). arXiv:2108.13552v2. 2022:1-37.
 
 The release that accompanies the published article has been archived in zenodo: https://zenodo.org/badge/latestdoi/6620902
 
 The [`manuscript`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/manuscript) folder includes the RMarkdown files with the text and code to generate the tutorial and Supplementary table pdf files. The manuscript RMarkdown file does not include all the code for all the analyses for both types of time dependence. The [`analysis`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/analysis) folder includes the scripts with all the code, description and comments to reproduce the CEA, probabilistic sensitivity analysis (PSA) and generation of epidemiological measures of the manuscript:
 
-   - [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_simulation.R): Code to replicate all simulation-time dependent cSTMs analyses of the manuscript.
-   - [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/cSTM_time_dep_state_residence.R): Code to replicate all state-residence time dependent cSTMs analyses of the manuscript.
+   - [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_simulation.R): Code to replicate all simulation-time dependent cSTMs analyses of the manuscript.
+   - [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_state_residence.R): Code to replicate all state-residence time dependent cSTMs analyses of the manuscript.
 
 The R scripts require loading functions that synthesize cSTMs outputs and conduct several sensitivity analyses included in the [`R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/R) folder:
 
@@ -28,7 +32,7 @@ The R scripts require loading functions that synthesize cSTMs outputs and conduc
 
 You can cite the R code in this repository like this "we based our analysis using the R code from Alarid-Escudero F et al. (2022)". Here is the full bibliographic reference to include in your reference list for the manuscript and the R code (don't forget to update the 'last accessed' date):
 
-> Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example (https://arxiv.org/abs/2108.13552). arXiv:2108.13552v2. 2022:1-37.
+> Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example. Medical Decision Making. 2022 (In press).
 
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM, Pechlivanoglou P, Jalal H (2022). R Code for A Tutorial on Time-Dependent Cohort State-Transition Models in R using a Cost-Effectiveness Analysis Example (Version v0.2.0). Zenodo. [10.5281/zenodo.6620902](https://www.doi.org/10.5281/zenodo.6620902). Last accessed 7 June 2022.
 
