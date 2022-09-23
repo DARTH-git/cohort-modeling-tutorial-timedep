@@ -11,10 +11,11 @@ using a cost-effectiveness analysis (CEA) example, explained in the
 following manuscript:
 
 -   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
-    Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort
+    Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
     State-Transition Models in R using a Cost-Effectiveness Analysis
-    Example. [Medical Decision
-    Making](https://journals.sagepub.com/home/mdm). 2022 (In press).
+    Example](https://journals.sagepub.com/doi/full/10.1177/0272989X221121747).
+    [Medical Decision Making](https://journals.sagepub.com/home/mdm).
+    2022 (Online First): <https://doi.org/10.1177/0272989X221121747>
 
 and its corresponding pre-print:
 
