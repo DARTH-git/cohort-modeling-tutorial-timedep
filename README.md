@@ -10,20 +10,20 @@ implement time-dependent cohort state-transition models (cSTMs) in R
 using a cost-effectiveness analysis (CEA) example, explained in the
 following manuscript:
 
--   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
-    Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
-    State-Transition Models in R using a Cost-Effectiveness Analysis
-    Example](https://journals.sagepub.com/doi/full/10.1177/0272989X221121747).
-    [Medical Decision Making](https://journals.sagepub.com/home/mdm).
-    2022 (Online First): <https://doi.org/10.1177/0272989X221121747>
+- Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
+  Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
+  State-Transition Models in R using a Cost-Effectiveness Analysis
+  Example](https://journals.sagepub.com/doi/full/10.1177/0272989X221121747).
+  [Medical Decision Making](https://journals.sagepub.com/home/mdm).
+  2023;43(1):21-41. <https://doi.org/10.1177/0272989X221121747>
 
 and its corresponding pre-print:
 
--   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
-    Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
-    State-Transition Models in R using a Cost-Effectiveness Analysis
-    Example](https://arxiv.org/abs/2108.13552). arXiv:2108.13552v2.
-    2022:1-37.
+- Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
+  Pechlivanoglou P, Jalal H. [A Tutorial on Time-Dependent Cohort
+  State-Transition Models in R using a Cost-Effectiveness Analysis
+  Example](https://arxiv.org/abs/2108.13552). arXiv:2108.13552v2.
+  2022:1-37.
 
 The release that accompanies the published article has been archived in
 zenodo: <https://zenodo.org/badge/latestdoi/6620902>
@@ -42,29 +42,29 @@ folder includes the scripts with all the code, description and comments
 to reproduce the CEA, probabilistic sensitivity analysis (PSA) and
 generation of epidemiological measures of the manuscript:
 
--   [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_simulation.R):
-    Code to replicate all simulation-time dependent cSTMs analyses of
-    the manuscript.
--   [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_state_residence.R):
-    Code to replicate all state-residence time dependent cSTMs analyses
-    of the manuscript.
+- [`cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_simulation.R):
+  Code to replicate all simulation-time dependent cSTMs analyses of the
+  manuscript.
+- [`cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/analysis/cSTM_time_dep_state_residence.R):
+  Code to replicate all state-residence time dependent cSTMs analyses of
+  the manuscript.
 
 The R scripts require loading functions that synthesize cSTMs outputs
 and conduct several sensitivity analyses included in the
 [`R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/tree/main/R)
 folder:
 
--   [`Funtions.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions.R):
-    Functions to generate epidemiological measures from time-dependent
-    cSTMs.
--   [`Functions_cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions_cSTM_time_dep_simulation.R):
-    These functions wrap the simulation-time dependent cSTMs, compute
-    CEA and epidemiological measures, and generate probabilistic
-    sensitivity analysis (PSA) input datasets.
--   [`Functions_cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions_cSTM_time_dep_state_residence.R):
-    These functions wrap the state-residence time dependent cSTMs,
-    compute CEA and epidemiological measures, and generate probabilistic
-    sensitivity analysis (PSA) input datasets.
+- [`Funtions.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions.R):
+  Functions to generate epidemiological measures from time-dependent
+  cSTMs.
+- [`Functions_cSTM_time_dep_simulation.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions_cSTM_time_dep_simulation.R):
+  These functions wrap the simulation-time dependent cSTMs, compute CEA
+  and epidemiological measures, and generate probabilistic sensitivity
+  analysis (PSA) input datasets.
+- [`Functions_cSTM_time_dep_state_residence.R`](https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/blob/main/R/Functions_cSTM_time_dep_state_residence.R):
+  These functions wrap the state-residence time dependent cSTMs, compute
+  CEA and epidemiological measures, and generate probabilistic
+  sensitivity analysis (PSA) input datasets.
 
 ## How to cite this R code in your article
 
@@ -77,7 +77,7 @@ accessed’ date):
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H. A Tutorial on Time-Dependent Cohort
 > State-Transition Models in R using a Cost-Effectiveness Analysis
-> Example. Medical Decision Making. 2022 (In press).
+> Example. Medical Decision Making. 2023;43(1):21-41.
 
 > Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
 > Pechlivanoglou P, Jalal H (2022). R Code for A Tutorial on
@@ -95,11 +95,10 @@ examples of how and when to cite computer code.
 
 ## Preliminaries
 
--   Install
-    [RStudio](https://www.rstudio.com/products/rstudio/download/)
--   Install
-    [`dampack`](https://cran.r-project.org/web/packages/dampack/index.html)
-    R package from CRAN
+- Install [RStudio](https://www.rstudio.com/products/rstudio/download/)
+- Install
+  [`dampack`](https://cran.r-project.org/web/packages/dampack/index.html)
+  R package from CRAN
 
 ``` r
 # Install release version from CRAN
@@ -109,9 +108,9 @@ install.packages("dampack")
 # devtools::install_github("DARTH-git/dampack")
 ```
 
--   Install `devtools` to install
-    [`darthtools`](https://github.com/DARTH-git/darthtools) R package
-    from [DARTH’s GitHub](https://github.com/DARTH-git)
+- Install `devtools` to install
+  [`darthtools`](https://github.com/DARTH-git/darthtools) R package from
+  [DARTH’s GitHub](https://github.com/DARTH-git)
 
 ``` r
 # Install release version from CRAN
@@ -121,7 +120,7 @@ install.packages("devtools")
 # devtools::install_github("r-lib/devtools")
 ```
 
--   Install `darthtools` using `devtools`
+- Install `darthtools` using `devtools`
 
 ``` r
 # Install development version from GitHub
@@ -131,33 +130,32 @@ devtools::install_github("DARTH-git/darthtools")
 We recommend reading our introductory tutorial on time-independent cSTMs
 in R:
 
--   Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
-    Pechlivanoglou P, Jalal H. [An Introductory Tutorial on Cohort
-    State-Transition Models in R Using a Cost-Effectiveness Analysis
-    Example](https://journals.sagepub.com/doi/full/10.1177/0272989X221103163).
-    [Medical Decision Making](https://journals.sagepub.com/home/mdm),
-    2022 (Online First):1-18.
-    <https://doi.org/10.1177/0272989X221103163>
+- Alarid-Escudero F, Krijkamp EM, Enns EA, Yang A, Hunink MGM,
+  Pechlivanoglou P, Jalal H. [An Introductory Tutorial on Cohort
+  State-Transition Models in R Using a Cost-Effectiveness Analysis
+  Example](https://journals.sagepub.com/doi/full/10.1177/0272989X221103163).
+  [Medical Decision Making](https://journals.sagepub.com/home/mdm),
+  2023;43(1):1-20. <https://doi.org/10.1177/0272989X221103163>
 
 and understanding the use of multidimensional arrays to represent cSTM
 dynamics in R described in:
 
--   Krijkamp EM, Alarid-Escudero F, Enns EA, Pechlivanoglou P, Hunink
-    MGM, Yang A, Jalal HJ. [A multidimensional array representation of
-    state-transition model
-    dynamics](https://journals.sagepub.com/doi/full/10.1177/0272989X19893973).
-    [Medical Decision Making](https://journals.sagepub.com/home/mdm),
-    2020;40(2):242-248. <https://doi.org/10.1177/0272989X19893973>,
+- Krijkamp EM, Alarid-Escudero F, Enns EA, Pechlivanoglou P, Hunink MGM,
+  Yang A, Jalal HJ. [A multidimensional array representation of
+  state-transition model
+  dynamics](https://journals.sagepub.com/doi/full/10.1177/0272989X19893973).
+  [Medical Decision Making](https://journals.sagepub.com/home/mdm),
+  2020;40(2):242-248. <https://doi.org/10.1177/0272989X19893973>,
 
 and familiarizing with the [DARTH](http://darthworkgroup.com) coding
 framework described in:
 
--   Alarid-Escudero F, Krijkamp EM, Pechlivanoglou P, Jalal HJ, Kao SYZ,
-    Yang A, Enns EA. [A Need for Change! A Coding Framework for
-    Improving Transparency in Decision
-    Modeling](https://link.springer.com/article/10.1007/s40273-019-00837-x).
-    [PharmacoEconomics](https://www.springer.com/journal/40273),
-    2190;37(11):1329–1339. <https://doi.org/10.1007/s40273-019-00837-x>
+- Alarid-Escudero F, Krijkamp EM, Pechlivanoglou P, Jalal HJ, Kao SYZ,
+  Yang A, Enns EA. [A Need for Change! A Coding Framework for Improving
+  Transparency in Decision
+  Modeling](https://link.springer.com/article/10.1007/s40273-019-00837-x).
+  [PharmacoEconomics](https://www.springer.com/journal/40273),
+  2190;37(11):1329–1339. <https://doi.org/10.1007/s40273-019-00837-x>
 
 To run the CEA, you require [`dampack`: Decision-Analytic Modeling
 Package](https://cran.r-project.org/web/packages/dampack/index.html), an
@@ -177,25 +175,25 @@ decision models.
         repository as a .zip file.
 3.  Open the RStudio project `cohort-modeling-tutorial-timedep.Rproj`.
 4.  Install all the required packages (as mentioned above)
-    -   [`dampack`](https://cran.r-project.org/web/packages/dampack/index.html)
-    -   [`darthtools`](https://github.com/DARTH-git/darthtools)
+    - [`dampack`](https://cran.r-project.org/web/packages/dampack/index.html)
+    - [`darthtools`](https://github.com/DARTH-git/darthtools)
 5.  Run the scripts in the analysis folder.
 6.  Modify or adapt these scripts as needed for your project or
     analysis.
 
 ## Full list of Contributors:
 
--   [Fernando Alarid-Escudero](https://github.com/feralaes)
+- [Fernando Alarid-Escudero](https://github.com/feralaes)
 
--   [Eline Krijkamp](https://github.com/krijkamp)
+- [Eline Krijkamp](https://github.com/krijkamp)
 
--   [Eva Enns](https://github.com/evaenns)
+- [Eva Enns](https://github.com/evaenns)
 
--   [Alan Yang](https://github.com/alanyang0924)
+- [Alan Yang](https://github.com/alanyang0924)
 
--   [Myriam
-    Hunink](http://www.erasmus-epidemiology.nl/people/profile.php?id=45)
+- [Myriam
+  Hunink](http://www.erasmus-epidemiology.nl/people/profile.php?id=45)
 
--   [Petros Pechlivanoglou](https://github.com/ppehli)
+- [Petros Pechlivanoglou](https://github.com/ppehli)
 
--   [Hawre Jalal](https://github.com/hjalal)
+- [Hawre Jalal](https://github.com/hjalal)
