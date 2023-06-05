@@ -135,7 +135,7 @@ in R:
   State-Transition Models in R Using a Cost-Effectiveness Analysis
   Example](https://journals.sagepub.com/doi/full/10.1177/0272989X221103163).
   [Medical Decision Making](https://journals.sagepub.com/home/mdm),
-  2023;43(1):1-20. <https://doi.org/10.1177/0272989X221103163>
+  2023;43(1):3-20. <https://doi.org/10.1177/0272989X221103163>
 
 and understanding the use of multidimensional arrays to represent cSTM
 dynamics in R described in:
