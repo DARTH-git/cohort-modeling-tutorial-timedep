@@ -4,7 +4,7 @@
 #* 'A Tutorial on Time-Dependent Cohort State-Transition Models in R using a 
 #* Cost-Effectiveness Analysis Example' 
 #* Authors: 
-#* - Fernando Alarid-Escudero <fernando.alarid@cide.edu>
+#* - Fernando Alarid-Escudero <falarid@stanford.edu>
 #* - Eline Krijkamp
 #* - Eva A. Enns
 #* - Alan Yang
