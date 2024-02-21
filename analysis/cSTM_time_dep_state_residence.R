@@ -62,6 +62,9 @@ library(ggrepel)    # For plotting
 library(gridExtra)  # For plotting
 library(ellipse)    # For plotting
 library(scales)     # For dollar signs and commas
+# Package ‘MethylCapSig’ was removed from the CRAN repository. Formerly 
+# available versions can be obtained from the archive using the following code:
+# devtools::install_version("MethylCapSig", version = "1.0.1", repos = "http://cran.us.r-project.org")
 library(MethylCapSig) # For sampling from a multivariate lognormal distribution (MVLN)
 # library(dampack)  # Uncomment to use CEA and PSA visualization functionality from dampack instead of the functions included in this repository
 # library(darthtools) # Uncomment to use WCC, parameter transformation, and matrix checks from darthtools instead of the functions included in this repository
