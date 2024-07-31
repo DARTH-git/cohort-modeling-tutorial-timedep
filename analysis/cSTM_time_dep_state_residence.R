@@ -160,8 +160,8 @@ ic_HS1 <- 1000  # increase in cost when transitioning from Healthy to Sick
 ic_D   <- 2000  # increase in cost when dying
 
 ### Discount weight for costs and effects ----
-v_dwc  <- 1 / ((1 + (d_e * cycle_length)) ^ (0:n_cycles))
-v_dwe  <- 1 / ((1 + (d_c * cycle_length)) ^ (0:n_cycles))
+v_dwc  <- 1 / ((1 + (d_c * cycle_length)) ^ (0:n_cycles))
+v_dwe  <- 1 / ((1 + (d_e * cycle_length)) ^ (0:n_cycles))
 
 # Process model inputs ----
 ## Age-specific transition rates to the Dead state for all cycles ----
