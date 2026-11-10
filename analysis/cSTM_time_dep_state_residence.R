@@ -62,6 +62,7 @@ library(ggrepel)    # For plotting
 library(gridExtra)  # For plotting
 library(ellipse)    # For plotting
 library(scales)     # For dollar signs and commas
+library(patchwork)  # For combining ggplot2 figures
 # Package ‘MethylCapSig’ was removed from the CRAN repository. Formerly 
 # available versions can be obtained from the archive using the following code:
 # devtools::install_version("MethylCapSig", version = "1.0.1", repos = "http://cran.us.r-project.org")

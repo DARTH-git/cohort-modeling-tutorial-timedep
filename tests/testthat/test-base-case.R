@@ -87,3 +87,26 @@ test_that("cost and QALY discount rates are not swapped", {
     expect_true(all(df_dc$Cost < df_base$Cost))
   }
 })
+
+test_that("transition array check tolerates floating-point rounding", {
+  # Valid rows (each sums to 1 up to rounding) whose total over 3 states is
+  # 3 - 4.4e-16, so an exact `==` comparison with n_states fails
+  v_p <- c(0.54756458822449339, 0.21743485789087841, 0.23500055388462818)
+  a_P <- array(rep(v_p, each = 3), dim = c(3, 3, 2))
+  expect_false(sum(rowSums(a_P[, , 1])) == 3)
+  expect_no_error(check_sum_of_transition_array(a_P, n_states = 3, n_cycles = 2,
+                                                verbose = FALSE))
+  # An invalid array is still rejected
+  a_P[1, 1, 2] <- 0.9
+  expect_error(check_sum_of_transition_array(a_P, n_states = 3, n_cycles = 2,
+                                             verbose = FALSE),
+               "not a valid transition array")
+})
+
+test_that("state-residence decision model accepts every PSA parameter set", {
+  # Regression test: PSA sample 220 used to fail the (exact) transition array
+  # check because of floating-point rounding, which stopped the PSA.
+  df_psa <- env_sr$generate_psa_params(n_sim = 1000, seed = 071818)
+  l_par  <- update_param_list(l_params_sr, df_psa[220, ])
+  expect_no_error(invisible(capture.output(env_sr$decision_model(l_par))))
+})
