@@ -89,10 +89,13 @@ test_that("cost and QALY discount rates are not swapped", {
 })
 
 test_that("transition array check tolerates floating-point rounding", {
-  # Valid rows (each sums to 1 up to rounding) whose total over 3 states is
-  # 3 - 4.4e-16, so an exact `==` comparison with n_states fails
-  v_p <- c(0.54756458822449339, 0.21743485789087841, 0.23500055388462818)
-  a_P <- array(rep(v_p, each = 3), dim = c(3, 3, 2))
+  # A valid array whose cycle sums differ from n_states by a rounding-sized
+  # error (1e-13), so an exact `==` comparison with n_states fails. (The
+  # error is added explicitly because whether a given set of probabilities
+  # sums exactly to n_states depends on the platform's floating-point
+  # accumulation.)
+  a_P <- array(rep(c(0.5, 0.3, 0.2), each = 3), dim = c(3, 3, 2))
+  a_P[1, 1, ] <- a_P[1, 1, ] + 1e-13
   expect_false(sum(rowSums(a_P[, , 1])) == 3)
   expect_no_error(check_sum_of_transition_array(a_P, n_states = 3, n_cycles = 2,
                                                 verbose = FALSE))
