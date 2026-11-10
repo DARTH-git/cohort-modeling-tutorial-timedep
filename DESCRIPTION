@@ -1,0 +1,54 @@
+Type: Project
+Package: cohortModelingTutorialTimeDep
+Title: R Code for A Tutorial on Time-Dependent Cohort State-Transition Models in R
+Version: 0.3.0
+Date: 2026-11-10
+Authors@R: c(
+    person("Fernando", "Alarid-Escudero", email = "falarid@stanford.edu",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-5076-1172")),
+    person("Eline", "Krijkamp", role = "aut",
+           comment = c(ORCID = "0000-0003-3970-2205")),
+    person("Eva A.", "Enns", role = "aut",
+           comment = c(ORCID = "0000-0003-0693-7358")),
+    person("Alan", "Yang", role = "aut",
+           comment = c(ORCID = "0000-0002-0344-6812")),
+    person("M.G. Myriam", "Hunink", role = "aut",
+           comment = c(ORCID = "0000-0002-2942-2798")),
+    person("Petros", "Pechlivanoglou", role = "aut",
+           comment = c(ORCID = "0000-0001-5090-7936")),
+    person("Hawre", "Jalal", role = "aut",
+           comment = c(ORCID = "0000-0002-8224-6834")))
+Description: Code accompanying Alarid-Escudero et al. (2023)
+    <doi:10.1177/0272989X221121747>, which shows how to implement
+    simulation-time-dependent and state-residence-time-dependent cohort
+    state-transition models (cSTMs) of the Sick-Sicker model in R and use them
+    for a cost-effectiveness analysis, including transition rewards,
+    within-cycle correction, probabilistic sensitivity analysis and
+    epidemiological outcomes. This file records the project version and
+    dependencies; the repository is not an installable R package.
+License: MIT + file LICENSE
+URL: https://github.com/DARTH-git/cohort-modeling-tutorial-timedep
+BugReports: https://github.com/DARTH-git/cohort-modeling-tutorial-timedep/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    data.table,
+    dplyr,
+    ellipse,
+    ggplot2 (>= 3.4.0),
+    ggrepel,
+    ggthemes,
+    gridExtra,
+    MethylCapSig,
+    patchwork,
+    plyr,
+    reshape2,
+    scales,
+    stringr,
+    tidyr
+Suggests:
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8

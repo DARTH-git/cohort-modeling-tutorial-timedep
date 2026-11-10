@@ -1,0 +1,83 @@
+cff-version: 1.2.0
+message: >-
+  If you use this code, please cite both the article and the software
+  using the metadata below.
+type: software
+title: >-
+  R Code for A Tutorial on Time-Dependent Cohort State-Transition Models
+  in R using a Cost-Effectiveness Analysis Example
+version: 0.3.0
+date-released: "2026-11-10"
+license: MIT
+repository-code: "https://github.com/DARTH-git/cohort-modeling-tutorial-timedep"
+doi: 10.5281/zenodo.5338818
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.5338818
+    description: Zenodo concept DOI (resolves to the latest version)
+keywords:
+  - cohort state-transition model
+  - Markov model
+  - cost-effectiveness analysis
+  - decision analysis
+  - time-dependent
+  - tunnel states
+  - within-cycle correction
+  - R
+authors:
+  - family-names: Alarid-Escudero
+    given-names: Fernando
+    email: falarid@stanford.edu
+    orcid: "https://orcid.org/0000-0001-5076-1172"
+  - family-names: Krijkamp
+    given-names: Eline
+    orcid: "https://orcid.org/0000-0003-3970-2205"
+  - family-names: Enns
+    given-names: Eva A.
+    orcid: "https://orcid.org/0000-0003-0693-7358"
+  - family-names: Yang
+    given-names: Alan
+    orcid: "https://orcid.org/0000-0002-0344-6812"
+  - family-names: Hunink
+    given-names: M.G. Myriam
+    orcid: "https://orcid.org/0000-0002-2942-2798"
+  - family-names: Pechlivanoglou
+    given-names: Petros
+    orcid: "https://orcid.org/0000-0001-5090-7936"
+  - family-names: Jalal
+    given-names: Hawre
+    orcid: "https://orcid.org/0000-0002-8224-6834"
+preferred-citation:
+  type: article
+  title: >-
+    A Tutorial on Time-Dependent Cohort State-Transition Models in R using a
+    Cost-Effectiveness Analysis Example
+  journal: Medical Decision Making
+  year: 2023
+  volume: 43
+  issue: 1
+  start: 21
+  end: 41
+  doi: 10.1177/0272989X221121747
+  authors:
+    - family-names: Alarid-Escudero
+      given-names: Fernando
+      orcid: "https://orcid.org/0000-0001-5076-1172"
+    - family-names: Krijkamp
+      given-names: Eline
+      orcid: "https://orcid.org/0000-0003-3970-2205"
+    - family-names: Enns
+      given-names: Eva A.
+      orcid: "https://orcid.org/0000-0003-0693-7358"
+    - family-names: Yang
+      given-names: Alan
+      orcid: "https://orcid.org/0000-0002-0344-6812"
+    - family-names: Hunink
+      given-names: M.G. Myriam
+      orcid: "https://orcid.org/0000-0002-2942-2798"
+    - family-names: Pechlivanoglou
+      given-names: Petros
+      orcid: "https://orcid.org/0000-0001-5090-7936"
+    - family-names: Jalal
+      given-names: Hawre
+      orcid: "https://orcid.org/0000-0002-8224-6834"
