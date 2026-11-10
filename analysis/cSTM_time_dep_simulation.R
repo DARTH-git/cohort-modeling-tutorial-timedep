@@ -101,7 +101,10 @@ v_names_str <- c("Standard of care",      # store the strategy names
 n_str       <- length(v_names_str)        # number of strategies
 
 ## Within-cycle correction (WCC) using Simpson's 1/3 rule ----
-v_wcc <- gen_wcc(n_cycles = n_cycles,  # Function included in "R/Functions.R". The latest version can be found in `darthtools` package
+#* Weights by time t = 0, ..., n_cycles: 1/3 at t = 0 and t = n_cycles, 4/3 at
+#* odd t, 2/3 at even t. Because n_cycles = 75 is odd, the last three cycles use
+#* Simpson's 3/8 rule (see ?gen_wcc in "R/Functions.R" and NEWS.md for v0.3.0).
+v_wcc <- gen_wcc(n_cycles = n_cycles,  # Function included in "R/Functions.R"
                  method = "Simpson1/3") # vector of wcc
 
 ### Transition rates (annual), and hazard ratios (HRs) ----
@@ -532,7 +535,7 @@ head(df_psa_input)
 ### Histogram of parameters ----
 ggplot(melt(df_psa_input, variable.name = "Parameter"), aes(x = value)) +
   facet_wrap(~Parameter, scales = "free") +
-  geom_histogram(aes(y = ..density..)) +
+  geom_histogram(aes(y = after_stat(density))) +
   ylab("") +
   theme_bw(base_size = 16) + 
   theme(axis.text = element_text(size = 6),
