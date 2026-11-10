@@ -11,6 +11,14 @@
 #' @export
 decision_model <- function(l_params_all, verbose = FALSE) {
   with(as.list(l_params_all), {
+    #* Model structure defined here so the function does not depend on objects
+    #* in the global environment
+    ## Strategy names
+    v_names_str <- c("Standard of care",      # store the strategy names
+                     "Strategy A", 
+                     "Strategy B",
+                     "Strategy AB") 
+    n_str       <- length(v_names_str)        # number of strategies
     ########################### Process model inputs ###########################
     ##* Number of cycles
     n_cycles <- (n_age_max - n_age_init)/cycle_length # time horizon, number of cycles
@@ -176,6 +184,17 @@ decision_model <- function(l_params_all, verbose = FALSE) {
 #' @export
 calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
   with(as.list(l_params_all), {
+    #* Model structure defined here so the function does not depend on objects
+    #* in the global environment
+    ## Strategy names
+    v_names_str <- c("Standard of care",      # store the strategy names
+                     "Strategy A", 
+                     "Strategy B",
+                     "Strategy AB") 
+    n_str       <- length(v_names_str)        # number of strategies
+    ## Health state names
+    v_names_states <- c("H", "S1", "S2", "D") # Healthy, Sick, Sicker, Dead
+    n_states       <- length(v_names_states)  # number of health states
     
     ### Run decision model to get transition dynamics array
     model <- decision_model(l_params_all = l_params_all)
@@ -245,12 +264,15 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
     n_cycles <- (n_age_max - n_age_init)/cycle_length # time horizon, number of cycles
     
     ## Discount weight for costs and effects
-    v_dwc  <- 1 / ((1 + d_e * cycle_length) ^ (0:n_cycles))
-    v_dwe  <- 1 / ((1 + d_c * cycle_length) ^ (0:n_cycles))
+    v_dwc  <- 1 / ((1 + d_c * cycle_length) ^ (0:n_cycles))
+    v_dwe  <- 1 / ((1 + d_e * cycle_length) ^ (0:n_cycles))
     
     ## Within-cycle correction (WCC) using Simpson's 1/3 rule
+    #* Uses `gen_wcc()` from "R/Functions.R" (fixed in v0.3.0). 
+    #* `darthtools::gen_wcc()` is identical from darthtools v0.4.1; earlier
+    #* versions have the indexing bug (see NEWS.md).
     v_wcc <- gen_wcc(n_cycles = n_cycles, 
-                                 method = "Simpson1/3") # vector of wcc
+                     method = "Simpson1/3") # vector of wcc
     
     #### Loop through each strategy and calculate total utilities and costs ####
     for (i in 1:n_str) { # i <- 1
@@ -316,6 +338,11 @@ calculate_ce_out <- function(l_params_all, n_wtp = 100000){ # User defined
 #------------------------------------------------------------------------------#
 generate_epi_measures_SoC <- function(l_params_all){ # User defined
   with(as.list(l_params_all), {
+    #* Model structure defined here so the function does not depend on objects
+    #* in the global environment
+    ## Health state names
+    v_names_states <- c("H", "S1", "S2", "D") # Healthy, Sick, Sicker, Dead
+    n_states       <- length(v_names_states)  # number of health states
     ### Run decision model to get cohort trace and transition dynamics array
     model <- decision_model(l_params_all = l_params_all)
     m_M_SoC <- model$l_m_M$`Standard of care`
